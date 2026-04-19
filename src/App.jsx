@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
-  Heart, BookOpen, Coffee, Calendar, Star, User, Trophy, CheckCircle2, Circle, Plus 
+  Heart, BookOpen, Coffee, Calendar, Star, User, Trophy, CheckCircle2, Circle, Plus, Trash2
 } from 'lucide-react';
 
 // --- Firebase 模組載入 ---
@@ -20,6 +20,7 @@ try {
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     getRoomRef = () => doc(db, 'artifacts', appId, 'public', 'data', 'rooms', 'shared-room');
   } else {
+    // 備援：本地開發環境變數 (Vite)
     const firebaseConfig = {
       apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
       authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -34,7 +35,7 @@ try {
     getRoomRef = () => doc(db, 'rooms', 'shared-room');
   }
 } catch (e) {
-  console.error("Firebase 初始化失敗", e);
+  console.error("Firebase Init Error:", e);
 }
 
 // --- 終極調色盤 ---
@@ -82,7 +83,7 @@ const PixelArt = ({ art, palette, pixelSize = 4, className = "" }) => {
   const rows = useMemo(() => (Array.isArray(art) ? art : art.trim().split('\n')).map(r => r.trim()), [art]);
   return (
     <div className={`relative ${className}`} style={{ width: rows[0].length * pixelSize, height: rows.length * pixelSize }}>
-      {rows.map((row, y) => row.split('').map((char, x) => {
+      {rows.flatMap((row, y) => row.split('').map((char, x) => {
         if (char === '.' || char === ' ' || !palette[char]) return null;
         return (
           <div key={`${x}-${y}`} style={{ position: 'absolute', left: x * pixelSize, top: y * pixelSize, width: pixelSize, height: pixelSize, backgroundColor: palette[char] }} />
@@ -107,7 +108,7 @@ const AnimatedWindow = () => {
   ];
   const windowFrames = [
     [ ...skySection, "KDUUUUVVVUUUUUUUKKUUUUUUVVVUUUUUUUKKUUUUUVVVUUUUUUDK", "KDUUUUUUVVVUUUUUKKUUUUUUUUVVVUUUUUKKUUUUUUUVVVUUUUDK", "KDUUVVUUUUUUUUUUKKUUUVVUUUUUUUUUUUKKUUUVVUUUUUUUVVDK", "KDUUUVVUUUUUUUUUKKUUUUVVUUUUUUUUUUKKUUUUVVUUUUUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUUVVVUUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", ...baseSection ].join('\n'),
-    [ ...skySection, "KDUUUUUVVVUUUUUUKKUUUUUUUVVVUUUUUUKKUUUUUUVVVUUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUUVVVUUUDK", "KDUUUVVUUUUUUUUUKKUUUUVVUUUUUUUUUUKKUUUUVVUUUUUUUVDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUUUUVVVUUUKKUUUUUUUUUUVVVUUUKKUUUUUUUUUVVVUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", ...baseSection ].join('\n'),
+    [ ...skySection, "KDUUUUUVVVUUUUUUKKUUUUUUUVVVUUUUUUKKUUUUUUVVVUUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUVVVUUUDK", "KDUUUVVUUUUUUUUUKKUUUUVVUUUUUUUUUUKKUUUUVVUUUUUUUVDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUUUUVVVUUUKKUUUUUUUUUUVVVUUUKKUUUUUUUUUVVVUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", ...baseSection ].join('\n'),
     [ ...skySection, "KDUUUUUUVVVUUUUUKKUUUUUUUUVVVUUUUUKKUUUUUUUVVVUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUUVVVUUUDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUVVUUUUUUUKKUUUUUUVVUUUUUUUUKKUUUUUUVVUUUUUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", "KDUUUUUUUUUUVVVUKKUUUUUUUUUUUUVVVUKKUUUUUUUUUUUVVUDK", ...baseSection ].join('\n')
   ];
   return <PixelArt art={windowFrames[frame]} palette={PALETTES.env} pixelSize={7} className="transition-opacity duration-300" />;
@@ -161,21 +162,38 @@ const RunningDragonIcon = () => {
   );
 };
 
-const App = () => {
+// 取得本地日期字串
+const getLocalDateStr = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+export default function App() {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [roomData, setRoomData] = useState({ 
     leftStudying: false, 
     rightStudying: false,
     leftStartTime: null,
-    rightStartTime: null 
+    rightStartTime: null,
+    leftDailyTotal: 0,
+    rightDailyTotal: 0,
+    lastActiveDate: getLocalDateStr(),
+    leftGoals: [],
+    rightGoals: [],
+    leftNudge: 0,  
+    rightNudge: 0  
   });
-  const [timer, setTimer] = useState(0);
-  const [showSummary, setShowSummary] = useState(false);
-  const [goals, setGoals] = useState([
-    { id: 1, text: '與夥伴一起待滿 2 小時', completed: false }
-  ]);
+  
+  const [currentTime, setCurrentTime] = useState(Date.now());
+  const [leftGoals, setLeftGoals] = useState([]);
+  const [rightGoals, setRightGoals] = useState([]);
   const [newGoalText, setNewGoalText] = useState("");
+  
+  // v9 狀態：番茄鐘
+  const [isPomodoro, setIsPomodoro] = useState(false);
+  const [receiveNudge, setReceiveNudge] = useState(false);
+  const prevNudgeRef = useRef(0);
 
   useEffect(() => {
     if (!auth) return;
@@ -186,13 +204,12 @@ const App = () => {
         } else {
           await signInAnonymously(auth);
         }
-      } catch (e) {
-        console.error("登入失敗", e);
+      } catch (err) {
+        console.error("Auth Error:", err);
       }
     };
     initAuth();
-    const unsub = onAuthStateChanged(auth, u => setUser(u));
-    return () => unsub();
+    return onAuthStateChanged(auth, setUser);
   }, []);
 
   useEffect(() => {
@@ -200,13 +217,23 @@ const App = () => {
     const roomRef = getRoomRef();
     const unsub = onSnapshot(roomRef, (snapshot) => {
       if (snapshot.exists()) {
-        setRoomData(snapshot.data());
+        const data = snapshot.data();
+        setRoomData(data);
+        setLeftGoals(data.leftGoals || []);
+        setRightGoals(data.rightGoals || []);
       } else {
         setDoc(roomRef, { 
           leftStudying: false, 
           rightStudying: false,
           leftStartTime: null,
-          rightStartTime: null
+          rightStartTime: null,
+          leftDailyTotal: 0,
+          rightDailyTotal: 0,
+          lastActiveDate: getLocalDateStr(),
+          leftGoals: [],
+          rightGoals: [],
+          leftNudge: 0,
+          rightNudge: 0
         });
       }
     }, (err) => console.error("監聽失敗", err));
@@ -214,15 +241,58 @@ const App = () => {
   }, [user]);
 
   const isStudying = role === 'left' ? roomData.leftStudying : roomData.rightStudying;
-  const partnerStudying = role === 'left' ? roomData.rightStudying : roomData.leftStudying;
+  const leftDragonIsStudying = roomData?.leftStudying || false;
+  const rightDragonIsStudying = roomData?.rightStudying || false;
 
   useEffect(() => {
-    let interval;
-    if (isStudying) {
-      interval = setInterval(() => setTimer(t => t + 1), 1000);
-    }
+    const interval = setInterval(() => setCurrentTime(Date.now()), 500);
     return () => clearInterval(interval);
-  }, [isStudying]);
+  }, []);
+
+  useEffect(() => {
+    if (!role) return;
+    const myNudge = role === 'left' ? roomData.leftNudge : roomData.rightNudge;
+    if (myNudge && myNudge !== prevNudgeRef.current) {
+      if (Date.now() - myNudge < 10000) {
+        setReceiveNudge(true);
+        setTimeout(() => setReceiveNudge(false), 3500);
+      }
+      prevNudgeRef.current = myNudge;
+    }
+  }, [roomData.leftNudge, roomData.rightNudge, role]);
+
+  const todayStr = getLocalDateStr();
+  
+  const calculateElapsed = (roleKey) => {
+    let accumulated = 0;
+    if (roomData.lastActiveDate === todayStr) {
+      accumulated = roomData[`${roleKey}DailyTotal`] || 0;
+    }
+
+    let currentSession = 0;
+    if (roomData[`${roleKey}Studying`] && roomData[`${roleKey}StartTime`]) {
+      const startTime = roomData[`${roleKey}StartTime`];
+      const startD = new Date(startTime);
+      const startStr = `${startD.getFullYear()}-${String(startD.getMonth()+1).padStart(2,'0')}-${String(startD.getDate()).padStart(2,'0')}`;
+
+      if (startStr === todayStr) {
+        currentSession = Math.max(0, Math.floor((currentTime - startTime) / 1000));
+      } else {
+        const d = new Date();
+        const todayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+        currentSession = Math.max(0, Math.floor((currentTime - todayStart) / 1000));
+      }
+    }
+    return { total: accumulated + currentSession, session: currentSession };
+  };
+
+  const leftTime = calculateElapsed('left');
+  const rightTime = calculateElapsed('right');
+  
+  const leftElapsed = leftTime.total;
+  const rightElapsed = rightTime.total;
+  const myElapsed = role === 'left' ? leftElapsed : rightElapsed;
+  const mySession = role === 'left' ? leftTime.session : rightTime.session; 
 
   const formatTime = (s) => {
     const h = Math.floor(s / 3600);
@@ -231,50 +301,121 @@ const App = () => {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   };
 
+  // 番茄鐘專用格式 (MM:SS)
+  const formatPomodoroTime = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+  };
+
   const handleToggleStudy = async () => {
     if (!role || !getRoomRef) return;
     const roomRef = getRoomRef();
-    const fieldToUpdate = role === 'left' ? 'leftStudying' : 'rightStudying';
-    const timeToUpdate = role === 'left' ? 'leftStartTime' : 'rightStartTime';
-    
+    const roleKey = role === 'left' ? 'left' : 'right';
+    const fieldStudying = `${roleKey}Studying`;
+    const fieldStartTime = `${roleKey}StartTime`;
+    const fieldDailyTotal = `${roleKey}DailyTotal`;
+    const currentDateStr = getLocalDateStr();
+
+    const updates = {};
+    if (roomData.lastActiveDate !== currentDateStr) {
+      updates.leftDailyTotal = 0;
+      updates.rightDailyTotal = 0;
+      updates.lastActiveDate = currentDateStr;
+    }
+
     if (isStudying) {
-      setShowSummary(true);
-      await updateDoc(roomRef, { 
-        [fieldToUpdate]: false,
-        [timeToUpdate]: null 
-      });
+      const exactElapsed = role === 'left' ? leftElapsed : rightElapsed;
+      updates[fieldStudying] = false;
+      updates[fieldStartTime] = null;
+      updates[fieldDailyTotal] = exactElapsed;
+      updates.lastActiveDate = currentDateStr;
     } else {
-      await updateDoc(roomRef, { 
-        [fieldToUpdate]: true,
-        [timeToUpdate]: Date.now() 
-      });
+      updates[fieldStudying] = true;
+      updates[fieldStartTime] = Date.now();
+      updates.lastActiveDate = currentDateStr;
+      setCurrentTime(Date.now());
+    }
+
+    await updateDoc(roomRef, updates);
+  };
+
+  const sendNudge = async () => {
+    if (!role || !getRoomRef) return;
+    const partnerRole = role === 'left' ? 'right' : 'left';
+    await updateDoc(getRoomRef(), { [`${partnerRole}Nudge`]: Date.now() });
+  };
+
+  // --- 任務操作邏輯 ---
+
+  const handleAddGoal = async (e) => {
+    e.preventDefault();
+    if (!newGoalText.trim() || !role) return;
+    
+    const newGoal = { id: Date.now(), text: newGoalText, completed: false };
+    const fieldToUpdate = role === 'left' ? 'leftGoals' : 'rightGoals';
+    const currentGoals = role === 'left' ? leftGoals : rightGoals;
+    const updatedGoals = [...currentGoals, newGoal];
+    
+    if (role === 'left') setLeftGoals(updatedGoals);
+    else setRightGoals(updatedGoals);
+    
+    setNewGoalText(""); 
+    
+    try {
+      await updateDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals });
+    } catch (err) {
+      console.error("Update Error:", err);
     }
   };
 
-  const toggleGoal = (id) => {
-    setGoals(goals.map(g => g.id === id ? { ...g, completed: !g.completed } : g));
+  const toggleGoal = async (id, targetRole) => {
+    if (role !== targetRole) return;
+    const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
+    const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
+    const updatedGoals = currentGoals.map(g => g.id === id ? { ...g, completed: !g.completed } : g);
+    
+    if (targetRole === 'left') setLeftGoals(updatedGoals);
+    else setRightGoals(updatedGoals);
+
+    try {
+      await updateDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals });
+    } catch (err) {
+      console.error("Toggle Error:", err);
+    }
   };
 
-  const handleAddGoal = (e) => {
-    e.preventDefault();
-    if (!newGoalText.trim()) return;
-    setGoals([...goals, { id: Date.now(), text: newGoalText, completed: false }]);
-    setNewGoalText("");
+  const deleteGoal = async (id, targetRole) => {
+    if (role !== targetRole) return;
+    const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
+    const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
+    const updatedGoals = currentGoals.filter(g => g.id !== id);
+    
+    if (targetRole === 'left') setLeftGoals(updatedGoals);
+    else setRightGoals(updatedGoals);
+
+    try {
+      await updateDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals });
+    } catch (err) {
+      console.error("Delete Error:", err);
+    }
   };
 
-  const completedCount = goals.filter(g => g.completed).length;
-  const progressPercent = goals.length === 0 ? 0 : Math.round((completedCount / goals.length) * 100);
+  const getProgress = (targetGoals) => {
+    if (!targetGoals || targetGoals.length === 0) return 0;
+    const completedCount = targetGoals.filter(g => g.completed).length;
+    return Math.round((completedCount / targetGoals.length) * 100);
+  };
 
-  // 登入選擇畫面的即時判斷
+  // --- 登入畫面 ---
+
   if (!role) {
     return (
       <div className="min-h-screen bg-[#0d0706] flex items-center justify-center p-6 font-sans">
         <div className="bg-[#1a0f0d] p-10 rounded-[3rem] border-[6px] border-[#3e2723] text-center max-w-lg w-full shadow-[0_0_100px_rgba(0,0,0,0.8)]">
-          <div className="flex justify-center mb-6">
-            <RunningDragonIcon />
-          </div>
+          <div className="flex justify-center mb-6"><RunningDragonIcon /></div>
           <h1 className="text-4xl font-black text-[#daa520] mb-4 tracking-wider">呱花秘密基地</h1>
-          <p className="text-[#e0d5c1] mb-8 font-bold leading-relaxed">
+          <p className="text-[#e0d5c1] mb-8 font-bold leading-relaxed text-lg">
             嘿！夥伴現在的狀態是？<br/>
             {roomData.leftStudying || roomData.rightStudying ? (
               <span className="text-[#daa520] animate-pulse">🔥 有人在努力中，快加入吧！</span>
@@ -282,92 +423,87 @@ const App = () => {
               <span className="text-[#8d6e63]">目前基地很安靜，可以盡情補眠...</span>
             )}
           </p>
-          
           <div className="flex gap-4">
-            {/* 左邊按鈕 */}
-            <button 
-              onClick={() => setRole('left')} 
-              className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group
-                ${roomData.leftStudying 
-                  ? 'bg-[#2c1d1a] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.3)]' 
-                  : 'bg-[#3e2723] border-transparent hover:border-[#daa520] hover:bg-[#5d4037]'
-                }`}
-            >
-              <div className="relative z-10">
-                <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mx-auto mb-4 transition-transform group-hover:scale-110 ${!roomData.leftStudying && 'grayscale opacity-50'}`} />
-                <span className={`font-black text-xl block ${roomData.leftStudying ? 'text-[#daa520]' : 'text-[#8d6e63]'}`}>
-                  {roomData.leftStudying ? '左龍專注中' : '坐左邊'}
-                </span>
-                {roomData.leftStudying && (
-                  <span className="text-[10px] text-[#e0d5c1] opacity-60 font-mono mt-1 block tracking-tighter">已有使用者</span>
-                )}
-              </div>
-              {roomData.leftStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#daa520]/10 to-transparent pointer-events-none" />}
+            <button onClick={() => setRole('left')} className={`flex-1 py-6 rounded-3xl border-4 transition-all group ${roomData.leftStudying ? 'bg-[#2c1d1a] border-[#daa520]' : 'bg-[#3e2723] border-transparent hover:border-[#daa520]'}`}>
+              <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mx-auto mb-4 ${!roomData.leftStudying && 'grayscale opacity-50'}`} />
+              <span className={`font-black text-xl block ${roomData.leftStudying ? 'text-[#daa520]' : 'text-[#8d6e63]'}`}>我是呱呱</span>
             </button>
-
-            {/* 右邊按鈕 */}
-            <button 
-              onClick={() => setRole('right')} 
-              className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group
-                ${roomData.rightStudying 
-                  ? 'bg-[#2c1d1a] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.3)]' 
-                  : 'bg-[#3e2723] border-transparent hover:border-[#daa520] hover:bg-[#5d4037]'
-                }`}
-            >
-              <div className="relative z-10">
-                <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mx-auto mb-4 transition-transform group-hover:scale-110 ${!roomData.rightStudying && 'grayscale opacity-50'}`} />
-                <span className={`font-black text-xl block ${roomData.rightStudying ? 'text-[#daa520]' : 'text-[#8d6e63]'}`}>
-                  {roomData.rightStudying ? '右龍專注中' : '坐右邊'}
-                </span>
-                {roomData.rightStudying && (
-                  <span className="text-[10px] text-[#e0d5c1] opacity-60 font-mono mt-1 block tracking-tighter">已有使用者</span>
-                )}
-              </div>
-              {roomData.rightStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#daa520]/10 to-transparent pointer-events-none" />}
+            <button onClick={() => setRole('right')} className={`flex-1 py-6 rounded-3xl border-4 transition-all group ${roomData.rightStudying ? 'bg-[#2c1d1a] border-[#daa520]' : 'bg-[#3e2723] border-transparent hover:border-[#daa520]'}`}>
+              <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mx-auto mb-4 ${!roomData.rightStudying && 'grayscale opacity-50'}`} />
+              <span className={`font-black text-xl block ${roomData.rightStudying ? 'text-[#daa520]' : 'text-[#8d6e63]'}`}>我是花花</span>
             </button>
-          </div>
-          
-          <div className="mt-8 pt-6 border-t border-[#3e2723]">
-            <p className="text-[10px] text-[#5d4037] font-bold uppercase tracking-[0.2em]">Secret Library Real-time Sync</p>
           </div>
         </div>
       </div>
     );
   }
 
-  const leftDragonIsStudying = role === 'left' ? isStudying : partnerStudying;
-  const rightDragonIsStudying = role === 'right' ? isStudying : partnerStudying;
-
   return (
     <div className="min-h-screen bg-[#0d0706] text-[#e0d5c1] font-sans pb-32 overflow-x-hidden">
+      
+      {/* v9 全螢幕沉浸番茄鐘 (變暗、大番茄鐘) */}
+      {isStudying && isPomodoro && (
+        <div className="fixed inset-0 z-[200] bg-[#0d0706]/95 backdrop-blur-lg flex flex-col items-center justify-center">
+          <div className="text-[100px] md:text-[140px] mb-4 animate-pulse drop-shadow-[0_0_40px_rgba(239,68,68,0.4)]">
+            🍅
+          </div>
+          <div className={`font-mono text-7xl md:text-9xl font-black tracking-widest mb-16 drop-shadow-[0_0_30px_rgba(218,165,32,0.4)] ${1500 - mySession <= 0 ? 'text-red-500 animate-bounce' : 'text-[#daa520]'}`}>
+            {formatPomodoroTime(Math.max(0, 1500 - mySession))}
+          </div>
+          <button 
+            onClick={handleToggleStudy}
+            className="px-10 py-5 bg-[#2c1d1a] text-[#daa520] font-black text-2xl rounded-[2rem] border-4 border-[#daa520] hover:bg-[#daa520] hover:text-[#0d0706] transition-all shadow-[0_0_20px_rgba(218,165,32,0.2)] active:scale-95"
+          >
+            結束專注
+          </button>
+        </div>
+      )}
+
+      {/* 戳一下全螢幕特效 */}
+      {receiveNudge && !isPomodoro && (
+        <div className="fixed inset-0 pointer-events-none z-[150] flex items-center justify-center bg-pink-500/10">
+          <div className="animate-bounce flex flex-col items-center">
+            <Heart size={120} fill="#f472b6" className="text-pink-400 drop-shadow-[0_0_30px_rgba(244,114,182,0.8)]" />
+            <span className="text-white font-black text-2xl md:text-4xl mt-6 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] px-6 py-2 bg-pink-500/80 rounded-full border-4 border-white">
+              對方給了你一個愛的鼓勵！
+            </span>
+          </div>
+        </div>
+      )}
+
       <header className="bg-[#1a0f0d] border-b-2 border-[#3e2723] p-4 sticky top-0 z-[100] flex justify-between items-center px-6 shadow-2xl">
         <div className="flex items-center gap-4">
           <RunningDragonIcon />
           <h1 className="text-2xl font-black tracking-widest text-[#daa520]">呱花秘密基地</h1>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs font-bold text-[#8d6e63] bg-[#3e2723] px-3 py-1 rounded-full">
-            你是 {role === 'left' ? '左邊' : '右邊'} 的龍龍
+          <span className="text-xs font-bold text-[#8d6e63] bg-[#3e2723] px-3 py-1 rounded-full hidden md:block">
+            你是 {role === 'left' ? '呱呱' : '花花'}
           </span>
           <div className="bg-black/80 px-6 py-2 rounded-2xl border-2 border-[#daa520]/40 shadow-[0_0_15px_rgba(218,165,32,0.15)]">
-            <span className="text-2xl font-mono font-bold text-[#daa520]">{formatTime(timer)}</span>
+            <span className="text-2xl font-mono font-bold text-[#daa520]">{formatTime(myElapsed)}</span>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto p-4 space-y-8">
-        {/* 渲染圖書館區域 */}
+      <main className="max-w-6xl mx-auto p-4 space-y-8 mt-4">
+        {/* 背景與動畫區域 */}
         <section className="relative w-full aspect-[21/9] md:aspect-[16/9] bg-[#3a2723] rounded-[4rem] overflow-hidden border-[12px] border-[#2c1d1a] shadow-[0_40px_100px_rgba(0,0,0,0.8)] flex flex-col items-center">
           <div className="absolute inset-0 bg-[#4e342e]" />
-          <div className="absolute top-[6%] left-[4%] z-10"><AnimatedWindow /></div>
-          <div className="absolute top-[5%] right-[8%] z-10 opacity-80">
+          <div className="absolute top-[6%] left-[4%] z-10 opacity-100 drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)]"><AnimatedWindow /></div>
+          <div className="absolute top-[5%] right-[8%] z-10 opacity-80 drop-shadow-xl">
              <PixelArt art={SPRITES.libraryShelf} palette={PALETTES.env} pixelSize={8} />
              <div className="mt-2"><PixelArt art={SPRITES.libraryShelf} palette={PALETTES.env} pixelSize={8} /></div>
           </div>
           <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10"><RealTimeClock /></div>
-
-          {/* 左邊位置 */}
+          
+          {/* 左側：呱呱 */}
           <div className="absolute bottom-[28%] left-[25%] -translate-x-1/2 z-20 flex justify-center items-end">
+             {role === 'right' && (
+               <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-xl border border-[#daa520]/50 text-[#daa520] font-mono text-sm font-bold z-50 tracking-wider shadow-[0_0_10px_rgba(0,0,0,0.6)]">
+                 {formatTime(leftElapsed)}
+               </div>
+             )}
              <div className={`transition-all duration-700 ${leftDragonIsStudying ? 'opacity-100 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}>
                 <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={11} className="drop-shadow-[0_15px_15px_rgba(0,0,0,0.7)]" />
              </div>
@@ -378,9 +514,14 @@ const App = () => {
                 </div>
              )}
           </div>
-
-          {/* 右邊位置 */}
+          
+          {/* 右側：花花 */}
           <div className="absolute bottom-[28%] left-[75%] -translate-x-1/2 z-20 flex justify-center items-end">
+             {role === 'left' && (
+               <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-xl border border-[#daa520]/50 text-[#daa520] font-mono text-sm font-bold z-50 tracking-wider shadow-[0_0_10px_rgba(0,0,0,0.6)]">
+                 {formatTime(rightElapsed)}
+               </div>
+             )}
              <div className={`transition-all duration-700 ${rightDragonIsStudying ? 'opacity-100 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}>
                 <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={11} className="drop-shadow-[0_15px_15px_rgba(0,0,0,0.7)]" />
              </div>
@@ -391,55 +532,186 @@ const App = () => {
                 </div>
              )}
           </div>
-
-          <div className="absolute bottom-0 left-0 w-full h-[32%] z-30 bg-[#4e342e] border-t-[20px] border-[#795548]" />
           
-          {/* 書桌上的物件 */}
+          <div className="absolute bottom-0 left-0 w-full h-[32%] z-30 bg-[#4e342e] border-t-[20px] border-[#795548] shadow-[0_-20px_40px_rgba(0,0,0,0.6)]">
+             <div className="absolute top-0 left-0 w-full h-2 bg-white/10" />
+             <div className="absolute top-[-20px] left-0 w-full h-2 bg-black/20" />
+          </div>
+
           <div className="absolute bottom-0 w-full h-full z-40 pointer-events-none">
-             <div className={`absolute inset-0 transition-all duration-700 ${leftDragonIsStudying ? 'opacity-100' : 'opacity-0'}`}>
-                 <div className="absolute bottom-[10%] left-[12%] flex flex-col items-center">
-                    <Steam /><PixelArt art={SPRITES.coffeeCupDetailed} palette={PALETTES.env} pixelSize={8} />
+             <div className={`absolute inset-0 transition-all duration-700 ${leftDragonIsStudying ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                 <div className="absolute bottom-[10%] left-[12%] z-[41] flex flex-col items-center">
+                    {leftDragonIsStudying && <div className="absolute -top-14 left-1/2 -translate-x-1/2"><Steam /></div>}
+                    <div className="drop-shadow-[0_15px_10px_rgba(0,0,0,0.8)]"><PixelArt art={SPRITES.coffeeCupDetailed} palette={PALETTES.env} pixelSize={8} /></div>
                  </div>
-                 <div className="absolute bottom-[12%] left-[28%]"><PixelArt art={SPRITES.redBook} palette={PALETTES.env} pixelSize={7.5} /></div>
+                 <div className="absolute bottom-[12%] left-[28%] z-[40]">
+                    <div className="drop-shadow-[0_20px_15px_rgba(0,0,0,0.8)]"><PixelArt art={SPRITES.redBook} palette={PALETTES.env} pixelSize={7.5} /></div>
+                 </div>
              </div>
-             <div className={`absolute inset-0 transition-all duration-700 ${rightDragonIsStudying ? 'opacity-100' : 'opacity-0'}`}>
-                 <div className="absolute bottom-[10%] left-[62%] flex flex-col items-center">
-                    <Steam /><PixelArt art={SPRITES.coffeeCupDetailed} palette={PALETTES.env} pixelSize={8} />
+
+             <div className={`absolute inset-0 transition-all duration-700 ${rightDragonIsStudying ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                 <div className="absolute bottom-[10%] left-[62%] z-[41] flex flex-col items-center">
+                    {rightDragonIsStudying && <div className="absolute -top-14 left-1/2 -translate-x-1/2"><Steam /></div>}
+                    <div className="drop-shadow-[0_15px_10px_rgba(0,0,0,0.8)]"><PixelArt art={SPRITES.coffeeCupDetailed} palette={PALETTES.env} pixelSize={8} /></div>
                  </div>
-                 <div className="absolute bottom-[12%] left-[78%]"><PixelArt art={SPRITES.redBook} palette={PALETTES.env} pixelSize={7.5} /></div>
+                 <div className="absolute bottom-[12%] left-[78%] z-[40]">
+                    <div className="drop-shadow-[0_20px_15px_rgba(0,0,0,0.8)]"><PixelArt art={SPRITES.redBook} palette={PALETTES.env} pixelSize={7.5} /></div>
+                 </div>
              </div>
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 z-[50] pointer-events-none" />
         </section>
 
         <div className="px-6 md:px-12 space-y-6">
-          <button onClick={handleToggleStudy} className={`w-full py-8 rounded-[3rem] font-black text-2xl border-[6px] border-black shadow-[0_12px_0_#000] active:shadow-none active:translate-y-3 transition-all flex items-center justify-center gap-6 ${isStudying ? 'bg-[#daa520] text-black' : 'bg-[#388e3c] text-white'}`}>
-            {isStudying ? <><Coffee size={36} /> 暫時休息</> : <><BookOpen size={36} /> 開始專注</>}
-          </button>
           
-          {/* 任務清單區塊 */}
-          <div className="bg-[#1a0f0d] p-10 rounded-[3rem] border-4 border-[#3e2723]">
-             <div className="flex justify-between items-center mb-8 pb-8 border-b-2 border-[#3e2723]">
-                <h3 className="text-[#daa520] font-black text-2xl flex items-center gap-3"><Trophy size={28} /> 我的任務</h3>
-                <div className="text-right text-sm font-bold text-[#e0d5c1]">進度 {progressPercent}%</div>
-             </div>
-             <div className="space-y-4 mb-8">
-               {goals.map(goal => (
-                 <div key={goal.id} onClick={() => toggleGoal(goal.id)} className={`cursor-pointer p-6 rounded-[2rem] border-4 transition-all flex items-center gap-5 ${goal.completed ? 'bg-[#2c1d1a] border-[#3e2723] opacity-60' : 'bg-[#0d0706] border-[#5d4037]'}`}>
-                   {goal.completed ? <CheckCircle2 size={32} className="text-[#daa520]" /> : <Circle size={32} className="text-[#5d4037]" />}
-                   <span className={`text-xl font-bold ${goal.completed ? 'line-through text-[#8d6e63]' : ''}`}>{goal.text}</span>
-                 </div>
-               ))}
-             </div>
-             <form onSubmit={handleAddGoal} className="flex gap-4">
-               <input type="text" value={newGoalText} onChange={(e) => setNewGoalText(e.target.value)} placeholder="新增任務..." className="flex-1 bg-[#0d0706] border-4 border-[#3e2723] px-6 py-4 rounded-[2rem]" />
-               <button type="submit" className="px-8 bg-[#3e2723] text-[#daa520] font-black rounded-[2rem] border-4 border-transparent hover:border-[#daa520]">新增</button>
-             </form>
+          {/* v9 改變：番茄鐘選項移到綠色大按鈕文字右側 */}
+          <button 
+            onClick={handleToggleStudy}
+            className={`w-full py-8 rounded-[3rem] font-black text-2xl border-[6px] border-black shadow-[0_12px_0_#000] active:shadow-none active:translate-y-3 transition-all flex items-center justify-center relative ${
+              isStudying ? 'bg-[#daa520] text-black' : 'bg-[#388e3c] text-white'
+            }`}
+          >
+            {isStudying ? (
+              <div className="flex items-center gap-6"><Coffee size={36} /> 暫時休息</div>
+            ) : (
+              <div className="flex items-center justify-center gap-4">
+                <BookOpen size={36} /> 
+                <span>開始專注</span>
+                {/* 停止按鈕點擊冒泡，避免點擊選項時觸發「開始專注」 */}
+                <label 
+                  onClick={(e) => e.stopPropagation()} 
+                  className="flex items-center gap-2 cursor-pointer text-white hover:text-yellow-200 transition-colors font-bold text-base bg-black/30 px-4 py-2 rounded-full ml-4 border-2 border-black/20"
+                >
+                  <input type="checkbox" checked={isPomodoro} onChange={e => setIsPomodoro(e.target.checked)} className="w-5 h-5 accent-[#daa520]" />
+                  🍅 番茄鐘
+                </label>
+              </div>
+            )}
+          </button>
+
+          {/* 任務方塊 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* 呱呱的任務 (左) */}
+            <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 transition-all ${role === 'left' ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
+               <div className="flex justify-between items-center mb-8 pb-6 border-b-4 border-[#3e2723]">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-[#daa520] font-black text-2xl flex items-center gap-3"><Trophy size={28} /> 呱呱的任務</h3>
+                    
+                    {/* 對方專用：戳一下 */}
+                    {role === 'right' && (
+                      <button onClick={sendNudge} className="flex items-center gap-1 text-[#f472b6] hover:text-pink-400 bg-[#331515] px-3 py-1 rounded-full border-2 border-[#f472b6]/30 hover:scale-105 active:scale-95 transition-all text-sm font-bold shadow-sm">
+                        <Heart size={16} fill="currentColor" /> 戳一下
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="text-right text-sm font-bold text-[#e0d5c1] flex items-center gap-4">
+                    進度 {getProgress(leftGoals)}%
+                  </div>
+               </div>
+               
+               <div className="space-y-2 mb-8 h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                 {leftGoals.map(goal => (
+                   <div 
+                     key={goal.id} 
+                     onClick={() => toggleGoal(goal.id, 'left')} 
+                     className={`p-3 rounded-2xl border-[3px] transition-all flex items-center gap-3 group relative ${
+                       role === 'left' ? 'cursor-pointer' : 'cursor-not-allowed'
+                     } ${
+                       goal.completed ? 'bg-[#2c1d1a] border-[#3e2723] opacity-60' : 'bg-[#0d0706] border-[#5d4037]'
+                     }`}
+                   >
+                     {goal.completed ? <CheckCircle2 size={24} className="text-[#daa520] shrink-0" /> : <Circle size={24} className="text-[#5d4037] shrink-0" />}
+                     <span className={`text-base font-bold flex-1 truncate ${goal.completed ? 'line-through text-[#8d6e63]' : ''}`}>{goal.text}</span>
+                     {role === 'left' && (
+                       <button 
+                         onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id, 'left'); }}
+                         className="opacity-0 group-hover:opacity-100 text-[#8b1a1a] hover:text-[#ff4d4d] transition-opacity p-1 shrink-0"
+                       >
+                         <Trash2 size={18} />
+                       </button>
+                     )}
+                   </div>
+                 ))}
+                 {leftGoals.length === 0 && <div className="text-center py-6 text-[#3e2723] font-bold italic text-sm">尚未新增任何任務...</div>}
+               </div>
+
+               {role === 'left' && (
+                 <form onSubmit={handleAddGoal} className="flex gap-4">
+                   <input 
+                     type="text" 
+                     value={newGoalText} 
+                     onChange={(e) => setNewGoalText(e.target.value)} 
+                     placeholder="新增任務..." 
+                     className="flex-1 bg-[#0d0706] border-4 border-[#3e2723] px-6 py-4 rounded-[1.5rem] font-bold text-xl outline-none focus:border-[#daa520] transition-colors shadow-inner"
+                   />
+                   <button type="submit" className="bg-[#3e2723] p-4 rounded-2xl text-[#daa520] hover:bg-[#daa520] hover:text-[#0d0706] transition-all border-b-4 border-black active:translate-y-1 active:border-b-0"><Plus size={32} strokeWidth={4} /></button>
+                 </form>
+               )}
+            </div>
+
+            {/* 花花的任務 (右) */}
+            <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 transition-all ${role === 'right' ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
+               <div className="flex justify-between items-center mb-8 pb-6 border-b-4 border-[#3e2723]">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-[#daa520] font-black text-2xl flex items-center gap-3"><Trophy size={28} /> 花花的任務</h3>
+                    
+                    {/* 對方專用：戳一下 */}
+                    {role === 'left' && (
+                      <button onClick={sendNudge} className="flex items-center gap-1 text-[#f472b6] hover:text-pink-400 bg-[#331515] px-3 py-1 rounded-full border-2 border-[#f472b6]/30 hover:scale-105 active:scale-95 transition-all text-sm font-bold shadow-sm">
+                        <Heart size={16} fill="currentColor" /> 戳一下
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="text-right text-sm font-bold text-[#e0d5c1] flex items-center gap-4">
+                    進度 {getProgress(rightGoals)}%
+                  </div>
+               </div>
+               
+               <div className="space-y-2 mb-8 h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                 {rightGoals.map(goal => (
+                   <div 
+                     key={goal.id} 
+                     onClick={() => toggleGoal(goal.id, 'right')} 
+                     className={`p-3 rounded-2xl border-[3px] transition-all flex items-center gap-3 group relative ${
+                       role === 'right' ? 'cursor-pointer' : 'cursor-not-allowed'
+                     } ${
+                       goal.completed ? 'bg-[#2c1d1a] border-[#3e2723] opacity-60' : 'bg-[#0d0706] border-[#5d4037]'
+                     }`}
+                   >
+                     {goal.completed ? <CheckCircle2 size={24} className="text-[#daa520] shrink-0" /> : <Circle size={24} className="text-[#5d4037] shrink-0" />}
+                     <span className={`text-base font-bold flex-1 truncate ${goal.completed ? 'line-through text-[#8d6e63]' : ''}`}>{goal.text}</span>
+                     {role === 'right' && (
+                       <button 
+                         onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id, 'right'); }}
+                         className="opacity-0 group-hover:opacity-100 text-[#8b1a1a] hover:text-[#ff4d4d] transition-opacity p-1 shrink-0"
+                       >
+                         <Trash2 size={18} />
+                       </button>
+                     )}
+                   </div>
+                 ))}
+                 {rightGoals.length === 0 && <div className="text-center py-6 text-[#3e2723] font-bold italic text-sm">尚未新增任何任務...</div>}
+               </div>
+
+               {role === 'right' && (
+                 <form onSubmit={handleAddGoal} className="flex gap-4">
+                   <input 
+                     type="text" 
+                     value={newGoalText} 
+                     onChange={(e) => setNewGoalText(e.target.value)} 
+                     placeholder="新增任務..." 
+                     className="flex-1 bg-[#0d0706] border-4 border-[#3e2723] px-6 py-4 rounded-[1.5rem] font-bold text-xl outline-none focus:border-[#daa520] transition-colors shadow-inner"
+                   />
+                   <button type="submit" className="bg-[#3e2723] p-4 rounded-2xl text-[#daa520] hover:bg-[#daa520] hover:text-[#0d0706] transition-all border-b-4 border-black active:translate-y-1 active:border-b-0"><Plus size={32} strokeWidth={4} /></button>
+                 </form>
+               )}
+            </div>
           </div>
         </div>
       </main>
     </div>
   );
-};
-
-export default App;
+}

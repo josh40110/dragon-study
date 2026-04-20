@@ -76,7 +76,7 @@ const SPRITES = {
   ].join('\n')
 };
 
-// --- 100 句勵志名言資料庫 ---
+// --- 名言資料庫 ---
 const QUOTES = [
   "生活就像騎單車，為了保持平衡，你必須不斷前進。 —— 阿爾伯特·愛因斯坦",
   "天才就是百分之一的靈感加上百分之九十九的汗水。 —— 湯瑪斯·愛迪生",
@@ -177,7 +177,7 @@ const QUOTES = [
   "不要讓你在起點的恐懼阻止你到達終點。 —— 貝比·魯斯",
   "當我們不再能夠改變一個情況，我們就面臨改變自己的挑戰。 —— 維克多·弗蘭克爾",
   "一個不曾犯錯的人，就是一個從未嘗試新事物的人。 —— 阿爾伯特·愛因斯坦",
-  "生命中最美麗的風景，是我們不懈追求夢想的過程。 —— 歌德"
+  "生命中最美麗的風景，是我們不懈追求夢裝的過程。 —— 歌德"
 ];
 
 const PixelArt = ({ art, palette, pixelSize = 4, className = "" }) => {
@@ -210,7 +210,7 @@ const AnimatedWindow = () => {
   const windowFrames = [
     [ ...skySection, "KDUUUUVVVUUUUUUUKKUUUUUUVVVUUUUUUUKKUUUUUVVVUUUUUUDK", "KDUUUUUUVVVUUUUUKKUUUUUUUUVVVUUUUUKKUUUUUUUVVVUUUUDK", "KDUUVVUUUUUUUUUUKKUUUVVUUUUUUUUUUUKKUUUVVUUUUUUUVVDK", "KDUUUVVUUUUUUUUUKKUUUUVVUUUUUUUUUUKKUUUUVVUUUUUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUUVVVUUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", ...baseSection ].join('\n'),
     [ ...skySection, "KDUUUUUVVVUUUUUUKKUUUUUUUVVVUUUUUUKKUUUUUUVVVUUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUVVVUUUDK", "KDUUUVVUUUUUUUUUKKUUUUVVUUUUUUUUUUKKUUUUVVUUUUUUUVDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUUUUVVVUUUKKUUUUUUUUUUVVVUUUKKUUUUUUUUUVVVUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", ...baseSection ].join('\n'),
-    [ ...skySection, "KDUUUUUUVVVUUUUUKKUUUUUUUUVVVUUUUUKKUUUUUUUVVVUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUUVVVUUUDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUVVUUUUUUUKKUUUUUUVVUUUUUUUUKKUUUUUUVVUUUUUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", "KDUUUUUUUUUUVVVUKKUUUUUUUUUUUUVVVUKKUUUUUUUUUUUVVUDK", ...baseSection ].join('\n')
+    [ ...skySection, "KDUUUUVVVUUUUUUUKKUUUUUUVVVUUUUUUUKKUUUUUVVVUUUUUUDK", "KDUUUUUUVVVUUUUUKKUUUUUUUUVVVUUUUUKKUUUUUUUVVVUUUUDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUVVUUUUUUUKKUUUUUUVVUUUUUUUUKKUUUUUUVVUUUUUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", "KDUUUUUUUUUUVVVUKKUUUUUUUUUUUUVVVUKKUUUUUUUUUUUVVUDK", ...baseSection ].join('\n')
   ];
   return <PixelArt art={windowFrames[frame]} palette={PALETTES.env} pixelSize={7} className="transition-opacity duration-300" />;
 };
@@ -241,34 +241,28 @@ const RealTimeClock = () => {
   );
 };
 
-// --- v14 新增：勵志電子牆元件 ---
 const MotivationalBoard = () => {
   const [quoteIndex, setQuoteIndex] = useState(0);
 
   useEffect(() => {
     const updateQuote = () => {
-      // 5 分鐘 = 300,000 毫秒，以此作為基數對陣列長度取餘數，確保所有用戶看到的都同步
       const index = Math.floor(Date.now() / 300000) % QUOTES.length;
       setQuoteIndex(index);
     };
     updateQuote();
-    // 每秒檢查一次是否跨越了 5 分鐘的邊界
     const interval = setInterval(updateQuote, 1000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="w-56 md:w-72 bg-[#0a0a0a] border-[6px] border-[#2c1d1a] rounded-lg p-3 shadow-[inset_0_0_15px_rgba(0,0,0,1),0_20px_25px_rgba(0,0,0,0.8)] relative overflow-hidden">
-      {/* 復古玻璃反光特效 */}
       <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
-      
       <div className="flex items-center justify-between mb-2 border-b border-[#333] pb-1">
         <span className="text-[10px] text-red-500 font-mono font-black animate-pulse flex items-center gap-1">
           <span className="w-2 h-2 bg-red-500 rounded-full" /> REC
         </span>
         <span className="text-[10px] text-[#666] font-mono tracking-widest">QUOTE OF THE MOMENT</span>
       </div>
-      
       <div className="min-h-[60px] flex items-center justify-center px-1">
         <p className="font-mono text-[#4ade80] text-sm md:text-base font-bold text-center leading-relaxed drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]">
           "{QUOTES[quoteIndex]}"
@@ -300,7 +294,6 @@ const RunningDragonIcon = () => {
   );
 };
 
-// 取得本地日期字串
 const getLocalDateStr = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -485,17 +478,13 @@ export default function App() {
   const handleAddGoal = async (e) => {
     e.preventDefault();
     if (!newGoalText.trim() || !role) return;
-    
     const newGoal = { id: Date.now(), text: newGoalText, completed: false };
     const fieldToUpdate = role === 'left' ? 'leftGoals' : 'rightGoals';
     const currentGoals = role === 'left' ? leftGoals : rightGoals;
     const updatedGoals = [...currentGoals, newGoal];
-    
     if (role === 'left') setLeftGoals(updatedGoals);
     else setRightGoals(updatedGoals);
-    
     setNewGoalText(""); 
-    
     try {
       await updateDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals });
     } catch (err) {
@@ -508,10 +497,8 @@ export default function App() {
     const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
     const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
     const updatedGoals = currentGoals.map(g => g.id === id ? { ...g, completed: !g.completed } : g);
-    
     if (targetRole === 'left') setLeftGoals(updatedGoals);
     else setRightGoals(updatedGoals);
-
     try {
       await updateDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals });
     } catch (err) {
@@ -524,10 +511,8 @@ export default function App() {
     const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
     const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
     const updatedGoals = currentGoals.filter(g => g.id !== id);
-    
     if (targetRole === 'left') setLeftGoals(updatedGoals);
     else setRightGoals(updatedGoals);
-
     try {
       await updateDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals });
     } catch (err) {
@@ -542,7 +527,6 @@ export default function App() {
   };
 
   // --- 登入畫面 ---
-
   if (!role) {
     return (
       <div className="min-h-screen bg-[#0d0706] flex items-center justify-center p-6 font-sans">
@@ -558,19 +542,18 @@ export default function App() {
             )}
           </p>
           <div className="flex gap-4">
-            <button onClick={() => setRole('left')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.leftStudying ? 'bg-[#2c1d1a] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.3)]' : 'bg-[#3e2723] border-transparent hover:border-[#daa520] hover:bg-[#5d4037]'}`}>
+            <button onClick={() => setRole('left')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.leftStudying ? 'bg-[#2c1d1a] border-[#22c55e] shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'bg-[#3e2723] border-transparent hover:border-[#22c55e] hover:bg-[#5d4037]'}`}>
               <div className="relative z-10 flex flex-col items-center">
                 <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mb-4 transition-transform group-hover:scale-110 ${!roomData.leftStudying && 'grayscale opacity-50'}`} />
-                <span className={`font-black text-xl block ${roomData.leftStudying ? 'text-[#daa520]' : 'text-[#8d6e63]'}`}>
+                <span className={`font-black text-xl block ${roomData.leftStudying ? 'text-[#22c55e]' : 'text-[#8d6e63]'}`}>
                   {roomData.leftStudying ? '呱呱專注中' : '我是呱呱'}
                 </span>
                 {roomData.leftStudying && (
                    <span className="text-[10px] text-[#e0d5c1] opacity-60 font-mono mt-2 block tracking-tighter">掛機專注中...</span>
                 )}
               </div>
-              {roomData.leftStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#daa520]/10 to-transparent pointer-events-none" />}
+              {roomData.leftStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#22c55e]/10 to-transparent pointer-events-none" />}
             </button>
-
             <button onClick={() => setRole('right')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.rightStudying ? 'bg-[#2c1d1a] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.3)]' : 'bg-[#3e2723] border-transparent hover:border-[#daa520] hover:bg-[#5d4037]'}`}>
               <div className="relative z-10 flex flex-col items-center">
                 <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mb-4 transition-transform group-hover:scale-110 ${!roomData.rightStudying && 'grayscale opacity-50'}`} />
@@ -592,6 +575,37 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#0d0706] text-[#e0d5c1] font-sans pb-32 overflow-x-hidden">
       
+      <style>{`
+        @keyframes stripe-move {
+          0% { background-position: 0 0; }
+          100% { background-position: 56.57px 0; }
+        }
+        .progress-stripes-left {
+          background-color: #064e1b;
+          background-image: repeating-linear-gradient(
+            -45deg,
+            #0a6b24 0px,
+            #0a6b24 20px,
+            transparent 20px,
+            transparent 40px
+          );
+          background-size: 56.57px 56.57px;
+          animation: stripe-move 3s linear infinite;
+        }
+        .progress-stripes-right {
+          background-color: #6b4412;
+          background-image: repeating-linear-gradient(
+            -45deg,
+            #8b5a2b 0px,
+            #8b5a2b 20px,
+            transparent 20px,
+            transparent 40px
+          );
+          background-size: 56.57px 56.57px;
+          animation: stripe-move 3s linear infinite;
+        }
+      `}</style>
+
       {/* 全螢幕沉浸番茄鐘 */}
       {isStudying && isPomodoro && (
         <div className="fixed inset-0 z-[200] bg-[#0d0706]/95 backdrop-blur-lg flex flex-col items-center justify-center">
@@ -643,7 +657,6 @@ export default function App() {
           <div className="absolute inset-0 bg-[#4e342e]" />
           <div className="absolute top-[6%] left-[4%] z-10 opacity-100 drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)]"><AnimatedWindow /></div>
           
-          {/* v14: 勵志電子牆 (取代原本的圖書館書櫃) */}
           <div className="absolute top-[8%] right-[6%] z-10 opacity-95">
              <MotivationalBoard />
           </div>
@@ -653,7 +666,7 @@ export default function App() {
           {/* 左側：呱呱 */}
           <div className="absolute bottom-[28%] left-[25%] -translate-x-1/2 z-20 flex justify-center items-end">
              {role === 'right' && (
-               <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-xl border border-[#daa520]/50 text-[#daa520] font-mono text-sm font-bold z-50 tracking-wider shadow-[0_0_10px_rgba(0,0,0,0.6)]">
+               <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-xl border border-[#22c55e]/50 text-[#22c55e] font-mono text-sm font-bold z-50 tracking-wider shadow-[0_0_10px_rgba(0,0,0,0.6)]">
                  {formatTime(leftElapsed)}
                </div>
              )}
@@ -743,20 +756,32 @@ export default function App() {
           {/* 任務方塊 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {/* 呱呱的任務 (左) */}
-            <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 transition-all ${role === 'left' ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
-               <div className="flex justify-between items-center mb-8 pb-6 border-b-4 border-[#3e2723]">
-                  <div className="flex items-center gap-4">
-                    <h3 className="text-[#daa520] font-black text-2xl flex items-center gap-3"><Trophy size={28} /> 呱呱的任務</h3>
-                    {role === 'right' && (
-                      <button onClick={sendNudge} className="flex items-center gap-1 text-[#f472b6] hover:text-pink-400 bg-[#331515] px-3 py-1 rounded-full border-2 border-[#f472b6]/30 hover:scale-105 active:scale-95 transition-all text-sm font-bold shadow-sm ml-2">
-                        <Heart size={16} fill="currentColor" /> 戳一下
-                      </button>
-                    )}
+            {/* 呱呱的任務 (左) - v8_滿版標題進度條 */}
+            <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 overflow-hidden transition-all ${role === 'left' ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
+               <div className="relative overflow-hidden bg-[#0c0807] border-b-[3px] border-[#2a1a15] h-24 flex items-end pb-5 px-14 mb-8 -mt-8 -mx-8 transition-colors duration-300" style={{ borderColor: getProgress(leftGoals) === 100 ? '#0a6b24' : (getProgress(leftGoals) > 0 ? '#14532d' : '#2a1a15') }}>
+                  {/* 電量填充層 */}
+                  <div 
+                    className="absolute left-0 top-0 h-full transition-all duration-[800ms] ease-[cubic-bezier(0.19,1,0.22,1)] z-0 progress-stripes-left" 
+                    style={{ 
+                      width: `${getProgress(leftGoals)}%`,
+                      boxShadow: getProgress(leftGoals) > 0 && getProgress(leftGoals) < 100 ? '4px 0 20px rgba(10,107,36,0.6)' : 'none'
+                    }}
+                  >
                   </div>
-                  
-                  <div className="text-right text-sm font-bold text-[#e0d5c1] flex items-center gap-4">
-                    進度 {getProgress(leftGoals)}%
+                  {/* 內容層 */}
+                  <div className="relative z-10 w-full flex justify-between items-center pointer-events-none">
+                    <div className="flex items-center gap-4 pointer-events-auto">
+                      <h3 className="text-[#daa520] font-black text-2xl flex items-center gap-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"><Trophy size={28} /> 呱呱的任務</h3>
+                      {role === 'right' && (
+                        <button onClick={sendNudge} className="flex items-center gap-1 text-[#f472b6] hover:text-pink-400 bg-[#331515] px-3 py-1 rounded-full border-2 border-[#f472b6]/30 hover:scale-105 active:scale-95 transition-all text-sm font-bold shadow-sm ml-2">
+                          <Heart size={16} fill="currentColor" /> 戳一下
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="text-right text-sm font-bold text-[#daa520] flex items-center gap-4 bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-xl border border-[#daa520]/20 pointer-events-auto shadow-sm">
+                      進度 {getProgress(leftGoals)}%
+                    </div>
                   </div>
                </div>
                
@@ -768,11 +793,11 @@ export default function App() {
                      className={`p-3 rounded-2xl border-[3px] transition-all flex items-center gap-3 group relative ${
                        role === 'left' ? 'cursor-pointer' : 'cursor-not-allowed'
                      } ${
-                       goal.completed ? 'bg-[#2c1d1a] border-[#3e2723] opacity-60' : 'bg-[#0d0706] border-[#5d4037]'
+                       goal.completed ? 'bg-[#061c0f] border-[#14532d] opacity-60' : 'bg-[#0d0706] border-[#14532d]/40'
                      }`}
                    >
-                     {goal.completed ? <CheckCircle2 size={24} className="text-[#daa520] shrink-0" /> : <Circle size={24} className="text-[#5d4037] shrink-0" />}
-                     <span className={`text-base font-bold flex-1 truncate ${goal.completed ? 'line-through text-[#8d6e63]' : ''}`}>{goal.text}</span>
+                     {goal.completed ? <CheckCircle2 size={24} className="text-[#22c55e] shrink-0" /> : <Circle size={24} className="text-[#14532d] shrink-0" />}
+                     <span className={`text-base font-bold flex-1 truncate ${goal.completed ? 'line-through text-[#166534]' : 'text-[#e0d5c1]'}`}>{goal.text}</span>
                      {role === 'left' && (
                        <button 
                          onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id, 'left'); }}
@@ -783,7 +808,7 @@ export default function App() {
                      )}
                    </div>
                  ))}
-                 {leftGoals.length === 0 && <div className="text-center py-6 text-[#3e2723] font-bold italic text-sm">尚未新增任何任務...</div>}
+                 {leftGoals.length === 0 && <div className="text-center py-6 text-[#14532d] font-bold italic text-sm">尚未新增任何任務...</div>}
                </div>
 
                {role === 'left' && (
@@ -793,29 +818,42 @@ export default function App() {
                      value={newGoalText} 
                      onChange={(e) => setNewGoalText(e.target.value)} 
                      placeholder="新增任務..." 
-                     className="flex-1 bg-[#0d0706] border-4 border-[#3e2723] px-6 py-4 rounded-[1.5rem] font-bold text-xl outline-none focus:border-[#daa520] transition-colors shadow-inner"
+                     className="flex-1 bg-[#0d0706] border-4 border-[#14532d]/40 px-6 py-4 rounded-[1.5rem] font-bold text-xl outline-none focus:border-[#22c55e] transition-colors shadow-inner text-[#e0d5c1]"
                    />
-                   <button type="submit" className="bg-[#3e2723] p-4 rounded-2xl text-[#daa520] hover:bg-[#daa520] hover:text-[#0d0706] transition-all border-b-4 border-black active:translate-y-1 active:border-b-0"><Plus size={32} strokeWidth={4} /></button>
+                   <button type="submit" className="bg-[#14532d] p-4 rounded-2xl text-[#22c55e] hover:bg-[#22c55e] hover:text-[#0d0706] transition-all border-b-4 border-black active:translate-y-1 active:border-b-0"><Plus size={32} strokeWidth={4} /></button>
                  </form>
                )}
             </div>
 
-            {/* 花花的任務 (右) */}
-            <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 transition-all ${role === 'right' ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
-               <div className="flex justify-between items-center mb-8 pb-6 border-b-4 border-[#3e2723]">
-                  <div className="flex items-center gap-4">
-                    <h3 className="text-[#daa520] font-black text-2xl flex items-center gap-3">
-                      <Trophy size={28} /> 花花的任務
-                    </h3>
-                    {role === 'left' && (
-                      <button onClick={sendNudge} className="flex items-center gap-1 text-[#f472b6] hover:text-pink-400 bg-[#331515] px-3 py-1 rounded-full border-2 border-[#f472b6]/30 hover:scale-105 active:scale-95 transition-all text-sm font-bold shadow-sm ml-2">
-                        <Heart size={16} fill="currentColor" /> 戳一下
-                      </button>
-                    )}
+            {/* 花花的任務 (右) - v8_滿版標題進度條 */}
+            <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 overflow-hidden transition-all ${role === 'right' ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
+               <div className="relative overflow-hidden bg-[#0c0807] border-b-[3px] border-[#2a1a15] h-24 flex items-end pb-5 px-14 mb-8 -mt-8 -mx-8 transition-colors duration-300" style={{ borderColor: getProgress(rightGoals) === 100 ? '#b8860b' : (getProgress(rightGoals) > 0 ? '#8b6508' : '#2a1a15') }}>
+                  {/* 電量填充層 */}
+                  <div 
+                    className="absolute left-0 top-0 h-full transition-all duration-[800ms] ease-[cubic-bezier(0.19,1,0.22,1)] z-0 progress-stripes-right" 
+                    style={{ 
+                      width: `${getProgress(rightGoals)}%`,
+                      boxShadow: getProgress(rightGoals) > 0 && getProgress(rightGoals) < 100 ? '4px 0 20px rgba(184,134,11,0.6)' : 'none'
+                    }}
+                  >
                   </div>
+                  
+                  {/* 內容層 */}
+                  <div className="relative z-10 w-full flex justify-between items-center pointer-events-none">
+                    <div className="flex items-center gap-4 pointer-events-auto">
+                      <h3 className="text-[#daa520] font-black text-2xl flex items-center gap-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                        <Trophy size={28} /> 花花的任務
+                      </h3>
+                      {role === 'left' && (
+                        <button onClick={sendNudge} className="flex items-center gap-1 text-[#f472b6] hover:text-pink-400 bg-[#331515] px-3 py-1 rounded-full border-2 border-[#f472b6]/30 hover:scale-105 active:scale-95 transition-all text-sm font-bold shadow-sm ml-2">
+                          <Heart size={16} fill="currentColor" /> 戳一下
+                        </button>
+                      )}
+                    </div>
 
-                  <div className="text-right text-sm font-bold text-[#e0d5c1] flex items-center gap-4">
-                    進度 {getProgress(rightGoals)}%
+                    <div className="text-right text-sm font-bold text-[#daa520] flex items-center gap-4 bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-xl border border-[#daa520]/20 pointer-events-auto shadow-sm">
+                      進度 {getProgress(rightGoals)}%
+                    </div>
                   </div>
                </div>
                

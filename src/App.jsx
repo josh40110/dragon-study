@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
-  Heart, BookOpen, Coffee, Calendar, Star, User, Trophy, CheckCircle2, Circle, Plus, Trash2
+  Heart, BookOpen, Coffee, Calendar, Star, User, Trophy, CheckCircle2, Circle, Plus, Trash2, Pencil, GripVertical
 } from 'lucide-react';
 
 // --- Firebase 模組載入 ---
@@ -325,22 +325,12 @@ export default function App() {
   const [receiveNudge, setReceiveNudge] = useState(false);
   const prevNudgeRef = useRef(0);
 
-  useEffect(() => {
-    if (!auth) return;
-    const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-      } catch (err) {
-        console.error("Auth Error:", err);
-      }
-    };
-    initAuth();
-    return onAuthStateChanged(auth, setUser);
-  }, []);
+  // 狀態：拖移與編輯的狀態
+  const dragItemRef = useRef(null);
+  const dragOverItemRef = useRef(null);
+  const [draggingId, setDraggingId] = useState(null); // 新增：用於追蹤正在拖曳的項目ID，以套用特效
+  const [editingGoalId, setEditingGoalId] = useState(null);
+  const [editingGoalText, setEditingGoalText] = useState("");
 
   useEffect(() => {
     if (!user || !db || !getRoomRef) return;
@@ -524,6 +514,83 @@ export default function App() {
     if (!targetGoals || targetGoals.length === 0) return 0;
     const completedCount = targetGoals.filter(g => g.completed).length;
     return Math.round((completedCount / targetGoals.length) * 100);
+  };
+
+  // --- 強化：處理拖曳排序邏輯 (即時視覺反饋) ---
+  const handleDragStart = (e, index, goalId) => {
+    dragItemRef.current = index;
+    setDraggingId(goalId);
+    // 設定拖曳時的滑鼠游標樣式
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragEnter = (e, index, targetRole) => {
+    e.preventDefault();
+    if (dragItemRef.current === null || dragItemRef.current === index) return;
+
+    // 拖曳中即時交換位置 (Optimistic UI)
+    const currentGoals = targetRole === 'left' ? [...leftGoals] : [...rightGoals];
+    const draggedItemContent = currentGoals[dragItemRef.current];
+    
+    currentGoals.splice(dragItemRef.current, 1);
+    currentGoals.splice(index, 0, draggedItemContent);
+    
+    // 更新當前拖曳項目的新 index
+    dragItemRef.current = index;
+
+    if (targetRole === 'left') setLeftGoals(currentGoals);
+    else setRightGoals(currentGoals);
+  };
+
+  const handleDragEnd = async (targetRole) => {
+    setDraggingId(null);
+    if (dragItemRef.current === null) return;
+    
+    dragItemRef.current = null;
+    dragOverItemRef.current = null;
+
+    const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
+    const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
+
+    // 放開滑鼠時才將最終排序寫入資料庫
+    try {
+      await updateDoc(getRoomRef(), { [fieldToUpdate]: currentGoals });
+    } catch (err) {
+      console.error("Drag Update Error:", err);
+    }
+  };
+
+  // --- 處理編輯邏輯 ---
+  const startEditGoal = (goal) => {
+    setEditingGoalId(goal.id);
+    setEditingGoalText(goal.text);
+  };
+
+  const saveEditGoal = async (id, targetRole) => {
+    if (!editingGoalText.trim()) {
+      setEditingGoalId(null);
+      return;
+    }
+    const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
+    const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
+    const updatedGoals = currentGoals.map(g => g.id === id ? { ...g, text: editingGoalText } : g);
+
+    if (targetRole === 'left') setLeftGoals(updatedGoals);
+    else setRightGoals(updatedGoals);
+
+    setEditingGoalId(null);
+    setEditingGoalText("");
+
+    try {
+      await updateDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals });
+    } catch (err) {
+      console.error("Edit Update Error:", err);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingGoalId(null);
+    setEditingGoalText("");
   };
 
   // --- 登入畫面 ---
@@ -786,25 +853,61 @@ export default function App() {
                </div>
                
                <div className="space-y-2 mb-8 h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                 {leftGoals.map(goal => (
+                 {leftGoals.map((goal, index) => (
                    <div 
                      key={goal.id} 
-                     onClick={() => toggleGoal(goal.id, 'left')} 
-                     className={`p-3 rounded-2xl border-[3px] transition-all flex items-center gap-3 group relative ${
-                       role === 'left' ? 'cursor-pointer' : 'cursor-not-allowed'
+                     draggable={role === 'left' && editingGoalId !== goal.id}
+                     onDragStart={(e) => handleDragStart(e, index, goal.id)}
+                     onDragEnter={(e) => handleDragEnter(e, index, 'left')}
+                     onDragEnd={() => handleDragEnd('left')}
+                     onDragOver={(e) => e.preventDefault()}
+                     onClick={() => { if (editingGoalId !== goal.id) toggleGoal(goal.id, 'left'); }}
+                     className={`p-3 rounded-2xl border-[3px] transition-all duration-200 flex items-center gap-3 group relative ${
+                       role === 'left' ? (editingGoalId !== goal.id ? 'cursor-grab active:cursor-grabbing' : 'cursor-text') : 'cursor-not-allowed'
                      } ${
-                       goal.completed ? 'bg-[#061c0f] border-[#14532d] opacity-60' : 'bg-[#0d0706] border-[#14532d]/40'
+                       draggingId === goal.id 
+                         ? 'opacity-50 border-dashed border-[#22c55e] scale-[0.98] bg-[#0c0807] shadow-inner' // 拖曳中的佔位符特效
+                         : goal.completed ? 'bg-[#061c0f] border-[#14532d] opacity-60' : 'bg-[#0d0706] border-[#14532d]/40 hover:border-[#14532d]'
                      }`}
                    >
+                     {role === 'left' && editingGoalId !== goal.id && (
+                       <GripVertical size={16} className="text-[#14532d] opacity-0 group-hover:opacity-100 cursor-grab shrink-0 transition-opacity" />
+                     )}
                      {goal.completed ? <CheckCircle2 size={24} className="text-[#22c55e] shrink-0" /> : <Circle size={24} className="text-[#14532d] shrink-0" />}
-                     <span className={`text-base font-bold flex-1 truncate ${goal.completed ? 'line-through text-[#166534]' : 'text-[#e0d5c1]'}`}>{goal.text}</span>
-                     {role === 'left' && (
-                       <button 
-                         onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id, 'left'); }}
-                         className="opacity-0 group-hover:opacity-100 text-[#8b1a1a] hover:text-[#ff4d4d] transition-opacity p-1 shrink-0"
-                       >
-                         <Trash2 size={18} />
-                       </button>
+                     
+                     {editingGoalId === goal.id ? (
+                       <input
+                         type="text"
+                         autoFocus
+                         value={editingGoalText}
+                         onChange={(e) => setEditingGoalText(e.target.value)}
+                         onBlur={() => saveEditGoal(goal.id, 'left')}
+                         onKeyDown={(e) => {
+                           if (e.key === 'Enter') saveEditGoal(goal.id, 'left');
+                           if (e.key === 'Escape') cancelEdit();
+                         }}
+                         onClick={(e) => e.stopPropagation()}
+                         className="flex-1 bg-transparent border-b-2 border-[#22c55e] text-[#e0d5c1] font-bold outline-none px-1 py-0.5"
+                       />
+                     ) : (
+                       <span className={`text-base font-bold flex-1 truncate ${goal.completed ? 'line-through text-[#166534]' : 'text-[#e0d5c1]'}`}>{goal.text}</span>
+                     )}
+
+                     {role === 'left' && editingGoalId !== goal.id && (
+                       <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity shrink-0">
+                         <button 
+                           onClick={(e) => { e.stopPropagation(); startEditGoal(goal); }}
+                           className="text-[#daa520] hover:text-[#fde047] p-1.5 transition-colors"
+                         >
+                           <Pencil size={18} />
+                         </button>
+                         <button 
+                           onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id, 'left'); }}
+                           className="text-[#8b1a1a] hover:text-[#ff4d4d] p-1.5 transition-colors"
+                         >
+                           <Trash2 size={18} />
+                         </button>
+                       </div>
                      )}
                    </div>
                  ))}
@@ -858,25 +961,61 @@ export default function App() {
                </div>
                
                <div className="space-y-2 mb-8 h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                 {rightGoals.map(goal => (
+                 {rightGoals.map((goal, index) => (
                    <div 
                      key={goal.id} 
-                     onClick={() => toggleGoal(goal.id, 'right')} 
-                     className={`p-3 rounded-2xl border-[3px] transition-all flex items-center gap-3 group relative ${
-                       role === 'right' ? 'cursor-pointer' : 'cursor-not-allowed'
+                     draggable={role === 'right' && editingGoalId !== goal.id}
+                     onDragStart={(e) => handleDragStart(e, index, goal.id)}
+                     onDragEnter={(e) => handleDragEnter(e, index, 'right')}
+                     onDragEnd={() => handleDragEnd('right')}
+                     onDragOver={(e) => e.preventDefault()}
+                     onClick={() => { if (editingGoalId !== goal.id) toggleGoal(goal.id, 'right'); }}
+                     className={`p-3 rounded-2xl border-[3px] transition-all duration-200 flex items-center gap-3 group relative ${
+                       role === 'right' ? (editingGoalId !== goal.id ? 'cursor-grab active:cursor-grabbing' : 'cursor-text') : 'cursor-not-allowed'
                      } ${
-                       goal.completed ? 'bg-[#2c1d1a] border-[#3e2723] opacity-60' : 'bg-[#0d0706] border-[#5d4037]'
+                       draggingId === goal.id 
+                         ? 'opacity-50 border-dashed border-[#daa520] scale-[0.98] bg-[#0c0807] shadow-inner' // 拖曳中的佔位符特效
+                         : goal.completed ? 'bg-[#2c1d1a] border-[#3e2723] opacity-60' : 'bg-[#0d0706] border-[#5d4037] hover:border-[#795548]'
                      }`}
                    >
+                     {role === 'right' && editingGoalId !== goal.id && (
+                       <GripVertical size={16} className="text-[#5d4037] opacity-0 group-hover:opacity-100 cursor-grab shrink-0 transition-opacity" />
+                     )}
                      {goal.completed ? <CheckCircle2 size={24} className="text-[#daa520] shrink-0" /> : <Circle size={24} className="text-[#5d4037] shrink-0" />}
-                     <span className={`text-base font-bold flex-1 truncate ${goal.completed ? 'line-through text-[#8d6e63]' : ''}`}>{goal.text}</span>
-                     {role === 'right' && (
-                       <button 
-                         onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id, 'right'); }}
-                         className="opacity-0 group-hover:opacity-100 text-[#8b1a1a] hover:text-[#ff4d4d] transition-opacity p-1 shrink-0"
-                       >
-                         <Trash2 size={18} />
-                       </button>
+                     
+                     {editingGoalId === goal.id ? (
+                       <input
+                         type="text"
+                         autoFocus
+                         value={editingGoalText}
+                         onChange={(e) => setEditingGoalText(e.target.value)}
+                         onBlur={() => saveEditGoal(goal.id, 'right')}
+                         onKeyDown={(e) => {
+                           if (e.key === 'Enter') saveEditGoal(goal.id, 'right');
+                           if (e.key === 'Escape') cancelEdit();
+                         }}
+                         onClick={(e) => e.stopPropagation()}
+                         className="flex-1 bg-transparent border-b-2 border-[#daa520] text-[#e0d5c1] font-bold outline-none px-1 py-0.5"
+                       />
+                     ) : (
+                       <span className={`text-base font-bold flex-1 truncate ${goal.completed ? 'line-through text-[#8d6e63]' : 'text-[#e0d5c1]'}`}>{goal.text}</span>
+                     )}
+
+                     {role === 'right' && editingGoalId !== goal.id && (
+                       <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity shrink-0">
+                         <button 
+                           onClick={(e) => { e.stopPropagation(); startEditGoal(goal); }}
+                           className="text-[#daa520] hover:text-[#fde047] p-1.5 transition-colors"
+                         >
+                           <Pencil size={18} />
+                         </button>
+                         <button 
+                           onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id, 'right'); }}
+                           className="text-[#8b1a1a] hover:text-[#ff4d4d] p-1.5 transition-colors"
+                         >
+                           <Trash2 size={18} />
+                         </button>
+                       </div>
                      )}
                    </div>
                  ))}

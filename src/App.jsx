@@ -76,7 +76,7 @@ const SPRITES = {
   ].join('\n')
 };
 
-// --- 名言資料庫 ---
+// --- 100 句勵志名言資料庫 ---
 const QUOTES = [
   "生活就像騎單車，為了保持平衡，你必須不斷前進。 —— 阿爾伯特·愛因斯坦",
   "天才就是百分之一的靈感加上百分之九十九的汗水。 —— 湯瑪斯·愛迪生",
@@ -177,7 +177,7 @@ const QUOTES = [
   "不要讓你在起點的恐懼阻止你到達終點。 —— 貝比·魯斯",
   "當我們不再能夠改變一個情況，我們就面臨改變自己的挑戰。 —— 維克多·弗蘭克爾",
   "一個不曾犯錯的人，就是一個從未嘗試新事物的人。 —— 阿爾伯特·愛因斯坦",
-  "生命中最美麗的風景，是我們不懈追求夢裝的過程。 —— 歌德"
+  "生命中最美麗的風景，是我們不懈追求夢想的過程。 —— 歌德"
 ];
 
 const PixelArt = ({ art, palette, pixelSize = 4, className = "" }) => {
@@ -210,7 +210,7 @@ const AnimatedWindow = () => {
   const windowFrames = [
     [ ...skySection, "KDUUUUVVVUUUUUUUKKUUUUUUVVVUUUUUUUKKUUUUUVVVUUUUUUDK", "KDUUUUUUVVVUUUUUKKUUUUUUUUVVVUUUUUKKUUUUUUUVVVUUUUDK", "KDUUVVUUUUUUUUUUKKUUUVVUUUUUUUUUUUKKUUUVVUUUUUUUVVDK", "KDUUUVVUUUUUUUUUKKUUUUVVUUUUUUUUUUKKUUUUVVUUUUUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUUVVVUUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", ...baseSection ].join('\n'),
     [ ...skySection, "KDUUUUUVVVUUUUUUKKUUUUUUUVVVUUUUUUKKUUUUUUVVVUUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUVVVUUUDK", "KDUUUVVUUUUUUUUUKKUUUUVVUUUUUUUUUUKKUUUUVVUUUUUUUVDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUUUUVVVUUUKKUUUUUUUUUUVVVUUUKKUUUUUUUUUVVVUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", ...baseSection ].join('\n'),
-    [ ...skySection, "KDUUUUVVVUUUUUUUKKUUUUUUVVVUUUUUUUKKUUUUUVVVUUUUUUDK", "KDUUUUUUVVVUUUUUKKUUUUUUUUVVVUUUUUKKUUUUUUUVVVUUUUDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUVVUUUUUUUKKUUUUUUVVUUUUUUUUKKUUUUUUVVUUUUUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", "KDUUUUUUUUUUVVVUKKUUUUUUUUUUUUVVVUKKUUUUUUUUUUUVVUDK", ...baseSection ].join('\n')
+    [ ...skySection, "KDUUUUUUVVVUUUUUKKUUUUUUUUVVVUUUUUKKUUUUUUUVVVUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUUVVVUUUDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUVVUUUUUUUKKUUUUUUVVUUUUUUUUKKUUUUUUVVUUUUUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", "KDUUUUUUUUUUVVVUKKUUUUUUUUUUUUVVVUKKUUUUUUUUUUUVVUDK", ...baseSection ].join('\n')
   ];
   return <PixelArt art={windowFrames[frame]} palette={PALETTES.env} pixelSize={7} className="transition-opacity duration-300" />;
 };
@@ -241,28 +241,34 @@ const RealTimeClock = () => {
   );
 };
 
+// --- v14 新增：勵志電子牆元件 ---
 const MotivationalBoard = () => {
   const [quoteIndex, setQuoteIndex] = useState(0);
 
   useEffect(() => {
     const updateQuote = () => {
+      // 5 分鐘 = 300,000 毫秒，以此作為基數對陣列長度取餘數，確保所有用戶看到的都同步
       const index = Math.floor(Date.now() / 300000) % QUOTES.length;
       setQuoteIndex(index);
     };
     updateQuote();
+    // 每秒檢查一次是否跨越了 5 分鐘的邊界
     const interval = setInterval(updateQuote, 1000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="w-56 md:w-72 bg-[#0a0a0a] border-[6px] border-[#2c1d1a] rounded-lg p-3 shadow-[inset_0_0_15px_rgba(0,0,0,1),0_20px_25px_rgba(0,0,0,0.8)] relative overflow-hidden">
+      {/* 復古玻璃反光特效 */}
       <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+      
       <div className="flex items-center justify-between mb-2 border-b border-[#333] pb-1">
         <span className="text-[10px] text-red-500 font-mono font-black animate-pulse flex items-center gap-1">
           <span className="w-2 h-2 bg-red-500 rounded-full" /> REC
         </span>
         <span className="text-[10px] text-[#666] font-mono tracking-widest">QUOTE OF THE MOMENT</span>
       </div>
+      
       <div className="min-h-[60px] flex items-center justify-center px-1">
         <p className="font-mono text-[#4ade80] text-sm md:text-base font-bold text-center leading-relaxed drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]">
           "{QUOTES[quoteIndex]}"
@@ -294,6 +300,7 @@ const RunningDragonIcon = () => {
   );
 };
 
+// 取得本地日期字串
 const getLocalDateStr = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -466,27 +473,31 @@ export default function App() {
       setCurrentTime(Date.now());
     }
 
-    await updateDoc(roomRef, updates);
+    await setDoc(roomRef, updates, { merge: true });
   };
 
   const sendNudge = async () => {
     if (!role || !getRoomRef) return;
     const partnerRole = role === 'left' ? 'right' : 'left';
-    await updateDoc(getRoomRef(), { [`${partnerRole}Nudge`]: Date.now() });
+    await setDoc(getRoomRef(), { [`${partnerRole}Nudge`]: Date.now() }, { merge: true });
   };
 
   const handleAddGoal = async (e) => {
     e.preventDefault();
     if (!newGoalText.trim() || !role) return;
+    
     const newGoal = { id: Date.now(), text: newGoalText, completed: false };
     const fieldToUpdate = role === 'left' ? 'leftGoals' : 'rightGoals';
     const currentGoals = role === 'left' ? leftGoals : rightGoals;
     const updatedGoals = [...currentGoals, newGoal];
+    
     if (role === 'left') setLeftGoals(updatedGoals);
     else setRightGoals(updatedGoals);
+    
     setNewGoalText(""); 
+    
     try {
-      await updateDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals });
+      await setDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals }, { merge: true });
     } catch (err) {
       console.error("Update Error:", err);
     }
@@ -497,10 +508,12 @@ export default function App() {
     const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
     const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
     const updatedGoals = currentGoals.map(g => g.id === id ? { ...g, completed: !g.completed } : g);
+    
     if (targetRole === 'left') setLeftGoals(updatedGoals);
     else setRightGoals(updatedGoals);
+
     try {
-      await updateDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals });
+      await setDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals }, { merge: true });
     } catch (err) {
       console.error("Toggle Error:", err);
     }
@@ -511,10 +524,12 @@ export default function App() {
     const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
     const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
     const updatedGoals = currentGoals.filter(g => g.id !== id);
+    
     if (targetRole === 'left') setLeftGoals(updatedGoals);
     else setRightGoals(updatedGoals);
+
     try {
-      await updateDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals });
+      await setDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals }, { merge: true });
     } catch (err) {
       console.error("Delete Error:", err);
     }
@@ -527,6 +542,7 @@ export default function App() {
   };
 
   // --- 登入畫面 ---
+
   if (!role) {
     return (
       <div className="min-h-screen bg-[#0d0706] flex items-center justify-center p-6 font-sans">
@@ -542,18 +558,19 @@ export default function App() {
             )}
           </p>
           <div className="flex gap-4">
-            <button onClick={() => setRole('left')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.leftStudying ? 'bg-[#2c1d1a] border-[#22c55e] shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'bg-[#3e2723] border-transparent hover:border-[#22c55e] hover:bg-[#5d4037]'}`}>
+            <button onClick={() => setRole('left')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.leftStudying ? 'bg-[#2c1d1a] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.3)]' : 'bg-[#3e2723] border-transparent hover:border-[#daa520] hover:bg-[#5d4037]'}`}>
               <div className="relative z-10 flex flex-col items-center">
                 <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mb-4 transition-transform group-hover:scale-110 ${!roomData.leftStudying && 'grayscale opacity-50'}`} />
-                <span className={`font-black text-xl block ${roomData.leftStudying ? 'text-[#22c55e]' : 'text-[#8d6e63]'}`}>
+                <span className={`font-black text-xl block ${roomData.leftStudying ? 'text-[#daa520]' : 'text-[#8d6e63]'}`}>
                   {roomData.leftStudying ? '呱呱專注中' : '我是呱呱'}
                 </span>
                 {roomData.leftStudying && (
                    <span className="text-[10px] text-[#e0d5c1] opacity-60 font-mono mt-2 block tracking-tighter">掛機專注中...</span>
                 )}
               </div>
-              {roomData.leftStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#22c55e]/10 to-transparent pointer-events-none" />}
+              {roomData.leftStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#daa520]/10 to-transparent pointer-events-none" />}
             </button>
+
             <button onClick={() => setRole('right')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.rightStudying ? 'bg-[#2c1d1a] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.3)]' : 'bg-[#3e2723] border-transparent hover:border-[#daa520] hover:bg-[#5d4037]'}`}>
               <div className="relative z-10 flex flex-col items-center">
                 <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mb-4 transition-transform group-hover:scale-110 ${!roomData.rightStudying && 'grayscale opacity-50'}`} />
@@ -657,6 +674,7 @@ export default function App() {
           <div className="absolute inset-0 bg-[#4e342e]" />
           <div className="absolute top-[6%] left-[4%] z-10 opacity-100 drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)]"><AnimatedWindow /></div>
           
+          {/* 勵志電子牆 */}
           <div className="absolute top-[8%] right-[6%] z-10 opacity-95">
              <MotivationalBoard />
           </div>
@@ -666,7 +684,7 @@ export default function App() {
           {/* 左側：呱呱 */}
           <div className="absolute bottom-[28%] left-[25%] -translate-x-1/2 z-20 flex justify-center items-end">
              {role === 'right' && (
-               <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-xl border border-[#22c55e]/50 text-[#22c55e] font-mono text-sm font-bold z-50 tracking-wider shadow-[0_0_10px_rgba(0,0,0,0.6)]">
+               <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-xl border border-[#daa520]/50 text-[#daa520] font-mono text-sm font-bold z-50 tracking-wider shadow-[0_0_10px_rgba(0,0,0,0.6)]">
                  {formatTime(leftElapsed)}
                </div>
              )}
@@ -756,7 +774,7 @@ export default function App() {
           {/* 任務方塊 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            {/* 呱呱的任務 (左) - v8_滿版標題進度條 */}
+            {/* 呱呱的任務 (左) - v15_修復Firebase錯誤滿版標題進度條 */}
             <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 overflow-hidden transition-all ${role === 'left' ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
                <div className="relative overflow-hidden bg-[#0c0807] border-b-[3px] border-[#2a1a15] h-24 flex items-end pb-5 px-14 mb-8 -mt-8 -mx-8 transition-colors duration-300" style={{ borderColor: getProgress(leftGoals) === 100 ? '#0a6b24' : (getProgress(leftGoals) > 0 ? '#14532d' : '#2a1a15') }}>
                   {/* 電量填充層 */}
@@ -825,7 +843,7 @@ export default function App() {
                )}
             </div>
 
-            {/* 花花的任務 (右) - v8_滿版標題進度條 */}
+            {/* 花花的任務 (右) - v15_修復Firebase錯誤滿版標題進度條 */}
             <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 overflow-hidden transition-all ${role === 'right' ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
                <div className="relative overflow-hidden bg-[#0c0807] border-b-[3px] border-[#2a1a15] h-24 flex items-end pb-5 px-14 mb-8 -mt-8 -mx-8 transition-colors duration-300" style={{ borderColor: getProgress(rightGoals) === 100 ? '#b8860b' : (getProgress(rightGoals) > 0 ? '#8b6508' : '#2a1a15') }}>
                   {/* 電量填充層 */}

@@ -1,435 +1,32 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { 
-  Heart, BookOpen, Coffee, Calendar, Star, User, Trophy, CheckCircle2, Circle, Plus, Trash2
-} from 'lucide-react';
-
-// --- Firebase 模組載入 ---
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
-
-// --- Firebase 環境初始化 ---
-let app, auth, db, getRoomRef;
-
-try {
-  if (typeof __firebase_config !== 'undefined') {
-    const firebaseConfig = JSON.parse(__firebase_config);
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    getRoomRef = () => doc(db, 'artifacts', appId, 'public', 'data', 'rooms', 'shared-room');
-  } else {
-    // 備援：本地開發環境變數 (Vite)
-    const firebaseConfig = {
-      apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-      appId: import.meta.env.VITE_FIREBASE_APP_ID
-    };
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    getRoomRef = () => doc(db, 'rooms', 'shared-room');
-  }
-} catch (e) {
-  console.error("Firebase Init Error:", e);
-}
-
-// --- 終極調色盤 ---
-const PALETTES = {
-  dragon: { 
-    'K': '#331515', 'k': '#8d6e63', 'W': '#ffffff', 'G': '#f5f5f5', 'R': '#8b0000', 'O': '#ff9a76', 'B': '#000000',
-    'Z': '#81d4fa', 'z': '#ffffff'  
-  },
-  env: {
-    'D': '#3e2723', 'L': '#5d4037', 'T': '#795548', 'S': '#1a0f0d', 
-    'r': '#a52a2a', 'b': '#2c3e50', 'y': '#f1c40f', 'g': '#27ae60', 'w': '#ecf0f1', 'p': '#8e44ad', 'o': '#e67e22',
-    'W': '#ffffff', 'coffee': '#3e2723', 'paper': '#fdf5e6', '-': '#d1d5db', 'R': '#c0392b',
-    'C': '#7dd3fc', 'H': '#bae6fd', 'Y': '#fde047', 'U': '#0284c7', 'V': '#38bdf8' 
-  }
-};
-
-const SPRITES = {
-  dragonSit: [
-    "......R...R......", "......R...R......", "....kkKKKKKkk....", "...kKWWWWWWWKk...", "..kKWWWWWWWWWKk..", ".kKWWWWWWWWWWWKk.", ".KWWKWWWWWWWKWWK.", ".KWWKWWKKKWWKWWK.", "KKWOOWWWWWOWOWKK.", "KKWOOWWWWWOWOWKK.", ".KWWWWWWWWWWWK...", ".KGGGGGGGGGGGK...", "..KKKKKKKKKKK....", ".....K...K......."
-  ].join('\n'),
-  dragonRun1: [
-    "......R...R......", "....kkKKKKKkk....", "..kKWWWWWWWWWKk..", ".kKWWWWWWWWWWWKk.", ".KWWKWWWWWWWKWWK.", ".KWWKWWKKKWWKWWK.", "KKWOOWWWWWOWOWKK.", ".KWWWWWWWWWWWK...", ".KGGGGGGGGGGGK...", "..KKKKKKKKKKK....", "...K.......K....."
-  ].join('\n'),
-  dragonRun2: [
-    "......R...R......", "....kkKKKKKkk....", "..kKWWWWWWWWWKk..", ".kKWWWWWWWWWWWKk.", ".KWWKWWWWWWWKWWK.", ".KWWKWWKKKWWKWWK.", ".KWOOWWWWWOWOWK..", ".KWWWWWWWWWWWK...", ".KGGGGGGGGGGGK...", "..KKKKKKKKKKK....", ".....K...K......."
-  ].join('\n'),
-  dragonSleep: [
-    "........R.....R.......", "......RRR...RRR.......", "........R.....R.......", ".....KKKKKKKKKKKKK....", "...KKWWWWWWWWWWWWWKK..", "..KWWWWWWWWWWWWWWWWWK.", "..KWWWWKKKWWWWWKKKWWK.", ".KWWWWWWWWWWWWWWWWWZZK", ".KWWWOOOOWWKWWOOOOZWZK", "KKWWWOOOOWWWWWWOOOOZZK", "KWWWWWWWWWWWWWWWWWWKK.", ".KKKKKKKKKKKKKKKKKKK.." 
-  ].join('\n'),
-  redBook: [
-    ".......S.......", ".WWWWWWWWWWWWW.", "WwwwwwwSwwwwwwW", "W--w--wS--w--wW", "WwwwwwwSwwwwwwW", "W--w--wS--w--wW", "RRRRRRRRRRRRRRR", ".SSSSSSSSSSSSS."
-  ].join('\n'),
-  coffeeCupDetailed: [
-    "...........", "..WWWWW....", ".WcccccW...", "WcccccccWW.", "WcccccccW.W", ".WWWWWWW.W.", "..WWWWW.W..", "..........."
-  ].join('\n'),
-  zzz: [
-    ".........zzzzz", "............z.", "...........z..", "..........z...", ".........zzzzz", "..............", ".....zzzz.....", ".......z......", "......z.......", ".....zzzz.....", "..............", "..zzz.........", "....z.........", "...z..........", "..zzz........."
-  ].join('\n')
-};
-
-// --- 100 句勵志名言資料庫 ---
-const QUOTES = [
-  "生活就像騎單車，為了保持平衡，你必須不斷前進。 —— 阿爾伯特·愛因斯坦",
-  "天才就是百分之一的靈感加上百分之九十九的汗水。 —— 湯瑪斯·愛迪生",
-  "不要等待機會，而要創造機會。 —— 喬治·蕭伯納",
-  "成功是由不斷的失敗所構成，卻不失熱情。 —— 溫斯頓·邱吉爾",
-  "我們最大的弱點在於放棄。成功的必然之路就是不斷的重來一次。 —— 湯瑪斯·愛迪生",
-  "你不能把點滴連結起來看向未來，你只能在回顧時將它們連結起來。 —— 史蒂夫·賈伯斯",
-  "只有把抱怨環境的心情，化為上進的力量，才是成功的保證。 —— 羅曼·羅蘭",
-  "那些瘋狂到以為自己能夠改變世界的人，才能真正改變世界。 —— 羅伯特·西爾弗伯格",
-  "成功不是最終的，失敗不是致命的：最重要的是繼續前進的勇氣。 —— 溫斯頓·邱吉爾",
-  "不論你在什麼時候開始，重要的是開始之後就不要停止。 —— 柏拉圖",
-  "想像力比知識更重要。 —— 阿爾伯特·愛因斯坦",
-  "走得慢沒關係，只要你不停下來。 —— 安迪·沃荷",
-  "我並沒有失敗。我只是找到了一萬種行不通的方法。 —— 湯瑪斯·愛迪生",
-  "如果你相信自己做得到，你就已經成功了一半。 —— 西奧多·羅斯福",
-  "如果這件事很重要，那你就會找到方法。 —— 伊隆·馬斯克",
-  "教育不是注滿一桶水，而是點燃一把火。 —— 威廉·巴特勒·葉慈",
-  "所謂的幸運，不過是機會遇見了努力。 —— 塞內卡",
-  "你不需要很厲害才能開始，但你需要開始才會很厲害。 —— 齊格·金克拉",
-  "人生沒有白走的路，每一步都算數。 —— 李宗盛",
-  "種一棵樹最好的時間是十年前，其次是現在。 —— 丹比薩·莫約",
-  "行動是治癒恐懼的良藥。 —— 威廉·詹姆斯",
-  "你的負擔將變成禮物，你受的苦將照亮你的路。 —— 羅賓德拉納特·泰戈爾",
-  "與其抱怨黑暗，不如提燈前行。 —— 海倫·凱勒",
-  "即使現在很痛苦，也要相信未來會很好。 —— 亞伯拉罕·林肯",
-  "努力不一定會成功，但不努力一定很舒服...才怪！ —— 蔡康永",
-  "每一次的失敗，都是成功的墊腳石。 —— 亨利·福特",
-  "最可怕的敵人，就是沒有堅定的信念。 —— 羅曼·羅蘭",
-  "真正的發現之旅不在於尋找新大陸，而在於擁有新的眼光。 —— 馬塞爾·普魯斯特",
-  "夢想還是要有的，萬一實現了呢？ —— 馬雲",
-  "不管前方的路有多苦，只要方向正確，都比站在原地更接近幸福。 —— 宮崎駿",
-  "成功，就是跌倒九次，爬起來十次。 —— 瓊·邦·喬飛",
-  "不要畏懼失敗，因為它是成功的必經之路。 —— 麥可·喬丹",
-  "我一直覺得，只有拼盡全力，才能看起來毫不費力。 —— 李安",
-  "把每天當作最後一天來活，你會更加珍惜。 —— 史蒂夫·賈伯斯",
-  "凡是殺不死我的，都會使我更強大。 —— 弗里德里希·尼采",
-  "做你害怕做的事，恐懼自然會消失。 —— 羅夫·華多·愛默生",
-  "我不在乎你跌倒了多少次，我在乎的是你是否站了起來。 —— 亞伯拉罕·林肯",
-  "偉大的事業不是靠力氣、速度和身體的敏捷完成的，而是靠性格、意志和知識的力量完成的。 —— 查理斯·達爾文",
-  "一切偉大的行動和思想，都有一個微不足道的開始。 —— 阿爾貝·卡繆",
-  "不要讓別人的意見淹沒了你內心的聲音。 —— 史蒂夫·賈伯斯",
-  "你若想做，會找一個方法；你若不想做，會找一個藉口。 —— 吉姆·羅恩",
-  "讀書不是為了雄辯和駁斥，也不是為了輕信和盲從，而是為了思考和權衡。 —— 弗蘭西斯·培根",
-  "只有在字典裡，成功才排在工作之前。 —— 維達·沙宣",
-  "不要試圖去做一個成功的人，而要努力成為一個有價值的人。 —— 阿爾伯特·愛因斯坦",
-  "人生的價值，並不是用時間，而是用深度去衡量的。 —— 列夫·托爾斯泰",
-  "沒有激流就稱不上勇進，沒有山峰則談不上攀登。 —— 拜倫",
-  "讀書之於心靈，猶如運動之於身體。 —— 理查·斯蒂爾",
-  "世上沒有絕望的處境，只有對處境絕望的人。 —— 哈爾夫丹·馬勒",
-  "我們知之甚少，而我們能做的又那麼多。 —— 威廉·詹姆斯",
-  "如果你不肯付出一時的努力去博取成功，那麼你可能就要用一生的耐心去忍受失敗。 —— 喬治·巴頓",
-  "有志者事竟成。 —— 查理斯·狄更斯",
-  "當你停下來休息的時候，別忘了別人還在奔跑。 —— 安德魯·卡內基",
-  "你必須成為你在這世界上想看到的改變。 —— 聖雄甘地",
-  "成功人士與其他人的區別，不是在於力量或知識的缺乏，而是在於意志力的缺乏。 —— 文斯·倫巴第",
-  "你改變不了過去，但你可以改變現在。 —— 威廉·大衛·米勒",
-  "每天做一件讓自己害怕的事。 —— 埃莉諾·羅斯福",
-  "相信你能，你就已經完成了一半。 —— 西奧多·羅斯福",
-  "未來屬於那些相信夢想之美的人。 —— 埃莉諾·羅斯福",
-  "不要把時間浪費在敲打一堵牆，期望它會變成一扇門。 —— 可可·香奈兒",
-  "不要因為事情困難就放棄，是因為放棄才讓事情變得困難。 —— 塞內卡",
-  "生活不是要等待風暴過去，而是要學會在雨中跳舞。 —— 薇薇安·格林",
-  "我們不能改變風向，但我們可以調整風帆。 —— 托馬斯·蒙蓀",
-  "你唯一應該超越的人，是昨天的自己。 —— 喬丹·彼得森",
-  "設定目標是將無形化為有形的第一步。 —— 托尼·羅賓斯",
-  "唯一能限制我們明天成就的，是我們今天的懷疑。 —— 富蘭克林·羅斯福",
-  "最困難的事情是做出行動的決定，剩下的只是純粹的毅力。 —— 阿梅莉亞·埃爾哈特",
-  "卓越不是單一的舉動，而是一種習慣。 —— 亞里斯多德",
-  "不要看手錶，做它正在做的事：繼續前進。 —— 山姆·萊文森",
-  "如果你一直在等待完美的時機，你可能永遠不會開始。 —— 喬治·盧卡斯",
-  "成功是從小努力中累積而成的，日復一日。 —— 羅伯特·科利爾",
-  "人生最重要的不是你所處的位置，而是你前進的方向。 —— 奧利弗·溫德爾·霍姆斯",
-  "每當你發現自己和大多數人站在同一邊，你就該停下來反思一下。 —— 馬克·吐溫",
-  "即使跌倒了，你依然在向前邁進。 —— 查爾斯·凱特林",
-  "我從不把時間浪費在後悔上，這是不值得的。 —— 比爾·蓋茲",
-  "勇敢是即使害怕，也要堅持向前。 —— 約翰·韋恩",
-  "你的時間有限，所以不要浪費時間去過別人的生活。 —— 史蒂夫·賈伯斯",
-  "一切的秘密在於行動。 —— 查理·卓別林",
-  "只有熱愛你所做的，才能成就偉大。 —— 史蒂夫·賈伯斯",
-  "無論做什麼事，都要有一顆渴望成功的心。 —— 亨利·福特",
-  "如果我們做到了所有我們能做的事，我們真的會讓自己大吃一驚。 —— 托馬斯·愛迪生",
-  "悲觀者在每個機會中看到困難，樂觀者在每個困難中看到機會。 —— 溫斯頓·邱吉爾",
-  "一個人的價值，應該看他貢獻什麼，而不應看他取得什麼。 —— 阿爾伯特·愛因斯坦",
-  "智慧源於經驗，而經驗往往源於缺乏智慧。 —— 泰瑞·普萊契",
-  "生命中最痛苦的事情，莫過於你本可以做到的卻沒有去做。 —— 傑西·傑克遜",
-  "永遠不要放棄你真正想要的東西。等待很困難，但後悔更困難。 —— 史蒂夫·賈伯斯",
-  "行動不一定帶來幸福，但沒有行動就一定沒有幸福。 —— 本傑明·迪斯雷利",
-  "最浪費的日子是那些沒有笑聲的日子。 —— E.E.卡明斯",
-  "成功並不複雜。就是知道你在做什麼，熱愛你在做什麼，並相信你在做什麼。 —— 威爾·羅傑斯",
-  "當你的才華還撐不起你的野心時，那你就應該靜下心來學習。 —— 莫言",
-  "最長的路也有盡頭，最黑暗的夜晚也會迎接清晨。 —— 哈里特·比徹·斯托",
-  "你無法跨越海洋，除非你有勇氣失去對海岸的視線。 —— 克里斯托弗·哥倫布",
-  "我寧願因嘗試做偉大的事情而失敗，也不願因什麼都不做而成功。 —— 羅伯特·H·舒勒",
-  "我們無法在不改變的情況下進步，那些無法改變自己心智的人，什麼也改變不了。 —— 喬治·蕭伯納",
-  "人生是由百分之十的遭遇，加上百分之九十你對它的反應所構成。 —— 查爾斯·斯溫多爾",
-  "成功是得到你想要的，幸福是享受你得到的。 —— 戴爾·卡內基",
-  "你永遠無法改變你的生活，除非你改變你每天做的事。 —— 約翰·麥克斯韋",
-  "不要讓你在起點的恐懼阻止你到達終點。 —— 貝比·魯斯",
-  "當我們不再能夠改變一個情況，我們就面臨改變自己的挑戰。 —— 維克多·弗蘭克爾",
-  "一個不曾犯錯的人，就是一個從未嘗試新事物的人。 —— 阿爾伯特·愛因斯坦",
-  "生命中最美麗的風景，是我們不懈追求夢想的過程。 —— 歌德"
-];
-
-const PixelArt = ({ art, palette, pixelSize = 4, className = "" }) => {
-  const rows = useMemo(() => (Array.isArray(art) ? art : art.trim().split('\n')).map(r => r.trim()), [art]);
-  return (
-    <div className={`relative ${className}`} style={{ width: rows[0].length * pixelSize, height: rows.length * pixelSize }}>
-      {rows.flatMap((row, y) => row.split('').map((char, x) => {
-        if (char === '.' || char === ' ' || !palette[char]) return null;
-        return (
-          <div key={`${x}-${y}`} style={{ position: 'absolute', left: x * pixelSize, top: y * pixelSize, width: pixelSize, height: pixelSize, backgroundColor: palette[char] }} />
-        );
-      }))}
-    </div>
-  );
-};
-
-const AnimatedWindow = () => {
-  const [frame, setFrame] = useState(0);
-  useEffect(() => {
-    const timer = setInterval(() => setFrame(f => (f + 1) % 3), 600);
-    return () => clearInterval(timer);
-  }, []);
-
-  const skySection = [
-    "KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK", "KDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDK", "KDCCCCCCCCCCCCCCKKCCCCCCCCCCCCCCCCKKCCCCCCCCCCCCCCDK", "KDCCCCCCCCCCCCCCKKCCCCCCCCCCCCCCCCKKCCCCCCCCCCCCCCDK", "KDCCCWWWWWCCCCCCKKCCCCCCYYYYYCCCCCKKCCCCCCCWWWWCCCDK", "KDCCWWWWWWWCCCCCKKCCCCYYYYYYYYYCCCKKCCCCCCWWWWWWCCDK", "KDCCCWWWWWCCCCCCKKCCCYYYYYYYYYYYCCKKCCCCCCCWWWWCCCDK", "KDCCCCCCCCCCCCCCKKCCCYYYYYYYYYYYCCKKCCCCCCCCCCCCCCDK", "KDCCCCHHHHCCCCCCKKCCHHHYYYYYYYYYHHKKCCHHHHCCCCCCCCDK", "KDHHHHHHHHHHHHHHKKHHHHHHYYYYYHHHHHKKHHHHHHHHHHHHHHDK", "KDHHHHHHHHHHHHHHKKHHHHHHHHHHHHHHHHKKHHHHHHHHHHHHHHDK", "KDHHHHHHHHHHHHHHKKHHHHHHHHHHHHHHHHKKHHHHHHHHHHHHHHDK", "KDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDK", "KDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDK"
-  ];
-  const baseSection = [
-    "KDUUUUUUUUUUUUUUKKUUUUUUUUUUUUUUUUKKUUUUUUUUUUUUUUDK", "KDUUUUUUUUUUUUUUKKUUUUUUUUUUUUUUUUKKUUUUUUUUUUUUUUDK", "KDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDK", "KLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLK", "KLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLK", "KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK"
-  ];
-  const windowFrames = [
-    [ ...skySection, "KDUUUUVVVUUUUUUUKKUUUUUUVVVUUUUUUUKKUUUUUVVVUUUUUUDK", "KDUUUUUUVVVUUUUUKKUUUUUUUUVVVUUUUUKKUUUUUUUVVVUUUUDK", "KDUUVVUUUUUUUUUUKKUUUVVUUUUUUUUUUUKKUUUVVUUUUUUUVVDK", "KDUUUVVUUUUUUUUUKKUUUUVVUUUUUUUUUUKKUUUUVVUUUUUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUUVVVUUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", ...baseSection ].join('\n'),
-    [ ...skySection, "KDUUUUUVVVUUUUUUKKUUUUUUUVVVUUUUUUKKUUUUUUVVVUUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUVVVUUUDK", "KDUUUVVUUUUUUUUUKKUUUUVVUUUUUUUUUUKKUUUUVVUUUUUUUVDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUUUUVVVUUUKKUUUUUUUUUUVVVUUUKKUUUUUUUUUVVVUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", ...baseSection ].join('\n'),
-    [ ...skySection, "KDUUUUUUVVVUUUUUKKUUUUUUUUVVVUUUUUKKUUUUUUUVVVUUUUDK", "KDUUUUUUUVVVUUUUKKUUUUUUUUUVVVUUUUKKUUUUUUUUVVVUUUDK", "KDUUUUVVUUUUUUUUKKUUUUUVVUUUUUUUUUKKUUUUUVVUUUUUUUDK", "KDUUUUUVVUUUUUUUKKUUUUUUVVUUUUUUUUKKUUUUUUVVUUUUUUDK", "KDUUUUUUUUUVVVUUKKUUUUUUUUUUUVVVUUKKUUUUUUUUUUVVVUDK", "KDUUUUUUUUUUVVVUKKUUUUUUUUUUUUVVVUKKUUUUUUUUUUUVVUDK", ...baseSection ].join('\n')
-  ];
-  return <PixelArt art={windowFrames[frame]} palette={PALETTES.env} pixelSize={7} className="transition-opacity duration-300" />;
-};
-
-const RealTimeClock = () => {
-  const [time, setTime] = useState(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-  const h = (time.getHours() % 12) * 30 + time.getMinutes() * 0.5;
-  const m = time.getMinutes() * 6;
-  const s = time.getSeconds() * 6;
-  return (
-    <div className="relative w-32 h-32 md:w-36 md:h-36 bg-[#faebd7] rounded-full border-8 md:border-[10px] border-[#5d4037] shadow-[inset_0_0_15px_rgba(0,0,0,0.4),0_15px_25px_rgba(0,0,0,0.8)] flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 rounded-full border-[3px] md:border-[4px] border-[#8b4513] opacity-60" />
-      <svg viewBox="0 0 100 100" className="w-full h-full relative z-10">
-        {[...Array(12)].map((_, i) => (
-          <rect key={i} x="48.5" y="6" width="3" height={i % 3 === 0 ? "10" : "5"} fill="#3e2723" transform={`rotate(${i * 30} 50 50)`} />
-        ))}
-        <rect x="47" y="25" width="6" height="25" rx="3" fill="#2c1d1a" transform={`rotate(${h} 50 50)`} />
-        <rect x="48" y="12" width="4" height="38" rx="2" fill="#3e2723" transform={`rotate(${m} 50 50)`} />
-        <line x1="50" y1="50" x2="50" y2="10" stroke="#b91c1c" strokeWidth="2" transform={`rotate(${s} 50 50)`} />
-        <circle cx="50" cy="50" r="4.5" fill="#5d4037" />
-        <circle cx="50" cy="50" r="2" fill="#fbbf24" />
-      </svg>
-    </div>
-  );
-};
-
-// --- v14 新增：勵志電子牆元件 ---
-const MotivationalBoard = () => {
-  const [quoteIndex, setQuoteIndex] = useState(0);
-
-  useEffect(() => {
-    const updateQuote = () => {
-      // 5 分鐘 = 300,000 毫秒，以此作為基數對陣列長度取餘數，確保所有用戶看到的都同步
-      const index = Math.floor(Date.now() / 300000) % QUOTES.length;
-      setQuoteIndex(index);
-    };
-    updateQuote();
-    // 每秒檢查一次是否跨越了 5 分鐘的邊界
-    const interval = setInterval(updateQuote, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="w-56 md:w-72 bg-[#0a0a0a] border-[6px] border-[#2c1d1a] rounded-lg p-3 shadow-[inset_0_0_15px_rgba(0,0,0,1),0_20px_25px_rgba(0,0,0,0.8)] relative overflow-hidden">
-      {/* 復古玻璃反光特效 */}
-      <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
-      
-      <div className="flex items-center justify-between mb-2 border-b border-[#333] pb-1">
-        <span className="text-[10px] text-red-500 font-mono font-black animate-pulse flex items-center gap-1">
-          <span className="w-2 h-2 bg-red-500 rounded-full" /> REC
-        </span>
-        <span className="text-[10px] text-[#666] font-mono tracking-widest">QUOTE OF THE MOMENT</span>
-      </div>
-      
-      <div className="min-h-[60px] flex items-center justify-center px-1">
-        <p className="font-mono text-[#4ade80] text-sm md:text-base font-bold text-center leading-relaxed drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]">
-          "{QUOTES[quoteIndex]}"
-        </p>
-      </div>
-    </div>
-  );
-};
-
-const Steam = () => (
-  <div className="flex gap-1.5 mb-1 justify-center opacity-70">
-    <div className="w-1.5 h-5 bg-white rounded-full animate-[bounce_2s_infinite] delay-100" />
-    <div className="w-1.5 h-7 bg-white rounded-full animate-[bounce_2s_infinite]" />
-    <div className="w-1.5 h-5 bg-white rounded-full animate-[bounce_2s_infinite] delay-300" />
-  </div>
-);
-
-const RunningDragonIcon = () => {
-  const [frame, setFrame] = useState(0);
-  useEffect(() => {
-    const timer = setInterval(() => setFrame(f => (f + 1) % 2), 150); 
-    return () => clearInterval(timer);
-  }, []);
-  const sprite = frame === 0 ? SPRITES.dragonRun1 : SPRITES.dragonRun2;
-  return (
-    <div className="w-12 h-12 bg-[#8b1a1a] rounded-xl border-2 border-black shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-hidden">
-      <PixelArt art={sprite} palette={PALETTES.dragon} pixelSize={2} className={`transition-transform duration-75 ${frame === 0 ? "translate-y-[2px]" : "-translate-y-[1px]"}`} />
-    </div>
-  );
-};
-
-// 取得本地日期字串
-const getLocalDateStr = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-};
+import { useState } from 'react';
+import { BookOpen, Coffee, Heart } from 'lucide-react';
+import { setDoc } from 'firebase/firestore';
+import AnimatedWindow from './components/AnimatedWindow';
+import MotivationalBoard from './components/MotivationalBoard';
+import PixelArt from './components/PixelArt';
+import RealTimeClock from './components/RealTimeClock';
+import RunningDragonIcon from './components/RunningDragonIcon';
+import Steam from './components/Steam';
+import TaskPanel from './components/TaskPanel';
+import { createGroupItem, createTaskItem, normalizeItemId } from './constants/roomDefaults';
+import { PALETTES, SPRITES } from './constants/pixelArtData';
+import { getRoomRef } from './lib/firebase';
+import { getLocalDateStr } from './utils/date';
+import useNudgeEffect from './hooks/useNudgeEffect';
+import useRoomSync from './hooks/useRoomSync';
+import useStudyTimer from './hooks/useStudyTimer';
 
 export default function App() {
-  const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
-  const [roomData, setRoomData] = useState({ 
-    leftStudying: false, 
-    rightStudying: false,
-    leftStartTime: null,
-    rightStartTime: null,
-    leftDailyTotal: 0,
-    rightDailyTotal: 0,
-    lastActiveDate: getLocalDateStr(),
-    leftGoals: [],
-    rightGoals: [],
-    leftNudge: 0,
-    rightNudge: 0
-  });
-  
-  const [currentTime, setCurrentTime] = useState(Date.now());
-  const [leftGoals, setLeftGoals] = useState([]);
-  const [rightGoals, setRightGoals] = useState([]);
-  const [newGoalText, setNewGoalText] = useState("");
-
+  const { roomData, leftGoals, setLeftGoals, rightGoals, setRightGoals } = useRoomSync();
+  const [newGoalText, setNewGoalText] = useState('');
   const [isPomodoro, setIsPomodoro] = useState(false);
-  const [receiveNudge, setReceiveNudge] = useState(false);
-  const prevNudgeRef = useRef(0);
-
-  useEffect(() => {
-    if (!auth) return;
-    const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-      } catch (err) {
-        console.error("Auth Error:", err);
-      }
-    };
-    initAuth();
-    return onAuthStateChanged(auth, setUser);
-  }, []);
-
-  useEffect(() => {
-    if (!user || !db || !getRoomRef) return;
-    const roomRef = getRoomRef();
-    const unsub = onSnapshot(roomRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        setRoomData(data);
-        setLeftGoals(data.leftGoals || []);
-        setRightGoals(data.rightGoals || []);
-      } else {
-        setDoc(roomRef, { 
-          leftStudying: false, 
-          rightStudying: false,
-          leftStartTime: null,
-          rightStartTime: null,
-          leftDailyTotal: 0,
-          rightDailyTotal: 0,
-          lastActiveDate: getLocalDateStr(),
-          leftGoals: [],
-          rightGoals: [],
-          leftNudge: 0,
-          rightNudge: 0
-        });
-      }
-    }, (err) => console.error("監聽失敗", err));
-    return () => unsub();
-  }, [user]);
+  const receiveNudge = useNudgeEffect(roomData, role);
 
   const isStudying = role === 'left' ? roomData.leftStudying : roomData.rightStudying;
   const leftDragonIsStudying = roomData?.leftStudying || false;
   const rightDragonIsStudying = roomData?.rightStudying || false;
-
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(Date.now()), 500);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (!role) return;
-    const myNudge = role === 'left' ? roomData.leftNudge : roomData.rightNudge;
-    if (myNudge && myNudge !== prevNudgeRef.current) {
-      if (Date.now() - myNudge < 10000) {
-        setReceiveNudge(true);
-        setTimeout(() => setReceiveNudge(false), 3500);
-      }
-      prevNudgeRef.current = myNudge;
-    }
-  }, [roomData.leftNudge, roomData.rightNudge, role]);
-
-  const todayStr = getLocalDateStr();
-  
-  const calculateElapsed = (roleKey) => {
-    let accumulated = 0;
-    if (roomData.lastActiveDate === todayStr) {
-      accumulated = roomData[`${roleKey}DailyTotal`] || 0;
-    }
-
-    let currentSession = 0;
-    if (roomData[`${roleKey}Studying`] && roomData[`${roleKey}StartTime`]) {
-      const startTime = roomData[`${roleKey}StartTime`];
-      const startD = new Date(startTime);
-      const startStr = `${startD.getFullYear()}-${String(startD.getMonth()+1).padStart(2,'0')}-${String(startD.getDate()).padStart(2,'0')}`;
-
-      if (startStr === todayStr) {
-        currentSession = Math.max(0, Math.floor((currentTime - startTime) / 1000));
-      } else {
-        const d = new Date();
-        const todayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-        currentSession = Math.max(0, Math.floor((currentTime - todayStart) / 1000));
-      }
-    }
-    return { total: accumulated + currentSession, session: currentSession };
-  };
-
-  const leftTime = calculateElapsed('left');
-  const rightTime = calculateElapsed('right');
-  
-  const leftElapsed = leftTime.total;
-  const rightElapsed = rightTime.total;
-  const myElapsed = role === 'left' ? leftElapsed : rightElapsed;
-  const mySession = role === 'left' ? leftTime.session : rightTime.session; 
+  const { leftElapsed, rightElapsed, myElapsed, mySession, setCurrentTime } = useStudyTimer(roomData, role);
 
   const formatTime = (s) => {
     const h = Math.floor(s / 3600);
@@ -442,6 +39,133 @@ export default function App() {
     const m = Math.floor(s / 60);
     const sec = s % 60;
     return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  const updateGoalsByRole = async (targetRole, updater, errorLabel) => {
+    if (role !== targetRole) return;
+    const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
+    const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
+    const nextGoals = updater(currentGoals);
+    const syncGroupCompletion = (items) =>
+      items.map((item) => {
+        if (item.type !== 'group') return item;
+        const nextChildren = syncGroupCompletion(item.children || []);
+        const hasChildren = nextChildren.length > 0;
+        const allChildrenCompleted = hasChildren && nextChildren.every((child) => Boolean(child.completed));
+        return { ...item, children: nextChildren, completed: allChildrenCompleted };
+      });
+    const updatedGoals = nextGoals ? syncGroupCompletion(nextGoals) : nextGoals;
+    if (!updatedGoals) return;
+
+    if (targetRole === 'left') setLeftGoals(updatedGoals);
+    else setRightGoals(updatedGoals);
+
+    try {
+      await setDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals }, { merge: true });
+    } catch (err) {
+      console.error(errorLabel, err);
+    }
+  };
+
+  const mapItemInTree = (items, itemId, updater) => {
+    const normalizedItemId = normalizeItemId(itemId);
+    return items.map((item) => {
+      if (normalizeItemId(item.id) === normalizedItemId) return updater(item);
+      if (item.type === 'group') {
+        return { ...item, children: mapItemInTree(item.children || [], normalizedItemId, updater) };
+      }
+      return item;
+    });
+  };
+
+  const removeTaskFromTree = (items, taskId) => {
+    const normalizedTaskId = normalizeItemId(taskId);
+    let removedTask = null;
+    const nextItems = [];
+    items.forEach((item) => {
+      if (item.type === 'task' && normalizeItemId(item.id) === normalizedTaskId) {
+        removedTask = item;
+        return;
+      }
+      if (item.type === 'group') {
+        const { nextItems: nextChildren, removedTask: removedFromChild } = removeTaskFromTree(item.children || [], normalizedTaskId);
+        if (removedFromChild && !removedTask) removedTask = removedFromChild;
+        nextItems.push({ ...item, children: nextChildren });
+        return;
+      }
+      nextItems.push(item);
+    });
+    return { nextItems, removedTask };
+  };
+
+  const removeItemFromTree = (items, itemId) => {
+    const normalizedItemId = normalizeItemId(itemId);
+    let removedItem = null;
+    const nextItems = [];
+    items.forEach((item) => {
+      if (normalizeItemId(item.id) === normalizedItemId) {
+        removedItem = item;
+        return;
+      }
+      if (item.type === 'group') {
+        const result = removeItemFromTree(item.children || [], normalizedItemId);
+        if (result.removedItem && !removedItem) removedItem = result.removedItem;
+        nextItems.push({ ...item, children: result.nextItems });
+        return;
+      }
+      nextItems.push(item);
+    });
+    return { nextItems, removedItem };
+  };
+
+  const addTaskToGroupInTree = (items, groupId, taskToAdd) =>
+    {
+      const normalizedGroupId = normalizeItemId(groupId);
+      return items.map((item) => {
+        if (item.type === 'group' && normalizeItemId(item.id) === normalizedGroupId) {
+          return { ...item, expanded: true, children: [...(item.children || []), taskToAdd] };
+        }
+        if (item.type === 'group') {
+          return { ...item, children: addTaskToGroupInTree(item.children || [], normalizedGroupId, taskToAdd) };
+        }
+        return item;
+      });
+    };
+
+  const insertTaskAroundTarget = (items, targetTaskId, taskToInsert, position = 'before') => {
+    const normalizedTargetTaskId = normalizeItemId(targetTaskId);
+    let inserted = false;
+    const nextItems = [];
+    items.forEach((item) => {
+      if (item.type === 'task' && normalizeItemId(item.id) === normalizedTargetTaskId) {
+        inserted = true;
+        if (position === 'before') nextItems.push(taskToInsert);
+        nextItems.push(item);
+        if (position === 'after') nextItems.push(taskToInsert);
+        return;
+      }
+      if (item.type === 'group') {
+        const result = insertTaskAroundTarget(item.children || [], normalizedTargetTaskId, taskToInsert, position);
+        if (result.inserted) {
+          inserted = true;
+          nextItems.push({ ...item, children: result.nextItems });
+        } else {
+          nextItems.push(item);
+        }
+        return;
+      }
+      nextItems.push(item);
+    });
+    return { nextItems, inserted };
+  };
+
+  const hasTaskInTree = (items, taskId) => {
+    const normalizedTaskId = normalizeItemId(taskId);
+    return items.some((item) => {
+      if (item.type === 'task' && normalizeItemId(item.id) === normalizedTaskId) return true;
+      if (item.type === 'group') return hasTaskInTree(item.children || [], normalizedTaskId);
+      return false;
+    });
   };
 
   const handleToggleStudy = async () => {
@@ -482,63 +206,135 @@ export default function App() {
     await setDoc(getRoomRef(), { [`${partnerRole}Nudge`]: Date.now() }, { merge: true });
   };
 
-  const handleAddGoal = async (e) => {
-    e.preventDefault();
+  const handleCreateItem = async (itemType = 'task') => {
     if (!newGoalText.trim() || !role) return;
-    
-    const newGoal = { id: Date.now(), text: newGoalText, completed: false };
-    const fieldToUpdate = role === 'left' ? 'leftGoals' : 'rightGoals';
-    const currentGoals = role === 'left' ? leftGoals : rightGoals;
-    const updatedGoals = [...currentGoals, newGoal];
-    
-    if (role === 'left') setLeftGoals(updatedGoals);
-    else setRightGoals(updatedGoals);
-    
-    setNewGoalText(""); 
-    
-    try {
-      await setDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals }, { merge: true });
-    } catch (err) {
-      console.error("Update Error:", err);
-    }
+
+    const newItem = itemType === 'group' ? createGroupItem(newGoalText.trim()) : createTaskItem(newGoalText.trim());
+    await updateGoalsByRole(role, (currentGoals) => [...currentGoals, newItem], 'Update Error:');
+    setNewGoalText('');
   };
 
   const toggleGoal = async (id, targetRole) => {
-    if (role !== targetRole) return;
-    const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
-    const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
-    const updatedGoals = currentGoals.map(g => g.id === id ? { ...g, completed: !g.completed } : g);
-    
-    if (targetRole === 'left') setLeftGoals(updatedGoals);
-    else setRightGoals(updatedGoals);
-
-    try {
-      await setDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals }, { merge: true });
-    } catch (err) {
-      console.error("Toggle Error:", err);
-    }
+    await updateGoalsByRole(
+      targetRole,
+      (currentGoals) => mapItemInTree(currentGoals, id, (item) => ({ ...item, completed: !item.completed })),
+      'Toggle Error:',
+    );
   };
 
   const deleteGoal = async (id, targetRole) => {
-    if (role !== targetRole) return;
-    const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
-    const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
-    const updatedGoals = currentGoals.filter(g => g.id !== id);
-    
-    if (targetRole === 'left') setLeftGoals(updatedGoals);
-    else setRightGoals(updatedGoals);
-
-    try {
-      await setDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals }, { merge: true });
-    } catch (err) {
-      console.error("Delete Error:", err);
-    }
+    await updateGoalsByRole(targetRole, (currentGoals) => removeItemFromTree(currentGoals, id).nextItems, 'Delete Error:');
   };
 
-  const getProgress = (targetGoals) => {
-    if (!targetGoals || targetGoals.length === 0) return 0;
-    const completedCount = targetGoals.filter(g => g.completed).length;
-    return Math.round((completedCount / targetGoals.length) * 100);
+  const editGoal = async (id, targetRole, newText) => {
+    if (role !== targetRole) return;
+    const normalizedText = newText.trim();
+    if (!normalizedText) return;
+    await updateGoalsByRole(
+      targetRole,
+      (currentGoals) => mapItemInTree(currentGoals, id, (item) => ({ ...item, text: normalizedText })),
+      'Edit Error:',
+    );
+  };
+
+  const reorderGoals = async (targetRole, draggedId, targetId, position = 'before') => {
+    if (role !== targetRole || normalizeItemId(draggedId) === normalizeItemId(targetId)) return;
+    await updateGoalsByRole(
+      targetRole,
+      (currentGoals) => {
+        if (!hasTaskInTree(currentGoals, draggedId) || !hasTaskInTree(currentGoals, targetId)) {
+          console.warn('Reorder skipped: task path invalid', { draggedId, targetId, targetRole });
+          return currentGoals;
+        }
+        const { nextItems, removedTask } = removeTaskFromTree(currentGoals, draggedId);
+        if (!removedTask) {
+          console.warn('Reorder skipped: dragged task not found', { draggedId, targetRole });
+          return currentGoals;
+        }
+        const inserted = insertTaskAroundTarget(nextItems, targetId, removedTask, position);
+        if (!inserted.inserted) {
+          console.warn('Reorder skipped: target task not found', { targetId, targetRole });
+          return currentGoals;
+        }
+        return inserted.nextItems;
+      },
+      'Reorder Error:',
+    );
+  };
+
+  const reorderTopLevelItem = async (targetRole, draggedId, targetId, position = 'before') => {
+    if (role !== targetRole || normalizeItemId(draggedId) === normalizeItemId(targetId)) return;
+    if (!draggedId || !targetId) return;
+    await updateGoalsByRole(
+      targetRole,
+      (currentGoals) => {
+        const fromIndex = currentGoals.findIndex((item) => normalizeItemId(item.id) === normalizeItemId(draggedId));
+        const toIndex = currentGoals.findIndex((item) => normalizeItemId(item.id) === normalizeItemId(targetId));
+        if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
+          console.warn('Top-level reorder skipped: item not found', { draggedId, targetId, targetRole });
+          return currentGoals;
+        }
+        const updated = [...currentGoals];
+        const [moved] = updated.splice(fromIndex, 1);
+        let insertIndex = toIndex;
+        if (position === 'after') {
+          insertIndex = fromIndex < toIndex ? toIndex : toIndex + 1;
+        } else if (fromIndex < toIndex) {
+          insertIndex = toIndex - 1;
+        }
+        updated.splice(insertIndex, 0, moved);
+        return updated;
+      },
+      'Top-level Reorder Error:',
+    );
+  };
+
+  const toggleGroupExpanded = async (id, targetRole) => {
+    await updateGoalsByRole(
+      targetRole,
+      (currentGoals) =>
+        currentGoals.map((g) => (g.id === id && g.type === 'group' ? { ...g, expanded: !g.expanded } : g)),
+      'Toggle Group Error:',
+    );
+  };
+
+  const moveTaskToGroup = async (taskId, groupId, targetRole) => {
+    await updateGoalsByRole(
+      targetRole,
+      (currentGoals) => {
+        const { nextItems, removedTask } = removeTaskFromTree(currentGoals, taskId);
+        if (!removedTask) {
+          console.warn('Move to group skipped: dragged task not found', { taskId, groupId, targetRole });
+          return currentGoals;
+        }
+        return addTaskToGroupInTree(nextItems, groupId, removedTask);
+      },
+      'Move To Group Error:',
+    );
+  };
+
+  const moveTaskAroundTopLevelItem = async (taskId, targetItemId, targetRole, position = 'before') => {
+    if (normalizeItemId(taskId) === normalizeItemId(targetItemId)) return;
+    await updateGoalsByRole(
+      targetRole,
+      (currentGoals) => {
+        const { nextItems, removedTask } = removeTaskFromTree(currentGoals, taskId);
+        if (!removedTask) {
+          console.warn('Move around top-level skipped: dragged task not found', { taskId, targetItemId, targetRole });
+          return currentGoals;
+        }
+        const targetIndex = nextItems.findIndex((item) => normalizeItemId(item.id) === normalizeItemId(targetItemId));
+        if (targetIndex === -1) {
+          console.warn('Move around top-level skipped: target item not found', { taskId, targetItemId, targetRole });
+          return currentGoals;
+        }
+        const updated = [...nextItems];
+        const insertIndex = position === 'after' ? targetIndex + 1 : targetIndex;
+        updated.splice(insertIndex, 0, removedTask);
+        return updated;
+      },
+      'Move Around Top Level Error:',
+    );
   };
 
   // --- 登入畫面 ---
@@ -620,6 +416,28 @@ export default function App() {
           );
           background-size: 56.57px 56.57px;
           animation: stripe-move 3s linear infinite;
+        }
+      `}</style>
+      <style>{`
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #d4a373 #1a0f0d;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 12px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #1a0f0d;
+          border: 2px solid #2a1a15;
+          border-radius: 999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #f5c27a 0%, #d4a373 40%, #8d6e63 100%);
+          border: 2px solid #1a0f0d;
+          border-radius: 999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #ffd59b 0%, #e0b27e 40%, #a57f72 100%);
         }
       `}</style>
 
@@ -773,147 +591,40 @@ export default function App() {
 
           {/* 任務方塊 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* 呱呱的任務 (左) - v15_修復Firebase錯誤滿版標題進度條 */}
-            <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 overflow-hidden transition-all ${role === 'left' ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
-               <div className="relative overflow-hidden bg-[#0c0807] border-b-[3px] border-[#2a1a15] h-24 flex items-end pb-5 px-14 mb-8 -mt-8 -mx-8 transition-colors duration-300" style={{ borderColor: getProgress(leftGoals) === 100 ? '#0a6b24' : (getProgress(leftGoals) > 0 ? '#14532d' : '#2a1a15') }}>
-                  {/* 電量填充層 */}
-                  <div 
-                    className="absolute left-0 top-0 h-full transition-all duration-[800ms] ease-[cubic-bezier(0.19,1,0.22,1)] z-0 progress-stripes-left" 
-                    style={{ 
-                      width: `${getProgress(leftGoals)}%`,
-                      boxShadow: getProgress(leftGoals) > 0 && getProgress(leftGoals) < 100 ? '4px 0 20px rgba(10,107,36,0.6)' : 'none'
-                    }}
-                  >
-                  </div>
-                  {/* 內容層 */}
-                  <div className="relative z-10 w-full flex justify-between items-center pointer-events-none">
-                    <div className="flex items-center gap-4 pointer-events-auto">
-                      <h3 className="text-[#daa520] font-black text-2xl flex items-center gap-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"><Trophy size={28} /> 呱呱的任務</h3>
-                      {role === 'right' && (
-                        <button onClick={sendNudge} className="flex items-center gap-1 text-[#f472b6] hover:text-pink-400 bg-[#331515] px-3 py-1 rounded-full border-2 border-[#f472b6]/30 hover:scale-105 active:scale-95 transition-all text-sm font-bold shadow-sm ml-2">
-                          <Heart size={16} fill="currentColor" /> 戳一下
-                        </button>
-                      )}
-                    </div>
-                    
-                    <div className="text-right text-sm font-bold text-[#daa520] flex items-center gap-4 bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-xl border border-[#daa520]/20 pointer-events-auto shadow-sm">
-                      進度 {getProgress(leftGoals)}%
-                    </div>
-                  </div>
-               </div>
-               
-               <div className="space-y-2 mb-8 h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                 {leftGoals.map(goal => (
-                   <div 
-                     key={goal.id} 
-                     onClick={() => toggleGoal(goal.id, 'left')} 
-                     className={`p-3 rounded-2xl border-[3px] transition-all flex items-center gap-3 group relative ${
-                       role === 'left' ? 'cursor-pointer' : 'cursor-not-allowed'
-                     } ${
-                       goal.completed ? 'bg-[#061c0f] border-[#14532d] opacity-60' : 'bg-[#0d0706] border-[#14532d]/40'
-                     }`}
-                   >
-                     {goal.completed ? <CheckCircle2 size={24} className="text-[#22c55e] shrink-0" /> : <Circle size={24} className="text-[#14532d] shrink-0" />}
-                     <span className={`text-base font-bold flex-1 truncate ${goal.completed ? 'line-through text-[#166534]' : 'text-[#e0d5c1]'}`}>{goal.text}</span>
-                     {role === 'left' && (
-                       <button 
-                         onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id, 'left'); }}
-                         className="opacity-0 group-hover:opacity-100 text-[#8b1a1a] hover:text-[#ff4d4d] transition-opacity p-1 shrink-0"
-                       >
-                         <Trash2 size={18} />
-                       </button>
-                     )}
-                   </div>
-                 ))}
-                 {leftGoals.length === 0 && <div className="text-center py-6 text-[#14532d] font-bold italic text-sm">尚未新增任何任務...</div>}
-               </div>
-
-               {role === 'left' && (
-                 <form onSubmit={handleAddGoal} className="flex gap-4">
-                   <input 
-                     type="text" 
-                     value={newGoalText} 
-                     onChange={(e) => setNewGoalText(e.target.value)} 
-                     placeholder="新增任務..." 
-                     className="flex-1 bg-[#0d0706] border-4 border-[#14532d]/40 px-6 py-4 rounded-[1.5rem] font-bold text-xl outline-none focus:border-[#22c55e] transition-colors shadow-inner text-[#e0d5c1]"
-                   />
-                   <button type="submit" className="bg-[#14532d] p-4 rounded-2xl text-[#22c55e] hover:bg-[#22c55e] hover:text-[#0d0706] transition-all border-b-4 border-black active:translate-y-1 active:border-b-0"><Plus size={32} strokeWidth={4} /></button>
-                 </form>
-               )}
-            </div>
-
-            {/* 花花的任務 (右) - v15_修復Firebase錯誤滿版標題進度條 */}
-            <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 overflow-hidden transition-all ${role === 'right' ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
-               <div className="relative overflow-hidden bg-[#0c0807] border-b-[3px] border-[#2a1a15] h-24 flex items-end pb-5 px-14 mb-8 -mt-8 -mx-8 transition-colors duration-300" style={{ borderColor: getProgress(rightGoals) === 100 ? '#b8860b' : (getProgress(rightGoals) > 0 ? '#8b6508' : '#2a1a15') }}>
-                  {/* 電量填充層 */}
-                  <div 
-                    className="absolute left-0 top-0 h-full transition-all duration-[800ms] ease-[cubic-bezier(0.19,1,0.22,1)] z-0 progress-stripes-right" 
-                    style={{ 
-                      width: `${getProgress(rightGoals)}%`,
-                      boxShadow: getProgress(rightGoals) > 0 && getProgress(rightGoals) < 100 ? '4px 0 20px rgba(184,134,11,0.6)' : 'none'
-                    }}
-                  >
-                  </div>
-                  
-                  {/* 內容層 */}
-                  <div className="relative z-10 w-full flex justify-between items-center pointer-events-none">
-                    <div className="flex items-center gap-4 pointer-events-auto">
-                      <h3 className="text-[#daa520] font-black text-2xl flex items-center gap-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                        <Trophy size={28} /> 花花的任務
-                      </h3>
-                      {role === 'left' && (
-                        <button onClick={sendNudge} className="flex items-center gap-1 text-[#f472b6] hover:text-pink-400 bg-[#331515] px-3 py-1 rounded-full border-2 border-[#f472b6]/30 hover:scale-105 active:scale-95 transition-all text-sm font-bold shadow-sm ml-2">
-                          <Heart size={16} fill="currentColor" /> 戳一下
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="text-right text-sm font-bold text-[#daa520] flex items-center gap-4 bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-xl border border-[#daa520]/20 pointer-events-auto shadow-sm">
-                      進度 {getProgress(rightGoals)}%
-                    </div>
-                  </div>
-               </div>
-               
-               <div className="space-y-2 mb-8 h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                 {rightGoals.map(goal => (
-                   <div 
-                     key={goal.id} 
-                     onClick={() => toggleGoal(goal.id, 'right')} 
-                     className={`p-3 rounded-2xl border-[3px] transition-all flex items-center gap-3 group relative ${
-                       role === 'right' ? 'cursor-pointer' : 'cursor-not-allowed'
-                     } ${
-                       goal.completed ? 'bg-[#2c1d1a] border-[#3e2723] opacity-60' : 'bg-[#0d0706] border-[#5d4037]'
-                     }`}
-                   >
-                     {goal.completed ? <CheckCircle2 size={24} className="text-[#daa520] shrink-0" /> : <Circle size={24} className="text-[#5d4037] shrink-0" />}
-                     <span className={`text-base font-bold flex-1 truncate ${goal.completed ? 'line-through text-[#8d6e63]' : ''}`}>{goal.text}</span>
-                     {role === 'right' && (
-                       <button 
-                         onClick={(e) => { e.stopPropagation(); deleteGoal(goal.id, 'right'); }}
-                         className="opacity-0 group-hover:opacity-100 text-[#8b1a1a] hover:text-[#ff4d4d] transition-opacity p-1 shrink-0"
-                       >
-                         <Trash2 size={18} />
-                       </button>
-                     )}
-                   </div>
-                 ))}
-                 {rightGoals.length === 0 && <div className="text-center py-6 text-[#3e2723] font-bold italic text-sm">尚未新增任何任務...</div>}
-               </div>
-
-               {role === 'right' && (
-                 <form onSubmit={handleAddGoal} className="flex gap-4">
-                   <input 
-                     type="text" 
-                     value={newGoalText} 
-                     onChange={(e) => setNewGoalText(e.target.value)} 
-                     placeholder="新增任務..." 
-                     className="flex-1 bg-[#0d0706] border-4 border-[#3e2723] px-6 py-4 rounded-[1.5rem] font-bold text-xl outline-none focus:border-[#daa520] transition-colors shadow-inner"
-                   />
-                   <button type="submit" className="bg-[#3e2723] p-4 rounded-2xl text-[#daa520] hover:bg-[#daa520] hover:text-[#0d0706] transition-all border-b-4 border-black active:translate-y-1 active:border-b-0"><Plus size={32} strokeWidth={4} /></button>
-                 </form>
-               )}
-            </div>
+            <TaskPanel
+              panelRole="left"
+              role={role}
+              goals={leftGoals}
+              newGoalText={newGoalText}
+              onNewGoalTextChange={setNewGoalText}
+              onCreateItem={handleCreateItem}
+              onToggleGoal={toggleGoal}
+              onDeleteGoal={deleteGoal}
+              onEditGoal={editGoal}
+              onReorderGoals={reorderGoals}
+              onReorderTopLevelItem={reorderTopLevelItem}
+              onToggleGroupExpanded={toggleGroupExpanded}
+              onMoveTaskToGroup={moveTaskToGroup}
+              onMoveTaskAroundTopLevelItem={moveTaskAroundTopLevelItem}
+              onSendNudge={sendNudge}
+            />
+            <TaskPanel
+              panelRole="right"
+              role={role}
+              goals={rightGoals}
+              newGoalText={newGoalText}
+              onNewGoalTextChange={setNewGoalText}
+              onCreateItem={handleCreateItem}
+              onToggleGoal={toggleGoal}
+              onDeleteGoal={deleteGoal}
+              onEditGoal={editGoal}
+              onReorderGoals={reorderGoals}
+              onReorderTopLevelItem={reorderTopLevelItem}
+              onToggleGroupExpanded={toggleGroupExpanded}
+              onMoveTaskToGroup={moveTaskToGroup}
+              onMoveTaskAroundTopLevelItem={moveTaskAroundTopLevelItem}
+              onSendNudge={sendNudge}
+            />
           </div>
         </div>
       </main>

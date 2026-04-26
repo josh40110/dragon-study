@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { BookOpen, Coffee, Heart } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BookOpen, CalendarDays, Coffee, Heart, Sparkles } from 'lucide-react';
 import { setDoc } from 'firebase/firestore';
 import AnimatedWindow from './components/AnimatedWindow';
 import MotivationalBoard from './components/MotivationalBoard';
@@ -8,25 +8,183 @@ import RealTimeClock from './components/RealTimeClock';
 import RunningDragonIcon from './components/RunningDragonIcon';
 import Steam from './components/Steam';
 import TaskPanel from './components/TaskPanel';
+import CompletionCalendarModal from './components/CompletionCalendarModal';
+import DailySettlementModal from './components/DailySettlementModal';
 import { createGroupItem, createTaskItem, normalizeItemId } from './constants/roomDefaults';
 import { PALETTES, SPRITES } from './constants/pixelArtData';
-import { getRoomRef } from './lib/firebase';
-import { getLocalDateStr } from './utils/date';
+import { auth, getFirestoreRestPatchUrl, getRoomRef } from './lib/firebase';
+import { getLocalDateStr, getLocalDateStrFromTime } from './utils/date';
 import useNudgeEffect from './hooks/useNudgeEffect';
 import useRoomSync from './hooks/useRoomSync';
-import useStudyTimer from './hooks/useStudyTimer';
+import useStudyTimer, { computeRoleTotalElapsed } from './hooks/useStudyTimer';
+import { firestorePatchKeepalive } from './utils/firestoreRestPatch';
+
+const END_STUDY_PENDING_KEY = 'dragon-study-pending-end-study';
+
+/** 與「暫時休息」按鈕相同的 Firestore 欄位（結束專注） */
+function buildEndStudyFirestoreUpdates({ roleKey, exactElapsed, roomLastActiveDate, nowMs = Date.now() }) {
+  const currentDateStr = getLocalDateStrFromTime(nowMs);
+  const updates = {};
+  if (roomLastActiveDate !== currentDateStr) {
+    updates.leftDailyTotal = 0;
+    updates.rightDailyTotal = 0;
+    updates.lastActiveDate = currentDateStr;
+  }
+  updates[`${roleKey}Studying`] = false;
+  updates[`${roleKey}StartTime`] = null;
+  updates[`${roleKey}DailyTotal`] = exactElapsed;
+  updates.lastActiveDate = currentDateStr;
+  return updates;
+}
 
 export default function App() {
   const [role, setRole] = useState(null);
-  const { roomData, leftGoals, setLeftGoals, rightGoals, setRightGoals } = useRoomSync();
+  const { roomData, leftGoals, setLeftGoals, rightGoals, setRightGoals, roomReady } = useRoomSync();
   const [newGoalText, setNewGoalText] = useState('');
   const [isPomodoro, setIsPomodoro] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showDailySettlement, setShowDailySettlement] = useState(false);
+  const [settlementStep, setSettlementStep] = useState('huahua');
   const receiveNudge = useNudgeEffect(roomData, role);
 
   const isStudying = role === 'left' ? roomData.leftStudying : roomData.rightStudying;
   const leftDragonIsStudying = roomData?.leftStudying || false;
   const rightDragonIsStudying = roomData?.rightStudying || false;
   const { leftElapsed, rightElapsed, myElapsed, mySession, setCurrentTime } = useStudyTimer(roomData, role);
+
+  const unloadStudyRef = useRef({ role: null, isStudying: false, roomData: null });
+  const idTokenRef = useRef(null);
+  const roomDataRef = useRef(roomData);
+
+  useEffect(() => {
+    roomDataRef.current = roomData;
+  }, [roomData]);
+
+  useEffect(() => {
+    unloadStudyRef.current = { role, isStudying, roomData };
+  }, [role, isStudying, roomData]);
+
+  useEffect(() => {
+    if (!auth) return undefined;
+    const unsub = auth.onAuthStateChanged((u) => {
+      if (!u) {
+        idTokenRef.current = null;
+        return;
+      }
+      void u.getIdToken().then((t) => {
+        idTokenRef.current = t;
+      });
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (!auth) return undefined;
+    const id = setInterval(() => {
+      const u = auth.currentUser;
+      if (!u) return;
+      void u.getIdToken(true).then((t) => {
+        idTokenRef.current = t;
+      });
+    }, 4 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  /** 關閉分頁時 setDoc 常被中斷：sessionStorage + fetch keepalive PATCH 補強；下次開啟再重試一次 */
+  useEffect(() => {
+    const persistEndStudyOnLeave = () => {
+      const s = unloadStudyRef.current;
+      if (!s.role || !getRoomRef || !s.isStudying) return;
+      const roleKey = s.role === 'left' ? 'left' : 'right';
+      const nowMs = Date.now();
+      const exactElapsed = computeRoleTotalElapsed(s.roomData, roleKey, nowMs);
+      const roomLastActiveDate = s.roomData?.lastActiveDate;
+      const updates = buildEndStudyFirestoreUpdates({ roleKey, exactElapsed, roomLastActiveDate, nowMs });
+      try {
+        sessionStorage.setItem(
+          END_STUDY_PENDING_KEY,
+          JSON.stringify({ roleKey, ts: nowMs, exactElapsed, roomLastActiveDate: roomLastActiveDate ?? null }),
+        );
+      } catch {
+        /* private mode */
+      }
+      const url = getFirestoreRestPatchUrl?.();
+      const token = idTokenRef.current;
+      if (url && token) {
+        firestorePatchKeepalive(url, token, updates);
+      }
+      void setDoc(getRoomRef(), updates, { merge: true }).catch(() => {
+        /* 仍可能中斷；依賴 keepalive 與下次開啟重試 */
+      });
+    };
+    window.addEventListener('pagehide', persistEndStudyOnLeave);
+    window.addEventListener('beforeunload', persistEndStudyOnLeave);
+    return () => {
+      window.removeEventListener('pagehide', persistEndStudyOnLeave);
+      window.removeEventListener('beforeunload', persistEndStudyOnLeave);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!roomReady || !getRoomRef) return;
+    let raw;
+    try {
+      raw = sessionStorage.getItem(END_STUDY_PENDING_KEY);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    let pending;
+    try {
+      pending = JSON.parse(raw);
+    } catch {
+      try {
+        sessionStorage.removeItem(END_STUDY_PENDING_KEY);
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+    if (!pending.roleKey || (pending.roleKey !== 'left' && pending.roleKey !== 'right')) return;
+    if (Date.now() - pending.ts > 120000) {
+      try {
+        sessionStorage.removeItem(END_STUDY_PENDING_KEY);
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+    const rd = roomDataRef.current;
+    if (!rd[`${pending.roleKey}Studying`]) {
+      try {
+        sessionStorage.removeItem(END_STUDY_PENDING_KEY);
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+    const key = pending.roleKey;
+    const nowMs = Date.now();
+    const exactElapsed = computeRoleTotalElapsed(rd, key, nowMs);
+    void setDoc(
+      getRoomRef(),
+      buildEndStudyFirestoreUpdates({
+        roleKey: key,
+        exactElapsed,
+        roomLastActiveDate: rd.lastActiveDate ?? pending.roomLastActiveDate,
+        nowMs,
+      }),
+      { merge: true },
+    )
+      .then(() => {
+        try {
+          sessionStorage.removeItem(END_STUDY_PENDING_KEY);
+        } catch {
+          /* ignore */
+        }
+      })
+      .catch(() => {});
+  }, [roomReady]);
 
   const formatTime = (s) => {
     const h = Math.floor(s / 3600);
@@ -41,7 +199,41 @@ export default function App() {
     return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   };
 
-  const updateGoalsByRole = async (targetRole, updater, errorLabel) => {
+  const getProgress = useCallback((targetGoals) => {
+    if (!targetGoals || targetGoals.length === 0) return 0;
+    const completedCount = targetGoals.filter((g) => g.completed).length;
+    return Math.round((completedCount / targetGoals.length) * 100);
+  }, []);
+
+  const todayKey = getLocalDateStr();
+  const huahuaItems = useMemo(() => roomData.rightCompletedByDate?.[todayKey] || [], [roomData.rightCompletedByDate, todayKey]);
+  const guaguaItems = useMemo(() => roomData.leftCompletedByDate?.[todayKey] || [], [roomData.leftCompletedByDate, todayKey]);
+  const huahuaRate = useMemo(() => getProgress(rightGoals), [getProgress, rightGoals]);
+  const guaguaRate = useMemo(() => getProgress(leftGoals), [getProgress, leftGoals]);
+
+  const openDailySettlement = useCallback(() => {
+    setSettlementStep('huahua');
+    setShowDailySettlement(true);
+  }, []);
+
+  const closeDailySettlement = useCallback(() => {
+    setShowDailySettlement(false);
+  }, []);
+
+  const openCalendarModal = useCallback(() => {
+    setShowCalendarModal(true);
+  }, []);
+
+  const closeCalendarModal = useCallback(() => {
+    setShowCalendarModal(false);
+  }, []);
+
+  const calendarCompletedByDate = useMemo(
+    () => (role === 'left' ? roomData.leftCompletedByDate : roomData.rightCompletedByDate),
+    [role, roomData.leftCompletedByDate, roomData.rightCompletedByDate],
+  );
+
+  const updateGoalsByRole = async (targetRole, updater, errorLabel, extraRoomFields = null) => {
     if (role !== targetRole) return;
     const fieldToUpdate = targetRole === 'left' ? 'leftGoals' : 'rightGoals';
     const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
@@ -61,7 +253,8 @@ export default function App() {
     else setRightGoals(updatedGoals);
 
     try {
-      await setDoc(getRoomRef(), { [fieldToUpdate]: updatedGoals }, { merge: true });
+      const payload = extraRoomFields ? { [fieldToUpdate]: updatedGoals, ...extraRoomFields } : { [fieldToUpdate]: updatedGoals };
+      await setDoc(getRoomRef(), payload, { merge: true });
     } catch (err) {
       console.error(errorLabel, err);
     }
@@ -76,6 +269,30 @@ export default function App() {
       }
       return item;
     });
+  };
+
+  const findItemInTree = (items, itemId) => {
+    const normalizedItemId = normalizeItemId(itemId);
+    for (const item of items) {
+      if (normalizeItemId(item.id) === normalizedItemId) return item;
+      if (item.type === 'group') {
+        const found = findItemInTree(item.children || [], normalizedItemId);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  const updateCompletedHistoryByDate = (currentByDate, dateKey, nextRecord, isCompleting) => {
+    const prev = currentByDate && typeof currentByDate === 'object' ? currentByDate : {};
+    const dayList = Array.isArray(prev[dateKey]) ? prev[dateKey] : [];
+    const nextDayList = isCompleting
+      ? [...dayList.filter((r) => r?.id !== nextRecord.id), nextRecord]
+      : dayList.filter((r) => r?.id !== nextRecord.id);
+    if (nextDayList.length === dayList.length && nextDayList.every((r, i) => r.id === dayList[i]?.id && r.text === dayList[i]?.text)) {
+      return prev;
+    }
+    return { ...prev, [dateKey]: nextDayList };
   };
 
   const removeTaskFromTree = (items, taskId) => {
@@ -174,8 +391,34 @@ export default function App() {
     const roleKey = role === 'left' ? 'left' : 'right';
     const fieldStudying = `${roleKey}Studying`;
     const fieldStartTime = `${roleKey}StartTime`;
-    const fieldDailyTotal = `${roleKey}DailyTotal`;
     const currentDateStr = getLocalDateStr();
+
+    if (isStudying) {
+      const nowMs = Date.now();
+      const exactElapsed = computeRoleTotalElapsed(roomData, roleKey, nowMs);
+      await setDoc(
+        roomRef,
+        buildEndStudyFirestoreUpdates({
+          roleKey,
+          exactElapsed,
+          roomLastActiveDate: roomData.lastActiveDate,
+          nowMs,
+        }),
+        { merge: true },
+      );
+      try {
+        sessionStorage.removeItem(END_STUDY_PENDING_KEY);
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+
+    try {
+      sessionStorage.removeItem(END_STUDY_PENDING_KEY);
+    } catch {
+      /* ignore */
+    }
 
     const updates = {};
     if (roomData.lastActiveDate !== currentDateStr) {
@@ -183,20 +426,10 @@ export default function App() {
       updates.rightDailyTotal = 0;
       updates.lastActiveDate = currentDateStr;
     }
-
-    if (isStudying) {
-      const exactElapsed = role === 'left' ? leftElapsed : rightElapsed;
-      updates[fieldStudying] = false;
-      updates[fieldStartTime] = null;
-      updates[fieldDailyTotal] = exactElapsed;
-      updates.lastActiveDate = currentDateStr;
-    } else {
-      updates[fieldStudying] = true;
-      updates[fieldStartTime] = Date.now();
-      updates.lastActiveDate = currentDateStr;
-      setCurrentTime(Date.now());
-    }
-
+    updates[fieldStudying] = true;
+    updates[fieldStartTime] = Date.now();
+    updates.lastActiveDate = currentDateStr;
+    setCurrentTime(Date.now());
     await setDoc(roomRef, updates, { merge: true });
   };
 
@@ -215,10 +448,21 @@ export default function App() {
   };
 
   const toggleGoal = async (id, targetRole) => {
+    const currentGoals = targetRole === 'left' ? leftGoals : rightGoals;
+    const targetItem = findItemInTree(currentGoals, id);
+    let extraRoomFields = null;
+    if (targetItem && targetItem.type === 'task') {
+      const dateKey = getLocalDateStr();
+      const record = { id: normalizeItemId(targetItem.id), text: targetItem.text || '' };
+      const sourceMap = targetRole === 'left' ? roomData.leftCompletedByDate : roomData.rightCompletedByDate;
+      const nextMap = updateCompletedHistoryByDate(sourceMap, dateKey, record, !targetItem.completed);
+      extraRoomFields = targetRole === 'left' ? { leftCompletedByDate: nextMap } : { rightCompletedByDate: nextMap };
+    }
     await updateGoalsByRole(
       targetRole,
       (currentGoals) => mapItemInTree(currentGoals, id, (item) => ({ ...item, completed: !item.completed })),
       'Toggle Error:',
+      extraRoomFields,
     );
   };
 
@@ -387,6 +631,41 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0d0706] text-[#e0d5c1] font-sans pb-32 overflow-x-hidden">
+      <CompletionCalendarModal
+        open={showCalendarModal}
+        onClose={closeCalendarModal}
+        completedByDate={calendarCompletedByDate}
+        roleLabel={role === 'left' ? '呱呱' : '花花'}
+      />
+      <DailySettlementModal
+        open={showDailySettlement}
+        step={settlementStep}
+        onStepChange={setSettlementStep}
+        onClose={closeDailySettlement}
+        huahuaItems={huahuaItems}
+        guaguaItems={guaguaItems}
+        huahuaRate={huahuaRate}
+        guaguaRate={guaguaRate}
+      />
+      <aside className={`${showDailySettlement ? 'hidden' : 'hidden md:flex'} fixed left-0 top-0 h-full w-20 bg-[#120a09] border-r-2 border-[#3e2723] z-[180] flex-col items-center py-6`}>
+        <button
+          onClick={openCalendarModal}
+          className="w-14 h-14 rounded-2xl bg-[#2c1d1a] border-2 border-[#daa520]/50 text-[#daa520] hover:bg-[#3e2723] transition-colors flex flex-col items-center justify-center gap-0.5"
+          title="日曆"
+        >
+          <CalendarDays size={18} />
+          <span className="text-[10px] font-black">日曆</span>
+        </button>
+      </aside>
+      {!showDailySettlement && (
+        <button
+          onClick={openDailySettlement}
+          className="fixed right-6 bottom-6 z-[180] px-5 py-3 rounded-2xl border-2 border-[#daa520] bg-[#2c1d1a] text-[#daa520] font-black shadow-[0_8px_0_#000] hover:bg-[#3e2723] active:translate-y-1 active:shadow-[0_4px_0_#000] transition-all flex items-center gap-2"
+        >
+          <Sparkles size={18} />
+          今日結算
+        </button>
+      )}
       
       <style>{`
         @keyframes stripe-move {
@@ -471,24 +750,24 @@ export default function App() {
         </div>
       )}
 
-      <header className="bg-[#1a0f0d] border-b-2 border-[#3e2723] p-4 sticky top-0 z-[100] flex justify-between items-center px-6 shadow-2xl">
-        <div className="flex items-center gap-4">
+      <header className="bg-[#1a0f0d] border-b-2 border-[#3e2723] p-4 2xl:p-5 sticky top-0 z-[100] flex justify-between items-center px-6 md:pl-28 2xl:px-10 2xl:pl-32 shadow-2xl">
+        <div className="flex items-center gap-4 min-w-0">
           <RunningDragonIcon />
-          <h1 className="text-2xl font-black tracking-widest text-[#daa520]">呱花秘密基地</h1>
+          <h1 className="text-2xl 2xl:text-3xl font-black tracking-widest text-[#daa520] no-wrap-scroll">呱花秘密基地</h1>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs font-bold text-[#8d6e63] bg-[#3e2723] px-3 py-1 rounded-full hidden md:block">
+          <span className="text-xs font-bold text-[#8d6e63] bg-[#3e2723] px-3 py-1 rounded-full hidden md:block no-wrap-scroll">
             你是 {role === 'left' ? '呱呱' : '花花'}
           </span>
-          <div className="bg-black/80 px-6 py-2 rounded-2xl border-2 border-[#daa520]/40 shadow-[0_0_15px_rgba(218,165,32,0.15)]">
-            <span className="text-2xl font-mono font-bold text-[#daa520]">{formatTime(myElapsed)}</span>
+          <div className="bg-black/80 px-6 2xl:px-7 py-2 2xl:py-2.5 rounded-2xl border-2 border-[#daa520]/40 shadow-[0_0_15px_rgba(218,165,32,0.15)]">
+            <span className="text-2xl 2xl:text-3xl font-mono font-bold text-[#daa520]">{formatTime(myElapsed)}</span>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto p-4 space-y-8 mt-4">
+      <main className="max-w-6xl 2xl:max-w-[1520px] mx-auto p-4 2xl:px-6 md:pl-24 2xl:pl-28 space-y-8 2xl:space-y-7 mt-4 2xl:mt-3">
         {/* 背景與動畫區域 */}
-        <section className="relative w-full aspect-[21/9] md:aspect-[16/9] bg-[#3a2723] rounded-[4rem] overflow-hidden border-[12px] border-[#2c1d1a] shadow-[0_40px_100px_rgba(0,0,0,0.8)] flex flex-col items-center">
+        <section className="relative w-full aspect-[21/9] md:aspect-[16/9] bg-[#3a2723] rounded-[4rem] 2xl:rounded-[4.6rem] overflow-hidden border-[12px] 2xl:border-[14px] border-[#2c1d1a] shadow-[0_40px_100px_rgba(0,0,0,0.8)] flex flex-col items-center">
           <div className="absolute inset-0 bg-[#4e342e]" />
           <div className="absolute top-[6%] left-[4%] z-10 opacity-100 drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)]"><AnimatedWindow /></div>
           
@@ -564,11 +843,11 @@ export default function App() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 z-[50] pointer-events-none" />
         </section>
 
-        <div className="px-6 md:px-12 space-y-6">
+        <div className="px-6 md:px-12 2xl:px-14 space-y-6 2xl:space-y-5">
           
           <button 
             onClick={handleToggleStudy}
-            className={`w-full py-8 rounded-[3rem] font-black text-2xl border-[6px] border-black shadow-[0_12px_0_#000] active:shadow-none active:translate-y-3 transition-all flex items-center justify-center relative ${
+            className={`w-full py-8 2xl:py-9 rounded-[3rem] 2xl:rounded-[3.3rem] font-black text-2xl 2xl:text-[2rem] border-[6px] 2xl:border-[7px] border-black shadow-[0_12px_0_#000] active:shadow-none active:translate-y-3 transition-all flex items-center justify-center relative ${
               isStudying ? 'bg-[#daa520] text-black' : 'bg-[#388e3c] text-white'
             }`}
           >
@@ -590,7 +869,7 @@ export default function App() {
           </button>
 
           {/* 任務方塊 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 2xl:gap-7">
             <TaskPanel
               panelRole="left"
               role={role}

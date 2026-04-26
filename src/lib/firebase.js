@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { getApp, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { doc, getFirestore } from 'firebase/firestore';
 
@@ -31,6 +31,20 @@ try {
   }
 } catch (e) {
   console.error('Firebase Init Error:', e);
+}
+
+/** Firestore REST v1 PATCH URL（不含 query）；供 keepalive 寫入。 */
+export function getFirestoreRestPatchUrl() {
+  if (!app || !getRoomRef) return null;
+  try {
+    const projectId = getApp().options?.projectId;
+    if (!projectId) return null;
+    const ref = getRoomRef();
+    const escaped = ref.path.split('/').join('%2F');
+    return `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${escaped}`;
+  } catch {
+    return null;
+  }
 }
 
 export { app, auth, db, getRoomRef };

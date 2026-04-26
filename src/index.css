@@ -1,1 +1,49 @@
 @import "tailwindcss";
+
+/* 全站文字不換行 */
+body,
+button,
+span,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+a,
+li,
+td,
+th {
+  white-space: nowrap;
+}
+
+/* 超出時可水平捲動，保留完整文字 */
+.no-wrap-scroll {
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(218, 165, 32, 0.65) rgba(26, 15, 13, 0.8);
+}
+
+.no-wrap-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.no-wrap-scroll::-webkit-scrollbar-track {
+  background: rgba(26, 15, 13, 0.8);
+  border-radius: 999px;
+}
+
+.no-wrap-scroll::-webkit-scrollbar-thumb {
+  background: rgba(218, 165, 32, 0.65);
+  border-radius: 999px;
+}
+
+.no-wrap-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(224, 178, 126, 0.85);
+}

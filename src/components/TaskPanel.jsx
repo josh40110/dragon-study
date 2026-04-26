@@ -366,7 +366,7 @@ export default function TaskPanel({
       ) : (
         <span
           title={task.text}
-          className={`text-base font-bold flex-1 min-w-0 line-clamp-2 break-words ${task.completed ? accent.textDone : accent.textTodo}`}
+          className={`text-base font-bold flex-1 min-w-0 no-wrap-scroll ${task.completed ? accent.textDone : accent.textTodo}`}
         >
           {task.text}
         </span>
@@ -422,9 +422,9 @@ export default function TaskPanel({
   );
 
   return (
-    <div className={`bg-[#1a0f0d] rounded-[3rem] p-8 border-4 overflow-hidden transition-all ${isMyPanel ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
+    <div className={`bg-[#1a0f0d] rounded-[3rem] 2xl:rounded-[3.3rem] p-8 2xl:p-9 border-4 2xl:border-[5px] overflow-hidden transition-all ${isMyPanel ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
       <div
-        className="relative overflow-hidden bg-[#0c0807] border-b-[3px] border-[#2a1a15] h-24 flex items-end pb-5 px-14 mb-8 -mt-8 -mx-8 transition-colors duration-300"
+        className="relative overflow-hidden bg-[#0c0807] border-b-[3px] border-[#2a1a15] h-24 2xl:h-28 flex items-end pb-5 2xl:pb-6 px-14 2xl:px-16 mb-4 2xl:mb-5 -mt-8 -mx-8 transition-colors duration-300"
         style={{ borderColor: progress === 100 ? accent.borderActive : progress > 0 ? accent.borderProgress : accent.borderIdle }}
       >
         <div
@@ -432,8 +432,8 @@ export default function TaskPanel({
           style={{ width: `${progress}%`, boxShadow: progress > 0 && progress < 100 ? accent.stripeShadow : 'none' }}
         />
         <div className="relative z-10 w-full flex justify-between items-center pointer-events-none">
-          <div className="flex items-center gap-4 pointer-events-auto">
-            <h3 className="text-[#daa520] font-black text-2xl flex items-center gap-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          <div className="flex items-center gap-4 pointer-events-auto min-w-0">
+            <h3 className="text-[#daa520] font-black text-2xl 2xl:text-[1.9rem] flex items-center gap-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] no-wrap-scroll max-w-[220px] 2xl:max-w-[300px]">
               <Trophy size={28} /> {headerTitle}
             </h3>
             {role && role !== panelRole && (
@@ -449,7 +449,7 @@ export default function TaskPanel({
       </div>
 
       <div
-        className="space-y-2 mb-8 h-[500px] overflow-y-auto pr-2 custom-scrollbar"
+        className="space-y-2 2xl:space-y-2.5 mb-8 h-[500px] 2xl:h-[560px] overflow-y-auto pr-2 custom-scrollbar"
         onDragEnter={(e) => {
           if (!canAcceptDrop(e)) return;
           e.preventDefault();
@@ -595,7 +595,7 @@ export default function TaskPanel({
                   ) : (
                     <span
                       title={goal.text}
-                      className={`text-base font-bold block min-w-0 line-clamp-2 break-words ${goal.completed ? accent.textDone : 'text-[#e7c59f]'}`}
+                      className={`text-base font-bold block min-w-0 no-wrap-scroll ${goal.completed ? accent.textDone : 'text-[#e7c59f]'}`}
                     >
                       {goal.text}
                     </span>
@@ -686,18 +686,18 @@ export default function TaskPanel({
           />
           <div className="relative">
             {showCreateMenu && (
-              <div className="absolute bottom-[calc(100%+8px)] right-0 bg-[#0d0706] border-2 border-[#3e2723] rounded-xl overflow-hidden shadow-2xl z-20 min-w-[170px]">
+              <div className="absolute bottom-[calc(100%+8px)] right-0 bg-[#0d0706] border-2 border-[#3e2723] rounded-xl overflow-hidden shadow-2xl z-20 min-w-[170px] flex flex-col">
                 <button
                   type="button"
                   onClick={() => selectCreateMode('task')}
-                  className="w-full text-left px-4 py-2 text-sm font-bold text-[#e0d5c1] hover:bg-[#1f1614] transition-colors"
+                  className="block w-full text-left px-4 py-2 text-sm font-bold text-[#e0d5c1] hover:bg-[#1f1614] transition-colors"
                 >
                   新增任務
                 </button>
                 <button
                   type="button"
                   onClick={() => selectCreateMode('group')}
-                  className="w-full text-left px-4 py-2 text-sm font-bold text-[#e0d5c1] hover:bg-[#1f1614] transition-colors border-t border-[#3e2723]"
+                  className="block w-full text-left px-4 py-2 text-sm font-bold text-[#e0d5c1] hover:bg-[#1f1614] transition-colors border-t border-[#3e2723]"
                 >
                   新增任務群組
                 </button>

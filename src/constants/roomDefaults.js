@@ -46,6 +46,24 @@ export const normalizeGoalList = (list) => {
   return list.map(normalizeGoalItem).filter(Boolean);
 };
 
+export const normalizeCompletedByDate = (input) => {
+  if (!input || typeof input !== 'object') return {};
+  const out = {};
+  Object.entries(input).forEach(([dateKey, records]) => {
+    if (!Array.isArray(records)) return;
+    out[dateKey] = records
+      .map((r) => {
+        if (!r || typeof r !== 'object') return null;
+        const id = typeof r.id === 'string' ? r.id : String(r.id ?? '');
+        const text = typeof r.text === 'string' ? r.text : '';
+        if (!id) return null;
+        return { id, text };
+      })
+      .filter(Boolean);
+  });
+  return out;
+};
+
 export const createInitialRoomData = () => ({
   leftStudying: false,
   rightStudying: false,
@@ -56,6 +74,8 @@ export const createInitialRoomData = () => ({
   lastActiveDate: getLocalDateStr(),
   leftGoals: [],
   rightGoals: [],
+  leftCompletedByDate: {},
+  rightCompletedByDate: {},
   leftNudge: 0,
   rightNudge: 0,
 });

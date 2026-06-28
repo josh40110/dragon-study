@@ -51,40 +51,40 @@ export default function TaskPanel({
   const headerTitle = isLeft ? '呱呱的任務' : '花花的任務';
   const accent = isLeft
     ? {
-        borderActive: '#0a6b24',
-        borderProgress: '#14532d',
-        borderIdle: '#2a1a15',
+        borderActive: '#16a34a',
+        borderProgress: '#5cb377',
+        borderIdle: '#e6dac1',
         stripeClass: 'progress-stripes-left',
-        stripeShadow: '4px 0 20px rgba(10,107,36,0.6)',
-        itemDone: 'bg-[#061c0f] border-[#14532d] opacity-60',
-        itemTodo: 'bg-[#0d0706] border-[#14532d]/40',
-        iconDone: 'text-[#22c55e]',
-        iconTodo: 'text-[#14532d]',
-        textDone: 'line-through text-[#166534]',
-        textTodo: 'text-[#e0d5c1]',
-        emptyText: 'text-[#14532d]',
+        stripeShadow: '4px 0 20px rgba(22,163,74,0.45)',
+        itemDone: 'bg-[#e8f3ea] border-[#9bd0ab] opacity-80',
+        itemTodo: 'bg-[#f6fbf7] border-[#cfe6d6]',
+        iconDone: 'text-[#16a34a]',
+        iconTodo: 'text-[#a7c7b2]',
+        textDone: 'line-through text-[#7aa588]',
+        textTodo: 'text-[#3a5343]',
+        emptyText: 'text-[#a7c7b2]',
         inputClass:
-          'flex-1 bg-[#0d0706] border-4 border-[#14532d]/40 px-6 py-4 rounded-[1.5rem] font-bold text-xl outline-none focus:border-[#22c55e] transition-colors shadow-inner text-[#e0d5c1]',
+          'flex-1 bg-[#f6fbf7] border-4 border-[#cfe6d6] px-6 py-4 rounded-[1.5rem] font-bold text-xl outline-none focus:border-[#16a34a] transition-colors shadow-sm text-[#3a5343]',
         btnClass:
-          'bg-[#14532d] p-4 rounded-2xl text-[#22c55e] hover:bg-[#22c55e] hover:text-[#0d0706] transition-all border-b-4 border-black active:translate-y-1 active:border-b-0',
+          'bg-[#16a34a] p-4 rounded-2xl text-white hover:bg-[#15803d] hover:text-white transition-all border-b-4 border-[#0f5132] active:translate-y-1 active:border-b-0',
       }
     : {
-        borderActive: '#b8860b',
-        borderProgress: '#8b6508',
-        borderIdle: '#2a1a15',
+        borderActive: '#daa520',
+        borderProgress: '#caa53f',
+        borderIdle: '#e6dac1',
         stripeClass: 'progress-stripes-right',
-        stripeShadow: '4px 0 20px rgba(184,134,11,0.6)',
-        itemDone: 'bg-[#2c1d1a] border-[#3e2723] opacity-60',
-        itemTodo: 'bg-[#0d0706] border-[#5d4037]',
-        iconDone: 'text-[#daa520]',
-        iconTodo: 'text-[#5d4037]',
-        textDone: 'line-through text-[#8d6e63]',
-        textTodo: '',
-        emptyText: 'text-[#3e2723]',
+        stripeShadow: '4px 0 20px rgba(218,165,32,0.45)',
+        itemDone: 'bg-[#f6edd9] border-[#e6d3aa] opacity-80',
+        itemTodo: 'bg-[#fdf7e9] border-[#ead7ad]',
+        iconDone: 'text-[#b8860b]',
+        iconTodo: 'text-[#cdb98f]',
+        textDone: 'line-through text-[#b09a7e]',
+        textTodo: 'text-[#4a3526]',
+        emptyText: 'text-[#cdb98f]',
         inputClass:
-          'flex-1 bg-[#0d0706] border-4 border-[#3e2723] px-6 py-4 rounded-[1.5rem] font-bold text-xl outline-none focus:border-[#daa520] transition-colors shadow-inner',
+          'flex-1 bg-[#fdf7e9] border-4 border-[#ead7ad] px-6 py-4 rounded-[1.5rem] font-bold text-xl outline-none focus:border-[#daa520] transition-colors shadow-sm text-[#4a3526]',
         btnClass:
-          'bg-[#3e2723] p-4 rounded-2xl text-[#daa520] hover:bg-[#daa520] hover:text-[#0d0706] transition-all border-b-4 border-black active:translate-y-1 active:border-b-0',
+          'bg-[#daa520] p-4 rounded-2xl text-white hover:bg-[#c4951c] hover:text-white transition-all border-b-4 border-[#9a7008] active:translate-y-1 active:border-b-0',
       };
 
   const startEdit = (goal) => {
@@ -343,7 +343,7 @@ export default function TaskPanel({
         className={`${isMyPanel ? 'cursor-grab active:cursor-grabbing' : 'cursor-not-allowed'} shrink-0 mt-1 touch-none`}
         title="拖曳排序"
       >
-        <GripVertical size={16} className="text-[#8d6e63] opacity-60" />
+        <GripVertical size={16} className="text-[#9a8568] opacity-60" />
       </div>
       {task.completed ? <CheckCircle2 size={24} className={`${accent.iconDone} shrink-0 mt-0.5`} /> : <Circle size={24} className={`${accent.iconTodo} shrink-0 mt-0.5`} />}
       {editingGoalId === task.id ? (
@@ -360,7 +360,7 @@ export default function TaskPanel({
               cancelEdit();
             }
           }}
-          className="text-base font-bold flex-1 bg-black/20 border border-[#daa520]/40 rounded-lg px-2 py-1 outline-none focus:border-[#daa520]"
+          className="text-base font-bold flex-1 bg-[#f3e9d6] border border-[#daa520]/50 rounded-lg px-2 py-1 outline-none focus:border-[#daa520]"
           autoFocus
         />
       ) : (
@@ -401,7 +401,7 @@ export default function TaskPanel({
                   e.stopPropagation();
                   startEdit(task);
                 }}
-                className="opacity-0 group-hover:opacity-100 text-[#9ca3af] hover:text-[#e5e7eb] transition-opacity p-1 shrink-0"
+                className="opacity-0 group-hover:opacity-100 text-[#9a8568] hover:text-[#4a3526] transition-opacity p-1 shrink-0"
               >
                 <Pencil size={18} />
               </button>
@@ -410,7 +410,7 @@ export default function TaskPanel({
                   e.stopPropagation();
                   onDeleteGoal(task.id, panelRole);
                 }}
-                className="opacity-0 group-hover:opacity-100 text-[#8b1a1a] hover:text-[#ff4d4d] transition-opacity p-1 shrink-0"
+                className="opacity-0 group-hover:opacity-100 text-[#b91c1c] hover:text-[#dc2626] transition-opacity p-1 shrink-0"
               >
                 <Trash2 size={18} />
               </button>
@@ -422,9 +422,9 @@ export default function TaskPanel({
   );
 
   return (
-    <div className={`bg-[#1a0f0d] rounded-[3rem] 2xl:rounded-[3.3rem] p-8 2xl:p-9 border-4 2xl:border-[5px] overflow-hidden transition-all ${isMyPanel ? 'border-[#3e2723] shadow-2xl' : 'border-black/50 opacity-80'}`}>
+    <div className={`bg-[#fdf9f1] rounded-[3rem] 2xl:rounded-[3.3rem] p-8 2xl:p-9 border-4 2xl:border-[5px] overflow-hidden transition-all ${isMyPanel ? 'border-[#e6dac1] shadow-[0_24px_60px_rgba(120,90,55,0.16)]' : 'border-[#e6dac1]/60 opacity-80'}`}>
       <div
-        className="relative overflow-hidden bg-[#0c0807] border-b-[3px] border-[#2a1a15] h-24 2xl:h-28 flex items-end pb-5 2xl:pb-6 px-14 2xl:px-16 mb-4 2xl:mb-5 -mt-8 -mx-8 transition-colors duration-300"
+        className="relative overflow-hidden bg-[#f7f0e2] border-b-[3px] border-[#e6dac1] h-24 2xl:h-28 flex items-end pb-5 2xl:pb-6 px-14 2xl:px-16 mb-4 2xl:mb-5 -mt-8 -mx-8 transition-colors duration-300"
         style={{ borderColor: progress === 100 ? accent.borderActive : progress > 0 ? accent.borderProgress : accent.borderIdle }}
       >
         <div
@@ -433,16 +433,16 @@ export default function TaskPanel({
         />
         <div className="relative z-10 w-full flex justify-between items-center pointer-events-none">
           <div className="flex items-center gap-4 pointer-events-auto min-w-0">
-            <h3 className="text-[#daa520] font-black text-2xl 2xl:text-[1.9rem] flex items-center gap-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] no-wrap-scroll max-w-[220px] 2xl:max-w-[300px]">
+            <h3 className="text-[#b07d0a] font-black text-2xl 2xl:text-[1.9rem] flex items-center gap-3 drop-shadow-[0_1px_1px_rgba(120,90,55,0.25)] no-wrap-scroll max-w-[220px] 2xl:max-w-[300px]">
               <Trophy size={28} /> {headerTitle}
             </h3>
             {role && role !== panelRole && (
-              <button onClick={onSendNudge} className="flex items-center gap-1 text-[#f472b6] hover:text-pink-400 bg-[#331515] px-3 py-1 rounded-full border-2 border-[#f472b6]/30 hover:scale-105 active:scale-95 transition-all text-sm font-bold shadow-sm ml-2">
+              <button onClick={onSendNudge} className="flex items-center gap-1 text-[#db2777] hover:text-pink-500 bg-[#fce7f0] px-3 py-1 rounded-full border-2 border-[#f472b6]/40 hover:scale-105 active:scale-95 transition-all text-sm font-bold shadow-sm ml-2">
                 <Heart size={16} fill="currentColor" /> 戳一下
               </button>
             )}
           </div>
-          <div className="text-right text-sm font-bold text-[#daa520] flex items-center gap-4 bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-xl border border-[#daa520]/20 pointer-events-auto shadow-sm">
+          <div className="text-right text-sm font-bold text-[#b07d0a] flex items-center gap-4 bg-[#fbf3df]/85 backdrop-blur-md px-4 py-1.5 rounded-xl border border-[#daa520]/30 pointer-events-auto shadow-sm">
             進度 {progress}%
           </div>
         </div>
@@ -523,7 +523,7 @@ export default function TaskPanel({
                   clearDragSession();
                 }
               }}
-              className={`p-3 rounded-2xl border-[3px] transition-all relative ${isMyPanel ? 'cursor-default' : 'cursor-not-allowed'} ${goal.completed ? accent.itemDone : 'bg-[#1c1412] border-[#5d4037] hover:border-[#8d6e63]'} ${dragOverGoalId === `group-${goal.id}` ? 'ring-2 ring-[#d4a373]/80 bg-[#2a1d18]' : ''}`}
+              className={`p-3 rounded-2xl border-[3px] transition-all relative ${isMyPanel ? 'cursor-default' : 'cursor-not-allowed'} ${goal.completed ? accent.itemDone : 'bg-[#faf2e2] border-[#e6d3aa] hover:border-[#caa53f]'} ${dragOverGoalId === `group-${goal.id}` ? 'ring-2 ring-[#caa53f]/80 bg-[#f3e6cc]' : ''}`}
             >
               {dragOverGoalId === `group-${goal.id}` && draggingGoalId !== goal.id && dropPosition !== 'inside' && (
                 <div className={`absolute left-3 right-3 h-[3px] bg-[#daa520] rounded-full shadow-[0_0_12px_rgba(218,165,32,0.9)] ${dropPosition === 'before' ? 'top-[-2px]' : 'bottom-[-2px]'}`} />
@@ -559,7 +559,7 @@ export default function TaskPanel({
                   className={`${isMyPanel ? 'cursor-grab active:cursor-grabbing' : 'cursor-not-allowed'} shrink-0 mt-1 touch-none`}
                   title="拖曳移動群組"
                 >
-                  <GripVertical size={16} className="text-[#8d6e63] opacity-60" />
+                  <GripVertical size={16} className="text-[#9a8568] opacity-60" />
                 </div>
                 <button
                   onMouseDown={(e) => {
@@ -572,7 +572,7 @@ export default function TaskPanel({
                   }}
                   className="shrink-0 mt-0.5"
                 >
-                  {goal.completed ? <CheckCircle2 size={24} className={`${accent.iconDone} shrink-0`} /> : <Circle size={24} className="text-[#d4a373] shrink-0" />}
+                  {goal.completed ? <CheckCircle2 size={24} className={`${accent.iconDone} shrink-0`} /> : <Circle size={24} className="text-[#b8860b] shrink-0" />}
                 </button>
                 <div className="flex-1 min-w-0">
                   {editingGoalId === goal.id ? (
@@ -589,18 +589,18 @@ export default function TaskPanel({
                           cancelEdit();
                         }
                       }}
-                      className="text-base font-bold w-full bg-black/20 border border-[#daa520]/40 rounded-lg px-2 py-1 outline-none focus:border-[#daa520] text-[#e7c59f]"
+                      className="text-base font-bold w-full bg-[#f3e9d6] border border-[#daa520]/50 rounded-lg px-2 py-1 outline-none focus:border-[#daa520] text-[#4a3526]"
                       autoFocus
                     />
                   ) : (
                     <span
                       title={goal.text}
-                      className={`text-base font-bold block min-w-0 no-wrap-scroll ${goal.completed ? accent.textDone : 'text-[#e7c59f]'}`}
+                      className={`text-base font-bold block min-w-0 no-wrap-scroll ${goal.completed ? accent.textDone : 'text-[#4a3526]'}`}
                     >
                       {goal.text}
                     </span>
                   )}
-                  <div className="text-xs text-[#8d6e63] mt-1">{goal.expanded ? '已展開，可拖曳任務進入' : '已收合'}</div>
+                  <div className="text-xs text-[#9a8568] mt-1">{goal.expanded ? '已展開，可拖曳任務進入' : '已收合'}</div>
                 </div>
                 {isMyPanel && (
                   <div className="flex items-center gap-1">
@@ -632,7 +632,7 @@ export default function TaskPanel({
                             e.stopPropagation();
                             startEdit(goal);
                           }}
-                          className="opacity-80 text-[#9ca3af] hover:text-[#e5e7eb] transition-opacity p-1 shrink-0"
+                          className="opacity-80 text-[#9a8568] hover:text-[#4a3526] transition-opacity p-1 shrink-0"
                         >
                           <Pencil size={18} />
                         </button>
@@ -641,7 +641,7 @@ export default function TaskPanel({
                             e.stopPropagation();
                             onDeleteGoal(goal.id, panelRole);
                           }}
-                          className="opacity-80 text-[#8b1a1a] hover:text-[#ff4d4d] transition-opacity p-1 shrink-0"
+                          className="opacity-80 text-[#b91c1c] hover:text-[#dc2626] transition-opacity p-1 shrink-0"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -654,7 +654,7 @@ export default function TaskPanel({
                     e.stopPropagation();
                     onToggleGroupExpanded(goal.id, panelRole);
                   }}
-                  className="opacity-80 text-[#d4a373] p-1 shrink-0"
+                  className="opacity-80 text-[#b8860b] p-1 shrink-0"
                 >
                   {goal.expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
@@ -662,7 +662,7 @@ export default function TaskPanel({
               {goal.expanded && (
                 <div className={`mt-2 space-y-2 ${draggingItemType === 'group' ? 'pointer-events-none' : ''}`}>
                   {(goal.children || []).length === 0 && (
-                    <div className="ml-6 text-xs text-[#8d6e63] italic">把任務拖曳到這個群組裡</div>
+                    <div className="ml-6 text-xs text-[#9a8568] italic">把任務拖曳到這個群組裡</div>
                   )}
                   {(goal.children || []).filter((child) => child.type === 'task').map((child) => renderTaskRow(child, 1, goal.id))}
                 </div>
@@ -686,18 +686,18 @@ export default function TaskPanel({
           />
           <div className="relative">
             {showCreateMenu && (
-              <div className="absolute bottom-[calc(100%+8px)] right-0 bg-[#0d0706] border-2 border-[#3e2723] rounded-xl overflow-hidden shadow-2xl z-20 min-w-[170px] flex flex-col">
+              <div className="absolute bottom-[calc(100%+8px)] right-0 bg-[#fdf9f1] border-2 border-[#e6dac1] rounded-xl overflow-hidden shadow-2xl z-20 min-w-[170px] flex flex-col">
                 <button
                   type="button"
                   onClick={() => selectCreateMode('task')}
-                  className="block w-full text-left px-4 py-2 text-sm font-bold text-[#e0d5c1] hover:bg-[#1f1614] transition-colors"
+                  className="block w-full text-left px-4 py-2 text-sm font-bold text-[#4a3526] hover:bg-[#f3e9d6] transition-colors"
                 >
                   新增任務
                 </button>
                 <button
                   type="button"
                   onClick={() => selectCreateMode('group')}
-                  className="block w-full text-left px-4 py-2 text-sm font-bold text-[#e0d5c1] hover:bg-[#1f1614] transition-colors border-t border-[#3e2723]"
+                  className="block w-full text-left px-4 py-2 text-sm font-bold text-[#4a3526] hover:bg-[#f3e9d6] transition-colors border-t border-[#e6dac1]"
                 >
                   新增任務群組
                 </button>

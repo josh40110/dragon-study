@@ -6,23 +6,23 @@ import { memo } from 'react';
 const ResultCard = memo(function ResultCard({ title, items, rate, visible }) {
   return (
     <div
-      className={`rounded-2xl border-2 border-[#3e2723] bg-[#130b0a] p-4 transform-gpu will-change-[transform,opacity] transition-[opacity,transform] duration-300 ${
+      className={`rounded-2xl border-2 border-[#e6dac1] bg-[#f7f0e2] p-4 transform-gpu will-change-[transform,opacity] transition-[opacity,transform] duration-300 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
       }`}
     >
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-[#daa520] font-black text-xl">{title}</h4>
-        <span className="text-xs font-black px-2 py-1 rounded-full bg-[#2c1d1a] text-[#e0d5c1]">完成率 {rate}%</span>
+        <h4 className="text-[#b07d0a] font-black text-xl">{title}</h4>
+        <span className="text-xs font-black px-2 py-1 rounded-full bg-[#f0e5d0] text-[#5b4636]">完成率 {rate}%</span>
       </div>
-      <div className="text-sm text-[#e0d5c1] font-bold mb-2">完成數量：{items.length}</div>
+      <div className="text-sm text-[#4a3526] font-bold mb-2">完成數量：{items.length}</div>
       {items.length === 0 ? (
-        <div className="text-sm text-[#8d6e63] font-bold">今日尚無完成事項</div>
+        <div className="text-sm text-[#9a8568] font-bold">今日尚無完成事項</div>
       ) : (
         <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
           {items.map((item) => (
-            <div key={`${title}-${item.id}`} className="flex items-start gap-2 rounded-lg border border-[#3e2723] bg-[#1a0f0d] p-2">
+            <div key={`${title}-${item.id}`} className="flex items-start gap-2 rounded-lg border border-[#e6dac1] bg-[#fdf9f1] p-2">
               <CheckCircle2 size={16} className="text-[#22c55e] shrink-0 mt-0.5" />
-              <span className="text-sm font-bold text-[#e0d5c1] no-wrap-scroll">{item.text || '(未命名任務)'}</span>
+              <span className="text-sm font-bold text-[#4a3526] no-wrap-scroll">{item.text || '(未命名任務)'}</span>
             </div>
           ))}
         </div>
@@ -66,15 +66,15 @@ function DailySettlementModal({
   const showSummary = step === 'summary';
 
   return createPortal(
-    <div className="fixed inset-0 z-[999] bg-black/85 backdrop-blur-sm grid place-items-center p-4">
+    <div className="fixed inset-0 z-[999] bg-[#2c1d1a]/50 backdrop-blur-sm grid place-items-center p-4">
       <button type="button" aria-label="關閉結算視窗" onClick={onClose} className="absolute inset-0" />
-      <div className="relative z-10 w-[min(920px,92vw)] max-h-[86vh] rounded-[2rem] border-4 border-[#5d4037] bg-[#1a0f0d] shadow-[0_0_80px_rgba(0,0,0,0.9)] overflow-hidden transform-gpu will-change-[transform,opacity] transition-[opacity,transform] duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-[#3e2723]">
-          <div className="flex items-center gap-2 text-[#daa520] no-wrap-scroll">
+      <div className="relative z-10 w-[min(920px,92vw)] max-h-[86vh] rounded-[2rem] border-4 border-[#e6dac1] bg-[#fdf9f1] shadow-[0_30px_80px_rgba(120,90,55,0.3)] overflow-hidden transform-gpu will-change-[transform,opacity] transition-[opacity,transform] duration-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-[#e6dac1]">
+          <div className="flex items-center gap-2 text-[#b07d0a] no-wrap-scroll">
             <Sparkles size={20} />
             <h3 className="font-black text-2xl">今日結算</h3>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg bg-[#2c1d1a] hover:bg-[#3e2723] text-[#e0d5c1]">
+          <button onClick={onClose} className="p-2 rounded-lg bg-[#f3e9d6] hover:bg-[#ece0c9] text-[#4a3526]">
             <X size={18} />
           </button>
         </div>
@@ -84,11 +84,11 @@ function DailySettlementModal({
           <ResultCard title="呱呱" items={guaguaItems} rate={guaguaRate} visible={showGuagua} />
 
           {showSummary && (
-            <div className="rounded-2xl border-2 border-[#daa520]/60 bg-[#2c1d1a] p-4 transition-[opacity,transform] duration-300 transform-gpu will-change-[transform,opacity]">
-              <div className="flex items-center gap-2 text-[#daa520] font-black text-xl mb-2">
+            <div className="rounded-2xl border-2 border-[#daa520]/60 bg-[#fff7e3] p-4 transition-[opacity,transform] duration-300 transform-gpu will-change-[transform,opacity]">
+              <div className="flex items-center gap-2 text-[#b07d0a] font-black text-xl mb-2">
                 <Trophy size={20} /> 今日總結
               </div>
-              <div className="text-[#e0d5c1] font-bold no-wrap-scroll">
+              <div className="text-[#4a3526] font-bold no-wrap-scroll">
                 花花完成率 <span className="text-[#22c55e]">{huahuaRate}%</span>，呱呱完成率 <span className="text-[#22c55e]">{guaguaRate}%</span>
               </div>
             </div>
@@ -99,7 +99,7 @@ function DailySettlementModal({
           {step !== 'summary' && (
             <button
               onClick={() => onStepChange(step === 'huahua' ? 'guagua' : 'summary')}
-              className="px-4 py-2 rounded-xl border-2 border-[#8d6e63] bg-[#130b0a] text-[#e0d5c1] font-bold hover:bg-[#2c1d1a]"
+              className="px-4 py-2 rounded-xl border-2 border-[#caa53f] bg-[#f7f0e2] text-[#4a3526] font-bold hover:bg-[#f0e5d0]"
             >
               下一步
             </button>
@@ -107,14 +107,14 @@ function DailySettlementModal({
           {step !== 'summary' && (
             <button
               onClick={() => onStepChange('summary')}
-              className="px-4 py-2 rounded-xl border-2 border-[#daa520]/60 bg-[#2c1d1a] text-[#daa520] font-black hover:bg-[#3e2723]"
+              className="px-4 py-2 rounded-xl border-2 border-[#daa520]/60 bg-[#fff7e3] text-[#b07d0a] font-black hover:bg-[#fdeecb]"
             >
               跳過動畫
             </button>
           )}
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border-2 border-[#daa520]/60 bg-[#2c1d1a] text-[#daa520] font-black hover:bg-[#3e2723]"
+            className="px-4 py-2 rounded-xl border-2 border-[#daa520]/60 bg-[#fff7e3] text-[#b07d0a] font-black hover:bg-[#fdeecb]"
           >
             完成
           </button>

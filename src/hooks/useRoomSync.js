@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signInAnonymously, signInWithCustomToken } from 'firebase/auth';
-import { onSnapshot, setDoc } from 'firebase/firestore';
-import { auth, db, getRoomRef } from '../lib/firebase';
+import { auth } from '../lib/firebase';
+import { ensureRoom, isFirebaseReady, subscribeRoom } from '../lib/roomStore';
 import { createInitialRoomData, normalizeCompletedByDate, normalizeGoalList } from '../constants/roomDefaults';
 
 export default function useRoomSync() {
@@ -9,7 +9,7 @@ export default function useRoomSync() {
   const [roomData, setRoomData] = useState(createInitialRoomData);
   const [leftGoals, setLeftGoals] = useState([]);
   const [rightGoals, setRightGoals] = useState([]);
-  /** 至少收到一次 Firestore snapshot，避免用初始 roomData 誤判 */
+  /** 至少收到一次 snapshot，避免用初始 roomData 誤判 */
   const [roomReady, setRoomReady] = useState(false);
 
   useEffect(() => {
@@ -30,14 +30,12 @@ export default function useRoomSync() {
   }, []);
 
   useEffect(() => {
-    if (!user || !db || !getRoomRef) return undefined;
-    const roomRef = getRoomRef();
-    const unsub = onSnapshot(
-      roomRef,
-      (snapshot) => {
+    // 線上模式需先登入才能讀取；離線（localStorage）模式可直接訂閱
+    if (isFirebaseReady() && !user) return undefined;
+    const unsub = subscribeRoom(
+      (data) => {
         setRoomReady(true);
-        if (snapshot.exists()) {
-          const data = snapshot.data();
+        if (data) {
           const normalizedLeftGoals = normalizeGoalList(data.leftGoals);
           const normalizedRightGoals = normalizeGoalList(data.rightGoals);
           const normalizedLeftCompletedByDate = normalizeCompletedByDate(data.leftCompletedByDate);
@@ -52,12 +50,12 @@ export default function useRoomSync() {
           setLeftGoals(normalizedLeftGoals);
           setRightGoals(normalizedRightGoals);
         } else {
-          setDoc(roomRef, createInitialRoomData());
+          ensureRoom(createInitialRoomData());
         }
       },
       (err) => console.error('監聽失敗', err),
     );
-    return () => unsub();
+    return unsub;
   }, [user]);
 
   return { roomData, setRoomData, leftGoals, setLeftGoals, rightGoals, setRightGoals, roomReady };

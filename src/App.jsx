@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, CalendarDays, Coffee, Heart, Sparkles } from 'lucide-react';
-import { setDoc } from 'firebase/firestore';
+import { updateRoom } from './lib/roomStore';
 import AnimatedWindow from './components/AnimatedWindow';
 import MotivationalBoard from './components/MotivationalBoard';
 import PixelArt from './components/PixelArt';
@@ -12,7 +12,7 @@ import CompletionCalendarModal from './components/CompletionCalendarModal';
 import DailySettlementModal from './components/DailySettlementModal';
 import { createGroupItem, createTaskItem, normalizeItemId } from './constants/roomDefaults';
 import { PALETTES, SPRITES } from './constants/pixelArtData';
-import { auth, getFirestoreRestPatchUrl, getRoomRef } from './lib/firebase';
+import { auth, getFirestoreRestPatchUrl } from './lib/firebase';
 import { getLocalDateStr, getLocalDateStrFromTime } from './utils/date';
 import useNudgeEffect from './hooks/useNudgeEffect';
 import useRoomSync from './hooks/useRoomSync';
@@ -94,7 +94,7 @@ export default function App() {
   useEffect(() => {
     const persistEndStudyOnLeave = () => {
       const s = unloadStudyRef.current;
-      if (!s.role || !getRoomRef || !s.isStudying) return;
+      if (!s.role || !s.isStudying) return;
       const roleKey = s.role === 'left' ? 'left' : 'right';
       const nowMs = Date.now();
       const exactElapsed = computeRoleTotalElapsed(s.roomData, roleKey, nowMs);
@@ -113,7 +113,7 @@ export default function App() {
       if (url && token) {
         firestorePatchKeepalive(url, token, updates);
       }
-      void setDoc(getRoomRef(), updates, { merge: true }).catch(() => {
+      void updateRoom(updates, { merge: true }).catch(() => {
         /* 仍可能中斷；依賴 keepalive 與下次開啟重試 */
       });
     };
@@ -126,7 +126,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!roomReady || !getRoomRef) return;
+    if (!roomReady) return;
     let raw;
     try {
       raw = sessionStorage.getItem(END_STUDY_PENDING_KEY);
@@ -166,8 +166,7 @@ export default function App() {
     const key = pending.roleKey;
     const nowMs = Date.now();
     const exactElapsed = computeRoleTotalElapsed(rd, key, nowMs);
-    void setDoc(
-      getRoomRef(),
+    void updateRoom(
       buildEndStudyFirestoreUpdates({
         roleKey: key,
         exactElapsed,
@@ -254,7 +253,7 @@ export default function App() {
 
     try {
       const payload = extraRoomFields ? { [fieldToUpdate]: updatedGoals, ...extraRoomFields } : { [fieldToUpdate]: updatedGoals };
-      await setDoc(getRoomRef(), payload, { merge: true });
+      await updateRoom(payload, { merge: true });
     } catch (err) {
       console.error(errorLabel, err);
     }
@@ -386,8 +385,7 @@ export default function App() {
   };
 
   const handleToggleStudy = async () => {
-    if (!role || !getRoomRef) return;
-    const roomRef = getRoomRef();
+    if (!role) return;
     const roleKey = role === 'left' ? 'left' : 'right';
     const fieldStudying = `${roleKey}Studying`;
     const fieldStartTime = `${roleKey}StartTime`;
@@ -396,8 +394,7 @@ export default function App() {
     if (isStudying) {
       const nowMs = Date.now();
       const exactElapsed = computeRoleTotalElapsed(roomData, roleKey, nowMs);
-      await setDoc(
-        roomRef,
+      await updateRoom(
         buildEndStudyFirestoreUpdates({
           roleKey,
           exactElapsed,
@@ -430,13 +427,13 @@ export default function App() {
     updates[fieldStartTime] = Date.now();
     updates.lastActiveDate = currentDateStr;
     setCurrentTime(Date.now());
-    await setDoc(roomRef, updates, { merge: true });
+    await updateRoom(updates, { merge: true });
   };
 
   const sendNudge = async () => {
-    if (!role || !getRoomRef) return;
+    if (!role) return;
     const partnerRole = role === 'left' ? 'right' : 'left';
-    await setDoc(getRoomRef(), { [`${partnerRole}Nudge`]: Date.now() }, { merge: true });
+    await updateRoom({ [`${partnerRole}Nudge`]: Date.now() }, { merge: true });
   };
 
   const handleCreateItem = async (itemType = 'task') => {
@@ -585,40 +582,40 @@ export default function App() {
 
   if (!role) {
     return (
-      <div className="min-h-screen bg-[#0d0706] flex items-center justify-center p-6 font-sans">
-        <div className="bg-[#1a0f0d] p-10 rounded-[3rem] border-[6px] border-[#3e2723] text-center max-w-lg w-full shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+      <div className="min-h-screen bg-[linear-gradient(180deg,#f3e9d3_0%,#ecdcbf_45%,#e0caa3_100%)] flex items-center justify-center p-6 font-sans">
+        <div className="bg-[#fdf9f1] p-10 rounded-[3rem] border-[6px] border-[#e6dac1] text-center max-w-lg w-full shadow-[0_24px_60px_rgba(120,90,55,0.18)]">
           <div className="flex justify-center mb-6"><RunningDragonIcon /></div>
-          <h1 className="text-4xl font-black text-[#daa520] mb-4 tracking-wider">呱花秘密基地</h1>
-          <p className="text-[#e0d5c1] mb-8 font-bold leading-relaxed text-lg">
+          <h1 className="text-4xl font-black text-[#b07d0a] mb-4 tracking-wider">呱花秘密基地</h1>
+          <p className="text-[#5b4636] mb-8 font-bold leading-relaxed text-lg">
             嘿！夥伴現在的狀態是？<br/>
             {roomData.leftStudying || roomData.rightStudying ? (
-              <span className="text-[#daa520] animate-pulse">🔥 有人在努力中，快加入吧！</span>
+              <span className="text-[#b07d0a] animate-pulse">🔥 有人在努力中，快加入吧！</span>
             ) : (
-              <span className="text-[#8d6e63]">目前基地很安靜，可以盡情補眠...</span>
+              <span className="text-[#9a8568]">目前基地很安靜，可以盡情補眠...</span>
             )}
           </p>
           <div className="flex gap-4">
-            <button onClick={() => setRole('left')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.leftStudying ? 'bg-[#2c1d1a] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.3)]' : 'bg-[#3e2723] border-transparent hover:border-[#daa520] hover:bg-[#5d4037]'}`}>
+            <button onClick={() => setRole('left')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.leftStudying ? 'bg-[#fff7e3] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.25)]' : 'bg-[#f3e9d6] border-transparent hover:border-[#caa53f] hover:bg-[#ece0c9]'}`}>
               <div className="relative z-10 flex flex-col items-center">
                 <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mb-4 transition-transform group-hover:scale-110 ${!roomData.leftStudying && 'grayscale opacity-50'}`} />
-                <span className={`font-black text-xl block ${roomData.leftStudying ? 'text-[#daa520]' : 'text-[#8d6e63]'}`}>
+                <span className={`font-black text-xl block ${roomData.leftStudying ? 'text-[#b07d0a]' : 'text-[#9a8568]'}`}>
                   {roomData.leftStudying ? '呱呱專注中' : '我是呱呱'}
                 </span>
                 {roomData.leftStudying && (
-                   <span className="text-[10px] text-[#e0d5c1] opacity-60 font-mono mt-2 block tracking-tighter">掛機專注中...</span>
+                   <span className="text-[10px] text-[#7a6450] opacity-70 font-mono mt-2 block tracking-tighter">掛機專注中...</span>
                 )}
               </div>
               {roomData.leftStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#daa520]/10 to-transparent pointer-events-none" />}
             </button>
 
-            <button onClick={() => setRole('right')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.rightStudying ? 'bg-[#2c1d1a] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.3)]' : 'bg-[#3e2723] border-transparent hover:border-[#daa520] hover:bg-[#5d4037]'}`}>
+            <button onClick={() => setRole('right')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.rightStudying ? 'bg-[#fff7e3] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.25)]' : 'bg-[#f3e9d6] border-transparent hover:border-[#caa53f] hover:bg-[#ece0c9]'}`}>
               <div className="relative z-10 flex flex-col items-center">
                 <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mb-4 transition-transform group-hover:scale-110 ${!roomData.rightStudying && 'grayscale opacity-50'}`} />
-                <span className={`font-black text-xl block ${roomData.rightStudying ? 'text-[#daa520]' : 'text-[#8d6e63]'}`}>
+                <span className={`font-black text-xl block ${roomData.rightStudying ? 'text-[#b07d0a]' : 'text-[#9a8568]'}`}>
                   {roomData.rightStudying ? '花花專注中' : '我是花花'}
                 </span>
                 {roomData.rightStudying && (
-                   <span className="text-[10px] text-[#e0d5c1] opacity-60 font-mono mt-2 block tracking-tighter">掛機專注中...</span>
+                   <span className="text-[10px] text-[#7a6450] opacity-70 font-mono mt-2 block tracking-tighter">掛機專注中...</span>
                 )}
               </div>
               {roomData.rightStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#daa520]/10 to-transparent pointer-events-none" />}
@@ -630,7 +627,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0706] text-[#e0d5c1] font-sans pb-32 overflow-x-hidden">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f3e9d3_0%,#ecdcbf_45%,#e0caa3_100%)] text-[#4a3526] font-sans pb-32 overflow-x-hidden">
       <CompletionCalendarModal
         open={showCalendarModal}
         onClose={closeCalendarModal}
@@ -647,10 +644,10 @@ export default function App() {
         huahuaRate={huahuaRate}
         guaguaRate={guaguaRate}
       />
-      <aside className={`${showDailySettlement ? 'hidden' : 'hidden md:flex'} fixed left-0 top-0 h-full w-20 bg-[#120a09] border-r-2 border-[#3e2723] z-[180] flex-col items-center py-6`}>
+      <aside className={`${showDailySettlement ? 'hidden' : 'hidden md:flex'} fixed left-0 top-0 h-full w-20 bg-[#fdf9f1] border-r-2 border-[#e6dac1] z-[180] flex-col items-center py-6`}>
         <button
           onClick={openCalendarModal}
-          className="w-14 h-14 rounded-2xl bg-[#2c1d1a] border-2 border-[#daa520]/50 text-[#daa520] hover:bg-[#3e2723] transition-colors flex flex-col items-center justify-center gap-0.5"
+          className="w-14 h-14 rounded-2xl bg-[#f3e9d6] border-2 border-[#daa520]/50 text-[#b07d0a] hover:bg-[#ece0c9] transition-colors flex flex-col items-center justify-center gap-0.5"
           title="日曆"
         >
           <CalendarDays size={18} />
@@ -660,7 +657,7 @@ export default function App() {
       {!showDailySettlement && (
         <button
           onClick={openDailySettlement}
-          className="fixed right-6 bottom-6 z-[180] px-5 py-3 rounded-2xl border-2 border-[#daa520] bg-[#2c1d1a] text-[#daa520] font-black shadow-[0_8px_0_#000] hover:bg-[#3e2723] active:translate-y-1 active:shadow-[0_4px_0_#000] transition-all flex items-center gap-2"
+          className="fixed right-6 bottom-6 z-[180] px-5 py-3 rounded-2xl border-2 border-[#daa520] bg-[#fff7e3] text-[#b07d0a] font-black shadow-[0_8px_0_#d8c4a0] hover:bg-[#fdeecb] active:translate-y-1 active:shadow-[0_4px_0_#d8c4a0] transition-all flex items-center gap-2"
         >
           <Sparkles size={18} />
           今日結算
@@ -750,24 +747,25 @@ export default function App() {
         </div>
       )}
 
-      <header className="bg-[#1a0f0d] border-b-2 border-[#3e2723] p-4 2xl:p-5 sticky top-0 z-[100] flex justify-between items-center px-6 md:pl-28 2xl:px-10 2xl:pl-32 shadow-2xl">
+      <header className="bg-[#fdf9f1] border-b-2 border-[#e6dac1] p-4 2xl:p-5 sticky top-0 z-[100] flex justify-between items-center px-6 md:pl-28 2xl:px-10 2xl:pl-32 shadow-[0_6px_20px_rgba(120,90,55,0.12)]">
         <div className="flex items-center gap-4 min-w-0">
           <RunningDragonIcon />
-          <h1 className="text-2xl 2xl:text-3xl font-black tracking-widest text-[#daa520] no-wrap-scroll">呱花秘密基地</h1>
+          <h1 className="text-2xl 2xl:text-3xl font-black tracking-widest text-[#b07d0a] no-wrap-scroll">呱花秘密基地</h1>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs font-bold text-[#8d6e63] bg-[#3e2723] px-3 py-1 rounded-full hidden md:block no-wrap-scroll">
+          <span className="text-xs font-bold text-[#8a755b] bg-[#f0e5d0] px-3 py-1 rounded-full hidden md:block no-wrap-scroll">
             你是 {role === 'left' ? '呱呱' : '花花'}
           </span>
-          <div className="bg-black/80 px-6 2xl:px-7 py-2 2xl:py-2.5 rounded-2xl border-2 border-[#daa520]/40 shadow-[0_0_15px_rgba(218,165,32,0.15)]">
-            <span className="text-2xl 2xl:text-3xl font-mono font-bold text-[#daa520]">{formatTime(myElapsed)}</span>
+          <div className="relative overflow-hidden bg-gradient-to-b from-[#3a2817] to-[#1b120b] px-6 2xl:px-7 py-2 2xl:py-2.5 rounded-2xl border border-[#daa520]/50 shadow-[inset_0_2px_6px_rgba(0,0,0,0.55),0_4px_12px_rgba(120,90,55,0.22)]">
+            <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent" />
+            <span className="relative text-2xl 2xl:text-3xl font-mono font-bold tracking-[0.12em] tabular-nums text-[#f4cd57] drop-shadow-[0_0_8px_rgba(244,205,87,0.45)]">{formatTime(myElapsed)}</span>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl 2xl:max-w-[1520px] mx-auto p-4 2xl:px-6 md:pl-24 2xl:pl-28 space-y-8 2xl:space-y-7 mt-4 2xl:mt-3">
         {/* 背景與動畫區域 */}
-        <section className="relative w-full aspect-[21/9] md:aspect-[16/9] bg-[#3a2723] rounded-[4rem] 2xl:rounded-[4.6rem] overflow-hidden border-[12px] 2xl:border-[14px] border-[#2c1d1a] shadow-[0_40px_100px_rgba(0,0,0,0.8)] flex flex-col items-center">
+        <section className="relative w-full aspect-[21/9] md:aspect-[16/9] bg-[#3a2723] rounded-[4rem] 2xl:rounded-[4.6rem] overflow-hidden border-[12px] 2xl:border-[14px] border-[#2c1d1a] shadow-[0_30px_70px_rgba(74,52,33,0.35)] flex flex-col items-center">
           <div className="absolute inset-0 bg-[#4e342e]" />
           <div className="absolute top-[6%] left-[4%] z-10 opacity-100 drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)]"><AnimatedWindow /></div>
           
@@ -845,23 +843,26 @@ export default function App() {
 
         <div className="px-6 md:px-12 2xl:px-14 space-y-6 2xl:space-y-5">
           
-          <button 
+          <button
             onClick={handleToggleStudy}
-            className={`w-full py-8 2xl:py-9 rounded-[3rem] 2xl:rounded-[3.3rem] font-black text-2xl 2xl:text-[2rem] border-[6px] 2xl:border-[7px] border-black shadow-[0_12px_0_#000] active:shadow-none active:translate-y-3 transition-all flex items-center justify-center relative ${
-              isStudying ? 'bg-[#daa520] text-black' : 'bg-[#388e3c] text-white'
+            className={`group w-full py-7 2xl:py-8 rounded-[2.5rem] 2xl:rounded-[2.8rem] font-black text-2xl 2xl:text-[2rem] transition-all duration-150 flex items-center justify-center relative overflow-hidden active:translate-y-[6px] ${
+              isStudying
+                ? 'bg-gradient-to-b from-[#f3c44e] to-[#dca01d] text-[#5a3c0e] shadow-[0_9px_0_#a9760a,0_16px_28px_rgba(176,125,10,0.35)] active:shadow-[0_3px_0_#a9760a]'
+                : 'bg-gradient-to-b from-[#57c25c] to-[#369a3f] text-white shadow-[0_9px_0_#2b7a33,0_16px_28px_rgba(46,125,50,0.35)] active:shadow-[0_3px_0_#2b7a33]'
             }`}
           >
+            <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent" />
             {isStudying ? (
-              <div className="flex items-center gap-6"><Coffee size={36} /> 暫時休息</div>
+              <div className="relative flex items-center gap-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.18)]"><Coffee size={34} /> 暫時休息</div>
             ) : (
-              <div className="flex items-center justify-center gap-4">
-                <BookOpen size={36} /> 
+              <div className="relative flex items-center justify-center gap-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.18)]">
+                <BookOpen size={34} />
                 <span>開始專注</span>
-                <label 
-                  onClick={(e) => e.stopPropagation()} 
-                  className="flex items-center gap-2 cursor-pointer text-white hover:text-yellow-200 transition-colors font-bold text-base bg-black/30 px-4 py-2 rounded-full ml-4 border-2 border-black/20"
+                <label
+                  onClick={(e) => e.stopPropagation()}
+                  className={`flex items-center gap-2 cursor-pointer font-bold text-base px-4 py-2 rounded-full ml-3 border transition-all duration-200 active:scale-95 ${isPomodoro ? 'bg-white text-[#d23f31] border-white shadow-[0_2px_8px_rgba(0,0,0,0.15)]' : 'bg-black/15 text-white border-white/40 hover:bg-black/25'}`}
                 >
-                  <input type="checkbox" checked={isPomodoro} onChange={e => setIsPomodoro(e.target.checked)} className="w-5 h-5 accent-[#daa520]" />
+                  <input type="checkbox" checked={isPomodoro} onChange={e => setIsPomodoro(e.target.checked)} className="w-4 h-4 accent-[#e74c3c] cursor-pointer" />
                   🍅 番茄鐘
                 </label>
               </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { QUOTES } from '../constants/quotes';
 
 // Font-size bounds (px) used by the auto-fit logic.
@@ -7,6 +7,7 @@ const MIN_FONT = 9;
 
 export default function MotivationalBoard() {
   const [quoteIndex, setQuoteIndex] = useState(0);
+  const [fontSize, setFontSize] = useState(MAX_FONT);
   const screenRef = useRef(null);
   const textRef = useRef(null);
 
@@ -20,8 +21,9 @@ export default function MotivationalBoard() {
     return () => clearInterval(interval);
   }, []);
 
-  // Shrink the quote until it fits inside the screen on any display size.
-  useEffect(() => {
+  // Shrink the quote until it fits inside the screen (width + fixed height) on any display.
+  // Runs before paint to avoid a flash of overflowing text.
+  useLayoutEffect(() => {
     const fit = () => {
       const screen = screenRef.current;
       const text = textRef.current;
@@ -39,6 +41,7 @@ export default function MotivationalBoard() {
         size -= 0.5;
         text.style.fontSize = `${size}px`;
       }
+      setFontSize(size);
     };
 
     fit();
@@ -61,13 +64,13 @@ export default function MotivationalBoard() {
         </span>
         <span className="text-[10px] text-[#666] font-mono tracking-widest">QUOTE OF THE MOMENT</span>
       </div>
-      <div
-        ref={screenRef}
-        className="h-16 flex items-center justify-center px-2 overflow-hidden"
-      >
+      <div ref={screenRef} className="h-16 flex items-center justify-center px-2 overflow-hidden">
         <p
           ref={textRef}
-          className="font-mono text-[#4ade80] font-bold text-center leading-snug whitespace-normal break-words min-w-0 max-w-full drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]"
+          className="font-mono text-[#4ade80] font-bold text-center leading-snug min-w-0 max-w-full drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]"
+          // Inline styles override the unlayered global `p { white-space: nowrap }`
+          // (in Tailwind v4 unlayered rules beat utility classes), so the quote always wraps.
+          style={{ fontSize: `${fontSize}px`, whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word' }}
         >
           "{QUOTES[quoteIndex]}"
         </p>

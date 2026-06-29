@@ -8,6 +8,5 @@ export default defineConfig({
     tailwindcss(),
   ],
   base: '/dragon-study/', // 這裡填入你的 GitHub 儲存庫名稱
-  envDir: '..',
 })
 

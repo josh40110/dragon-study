@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 共用讀書房：需登入（匿名登入即可）才能讀寫，其餘路徑一律拒絕
+    match /rooms/{roomId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

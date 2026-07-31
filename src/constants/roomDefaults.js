@@ -78,4 +78,12 @@ export const createInitialRoomData = () => ({
   rightCompletedByDate: {},
   leftNudge: 0,
   rightNudge: 0,
+  // 龍龍語言教室
+  langStarred: [],
+  leftLangDates: [],
+  rightLangDates: [],
+  czDepartureDate: null,
+  // 100 天課程各自的進度
+  leftCourseDays: [],
+  rightCourseDays: [],
 });

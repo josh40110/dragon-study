@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, CalendarDays, Coffee, Heart, Sparkles } from 'lucide-react';
+import { BookOpen, CalendarDays, Coffee, Heart, Home, Languages, Sparkles } from 'lucide-react';
 import { updateRoom } from './lib/roomStore';
 import AnimatedWindow from './components/AnimatedWindow';
+import LanguageLab from './components/LanguageLab';
 import MotivationalBoard from './components/MotivationalBoard';
 import PixelArt from './components/PixelArt';
 import RealTimeClock from './components/RealTimeClock';
@@ -20,6 +21,11 @@ import useStudyTimer, { computeRoleTotalElapsed } from './hooks/useStudyTimer';
 import { firestorePatchKeepalive } from './utils/firestoreRestPatch';
 
 const END_STUDY_PENDING_KEY = 'dragon-study-pending-end-study';
+
+const MAIN_TABS = [
+  { key: 'room', label: '共讀小屋', icon: Home },
+  { key: 'language', label: '龍龍語言教室', icon: Languages },
+];
 
 /** 與「暫時休息」按鈕相同的 Firestore 欄位（結束專注） */
 function buildEndStudyFirestoreUpdates({ roleKey, exactElapsed, roomLastActiveDate, nowMs = Date.now() }) {
@@ -42,6 +48,7 @@ export default function App() {
   const { roomData, leftGoals, setLeftGoals, rightGoals, setRightGoals, roomReady } = useRoomSync();
   const [newGoalText, setNewGoalText] = useState('');
   const [isPomodoro, setIsPomodoro] = useState(false);
+  const [activeTab, setActiveTab] = useState('room');
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showDailySettlement, setShowDailySettlement] = useState(false);
   const [settlementStep, setSettlementStep] = useState('huahua');
@@ -654,7 +661,7 @@ export default function App() {
           <span className="text-[10px] font-black">日曆</span>
         </button>
       </aside>
-      {!showDailySettlement && (
+      {!showDailySettlement && activeTab === 'room' && (
         <button
           onClick={openDailySettlement}
           className="fixed right-6 bottom-6 z-[180] px-5 py-3 rounded-2xl border-2 border-[#daa520] bg-[#fff7e3] text-[#b07d0a] font-black shadow-[0_8px_0_#d8c4a0] hover:bg-[#fdeecb] active:translate-y-1 active:shadow-[0_4px_0_#d8c4a0] transition-all flex items-center gap-2"
@@ -747,11 +754,34 @@ export default function App() {
         </div>
       )}
 
-      <header className="bg-[#fdf9f1] border-b-2 border-[#e6dac1] p-4 2xl:p-5 sticky top-0 z-[100] flex justify-between items-center px-6 md:pl-28 2xl:px-10 2xl:pl-32 shadow-[0_6px_20px_rgba(120,90,55,0.12)]">
+      <header className="bg-[#fdf9f1] border-b-2 border-[#e6dac1] p-4 2xl:p-5 sticky top-0 z-[100] flex flex-wrap gap-y-3 justify-between items-center px-6 md:pl-28 2xl:px-10 2xl:pl-32 shadow-[0_6px_20px_rgba(120,90,55,0.12)]">
         <div className="flex items-center gap-4 min-w-0">
           <RunningDragonIcon />
           <h1 className="text-2xl 2xl:text-3xl font-black tracking-widest text-[#b07d0a] no-wrap-scroll">呱花秘密基地</h1>
         </div>
+
+        {/* 頁籤：共讀小屋 ⇄ 龍龍語言教室 */}
+        <nav className="order-3 w-full lg:order-none lg:w-auto flex items-center gap-1.5 bg-[#f3e9d6] border-2 border-[#e6dac1] rounded-2xl p-1">
+          {MAIN_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 lg:flex-none px-4 py-2 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 ${
+                  active
+                    ? 'bg-[#fff7e3] text-[#b07d0a] border-2 border-[#daa520] shadow-[0_3px_0_#d8c4a0]'
+                    : 'text-[#9a8568] border-2 border-transparent hover:bg-[#ece0c9]'
+                }`}
+              >
+                <Icon size={16} />
+                <span className="no-wrap-scroll">{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
         <div className="flex items-center gap-4">
           <span className="text-xs font-bold text-[#8a755b] bg-[#f0e5d0] px-3 py-1 rounded-full hidden md:block no-wrap-scroll">
             你是 {role === 'left' ? '呱呱' : '花花'}
@@ -764,6 +794,10 @@ export default function App() {
       </header>
 
       <main className="max-w-6xl 2xl:max-w-[1520px] mx-auto p-4 2xl:px-6 md:pl-24 2xl:pl-28 space-y-8 2xl:space-y-7 mt-4 2xl:mt-3">
+        {activeTab === 'language' && <LanguageLab role={role} roomData={roomData} />}
+
+        {activeTab === 'room' && (
+        <div className="space-y-8 2xl:space-y-7">
         {/* 背景與動畫區域 */}
         <section className="relative w-full aspect-[21/9] md:aspect-[16/9] bg-[#3a2723] rounded-[4rem] 2xl:rounded-[4.6rem] overflow-hidden border-[12px] 2xl:border-[14px] border-[#2c1d1a] shadow-[0_30px_70px_rgba(74,52,33,0.35)] flex flex-col items-center">
           <div className="absolute inset-0 bg-[#4e342e]" />
@@ -907,6 +941,8 @@ export default function App() {
             />
           </div>
         </div>
+        </div>
+        )}
       </main>
     </div>
   );

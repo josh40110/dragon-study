@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { Check, RotateCcw, Trophy, Volume2, X, Zap } from 'lucide-react';
 import { ALL_TERMS } from '../constants/languageData';
 import { shuffle } from '../utils/dailyPick';
-import { speak } from '../utils/speech';
+import { pronounce } from '../utils/voice';
 import PixelArt from './PixelArt';
 import { PALETTES, SPRITES } from '../constants/pixelArtData';
 
@@ -54,7 +54,7 @@ export default function LanguageQuiz({ pool, onComplete }) {
           setBestCombo((b) => Math.max(b, next));
           return next;
         });
-        if (!current.askTerm) speak(current.word.term, current.word.lang);
+        if (!current.askTerm) pronounce({ id: current.word.id, text: current.word.term, lang: current.word.lang });
       } else {
         setCombo(0);
       }
@@ -153,7 +153,7 @@ export default function LanguageQuiz({ pool, onComplete }) {
           </span>
           {!current.askTerm && (
             <button
-              onClick={() => speak(current.word.term, current.word.lang)}
+              onClick={() => pronounce({ id: current.word.id, text: current.word.term, lang: current.word.lang })}
               className="p-2 rounded-xl bg-[#f3e9d6] text-[#b07d0a] hover:bg-[#ece0c9] transition-colors shrink-0"
               title="唸給我聽"
             >

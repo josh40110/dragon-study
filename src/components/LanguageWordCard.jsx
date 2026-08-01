@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Star, Volume2 } from 'lucide-react';
-import { speak } from '../utils/speech';
+import { pronounce } from '../utils/voice';
 
 const LANG_BADGE = {
   cs: { label: '🇨🇿 捷克文', className: 'bg-[#1b3a8f]/10 text-[#1b3a8f] border-[#1b3a8f]/30' },
@@ -19,9 +19,9 @@ const FACE = {
 export default memo(function LanguageWordCard({ word, flipped, onFlip, starred, onToggleStar }) {
   const badge = LANG_BADGE[word.lang] || LANG_BADGE.cs;
 
-  const handleSpeak = (e, text) => {
+  const handleSpeak = (e, text, id) => {
     e.stopPropagation();
-    speak(text, word.lang);
+    pronounce({ id, text, lang: word.lang });
   };
 
   const handleStar = (e) => {
@@ -58,7 +58,7 @@ export default memo(function LanguageWordCard({ word, flipped, onFlip, starred, 
             <span className={`text-[11px] font-black px-2.5 py-1 rounded-full border ${badge.className}`}>{badge.label}</span>
             <div className="flex items-center gap-1">
               <button
-                onClick={(e) => handleSpeak(e, word.term)}
+                onClick={(e) => handleSpeak(e, word.term, word.id)}
                 className="p-2 rounded-xl bg-[#f3e9d6] text-[#b07d0a] hover:bg-[#ece0c9] transition-colors"
                 title="唸給我聽"
               >
@@ -113,7 +113,7 @@ export default memo(function LanguageWordCard({ word, flipped, onFlip, starred, 
             <div className="flex items-start justify-between gap-2">
               <p className="text-[#4a3526] font-bold text-[13px] leading-snug" style={WRAP}>{word.ex}</p>
               <button
-                onClick={(e) => handleSpeak(e, word.ex)}
+                onClick={(e) => handleSpeak(e, word.ex, `${word.id}-ex`)}
                 className="p-1.5 rounded-lg bg-[#f3e9d6] text-[#b07d0a] hover:bg-[#ece0c9] transition-colors shrink-0"
                 title="唸整句"
               >

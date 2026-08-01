@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, GraduationCap, Lightbulb, Play, Star, Volume2 } from 'lucide-react';
 import { COURSE_STAGES, TOTAL_DAYS, firstUnfinishedDay, getCourseDay } from '../constants/curriculum';
 import { updateRoom } from '../lib/roomStore';
-import { speak } from '../utils/speech';
+import { pronounce } from '../utils/voice';
 import LanguageQuiz from './LanguageQuiz';
 
 const WRAP = { whiteSpace: 'normal', overflowWrap: 'anywhere' };
@@ -51,14 +51,14 @@ function GrammarCard({ grammar, lang, accent }) {
       )}
 
       <div className="space-y-2">
-        {grammar.examples.map(([sentence, zh]) => (
+        {grammar.examples.map(([sentence, zh], index) => (
           <div key={sentence} className="bg-[#f7f0e2] border-2 border-[#e6dac1] rounded-2xl p-3 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[#4a3526] font-black text-[14px] leading-snug" style={WRAP}>{sentence}</p>
               <p className="text-[#8a755b] font-bold text-[13px] mt-0.5" style={WRAP}>{zh}</p>
             </div>
             <button
-              onClick={() => speak(sentence, lang)}
+              onClick={() => pronounce({ id: `${grammar.id}-e${index}`, text: sentence, lang })}
               className="p-2 rounded-xl bg-[#f3e9d6] text-[#b07d0a] hover:bg-[#ece0c9] transition-colors shrink-0"
               title="唸這一句"
             >
@@ -81,7 +81,7 @@ function WordRow({ word, starred, onToggleStar }) {
   return (
     <div className="bg-[#f7f0e2] border-2 border-[#e6dac1] rounded-2xl px-3 py-2.5 flex items-center gap-2.5">
       <button
-        onClick={() => speak(word.term, word.lang)}
+        onClick={() => pronounce({ id: word.id, text: word.term, lang: word.lang })}
         className="p-2 rounded-xl bg-[#f3e9d6] text-[#b07d0a] hover:bg-[#ece0c9] transition-colors shrink-0"
         title="唸給我聽"
       >

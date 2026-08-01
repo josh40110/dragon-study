@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Search, Star, Volume2, X } from 'lucide-react';
 import { CZ_CATEGORIES, CZ_VOCAB } from '../constants/vocabCzech';
 import { EN_CATEGORIES, EN_VOCAB } from '../constants/vocabEnglish';
-import { speak } from '../utils/speech';
+import { pronounce } from '../utils/voice';
 
 const WRAP = { whiteSpace: 'normal', overflowWrap: 'anywhere' };
 const MAX_ROWS = 200;
@@ -119,7 +119,7 @@ export default function VocabBook({ starredSet, onToggleStar }) {
             return (
               <div key={word.id} className="bg-[#f7f0e2] border-2 border-[#e6dac1] rounded-2xl px-3 py-2.5 flex items-center gap-2.5">
                 <button
-                  onClick={() => speak(word.term, word.lang)}
+                  onClick={() => pronounce({ id: word.id, text: word.term, lang: word.lang })}
                   className="p-2 rounded-xl bg-[#f3e9d6] text-[#b07d0a] hover:bg-[#ece0c9] transition-colors shrink-0"
                   title="唸給我聽"
                 >

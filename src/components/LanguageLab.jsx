@@ -1,9 +1,9 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BookMarked, BookOpen, Check, Flame, GraduationCap, Lightbulb, Plane, Search, Star, Volume2 } from 'lucide-react';
 import { updateRoom } from '../lib/roomStore';
 import { getLocalDateStr } from '../utils/date';
 import { computeStreak, daysUntil, dayNumberFromDateStr, pickDaily } from '../utils/dailyPick';
-import { speak } from '../utils/speech';
+import { pronounce, loadClipManifest } from '../utils/voice';
 import { CZECH_WORDS, DAILY_TIPS, ENGLISH_WORDS, PHRASE_SCENES, STREAK_CHEERS, TERMS_BY_ID } from '../constants/languageData';
 import { TOTAL_DAYS } from '../constants/curriculum';
 import LanguageWordCard from './LanguageWordCard';
@@ -33,6 +33,11 @@ export default function LanguageLab({ role, roomData }) {
   const [flippedIds, setFlippedIds] = useState(() => new Set());
   const [quizDone, setQuizDone] = useState(false);
   const [editingDeparture, setEditingDeparture] = useState(false);
+
+  // 一進語言教室就把真人音檔清單抓下來，按發音鈕才不會先送一個 404
+  useEffect(() => {
+    loadClipManifest();
+  }, []);
 
   const today = getLocalDateStr();
   const dayNumber = useMemo(() => dayNumberFromDateStr(today), [today]);
@@ -279,7 +284,7 @@ export default function LanguageLab({ role, roomData }) {
               </div>
 
               <div className="mt-4 space-y-2.5">
-                {scene.lines.map((line) => (
+                {scene.lines.map((line, index) => (
                   <div key={line.cs} className="bg-[#f7f0e2] border-2 border-[#e6dac1] rounded-2xl p-3.5">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -291,7 +296,7 @@ export default function LanguageLab({ role, roomData }) {
                         </p>
                       </div>
                       <button
-                        onClick={() => speak(line.cs, 'cs')}
+                        onClick={() => pronounce({ id: `${scene.id}-l${index}-cs`, text: line.cs, lang: 'cs' })}
                         className="p-2 rounded-xl bg-[#f3e9d6] text-[#b07d0a] hover:bg-[#ece0c9] transition-colors shrink-0"
                         title="唸捷克文"
                       >
@@ -303,7 +308,7 @@ export default function LanguageLab({ role, roomData }) {
                         🇬🇧 {line.en}
                       </p>
                       <button
-                        onClick={() => speak(line.en, 'en')}
+                        onClick={() => pronounce({ id: `${scene.id}-l${index}-en`, text: line.en, lang: 'en' })}
                         className="p-1.5 rounded-lg bg-[#f3e9d6] text-[#7a8f4a] hover:bg-[#ece0c9] transition-colors shrink-0"
                         title="唸英文"
                       >
@@ -378,7 +383,7 @@ export default function LanguageLab({ role, roomData }) {
               {starredWords.map((word) => (
                 <div key={word.id} className="bg-[#f7f0e2] border-2 border-[#e6dac1] rounded-2xl p-3.5 flex items-start gap-3">
                   <button
-                    onClick={() => speak(word.term, word.lang)}
+                    onClick={() => pronounce({ id: word.id, text: word.term, lang: word.lang })}
                     className="p-2 rounded-xl bg-[#f3e9d6] text-[#b07d0a] hover:bg-[#ece0c9] transition-colors shrink-0"
                     title="唸給我聽"
                   >

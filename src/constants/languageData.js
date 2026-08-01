@@ -7,8 +7,8 @@
  *   - tip：踩雷提醒／記憶法，可省略
  */
 
-import { CZ_VOCAB } from './vocabCzech';
-import { EN_VOCAB } from './vocabEnglish';
+import { CZ_VOCAB } from './vocabCzech.js';
+import { EN_VOCAB } from './vocabEnglish.js';
 
 export const CZECH_WORDS = [
   // ── 寒暄 ──

@@ -27,3 +27,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# TTS 音檔生成工具：虛擬環境與模型不進版控（音檔本身在 public/audio 要進）
+tools/tts/.venv/
+tools/tts/models/
+tools/tts/terms.json
+tools/tts/.tmp.wav

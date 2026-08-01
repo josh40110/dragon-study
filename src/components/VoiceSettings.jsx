@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Play, RotateCcw, Settings2, Volume2 } from 'lucide-react';
 import { getRate, getVoicePref, listVoices, onVoicesReady, resolveVoice, setRate, setVoicePref, speak } from '../utils/speech';
+import { isForcingSystemVoice, loadClipManifest, setForceSystemVoice } from '../utils/voice';
 
 const WRAP = { whiteSpace: 'normal', overflowWrap: 'anywhere' };
 
@@ -14,6 +15,12 @@ export default function VoiceSettings() {
   const [tick, setTick] = useState(0);
   const [prefs, setPrefs] = useState({ cs: getVoicePref('cs'), en: getVoicePref('en') });
   const [rate, setRateState] = useState(getRate);
+  const [clipCountState, setClipCountState] = useState(0);
+  const [systemOnly, setSystemOnly] = useState(isForcingSystemVoice);
+
+  useEffect(() => {
+    loadClipManifest().then((ids) => setClipCountState(ids.size));
+  }, []);
 
   // 語音清單是非同步載入的
   useEffect(() => onVoicesReady(() => setTick((t) => t + 1)), []);
@@ -61,6 +68,30 @@ export default function VoiceSettings() {
 
       {open && (
         <div className="px-6 pb-6 space-y-5 border-t-2 border-[#e6dac1] pt-5">
+          {clipCountState > 0 && (
+            <div className="bg-[#e8f7e9] border-2 border-[#16a34a]/40 rounded-2xl px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-[#166534] font-black text-sm">
+                  🎙️ 已載入 {clipCountState} 個預錄音檔（優先使用，音質最好）
+                </span>
+                <label className="flex items-center gap-2 text-[#4a3526] font-bold text-xs cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={systemOnly}
+                    onChange={(e) => {
+                      setForceSystemVoice(e.target.checked);
+                      setSystemOnly(e.target.checked);
+                    }}
+                    className="w-4 h-4 accent-[#daa520]"
+                  />
+                  改用系統語音
+                </label>
+              </div>
+              <p className="text-[11px] text-[#3f6b45] font-bold mt-1" style={WRAP}>
+                下面的語音設定只在沒有預錄音檔的字句上生效。
+              </p>
+            </div>
+          )}
           {LANGS.map((lang) => {
             const ranked = voices[lang.key];
             const current = prefs[lang.key] || resolveVoice(lang.key)?.voiceURI || '';
@@ -91,7 +122,7 @@ export default function VoiceSettings() {
                       ))}
                     </select>
                     <button
-                      onClick={() => speak(lang.sample, lang.key)}
+                      onClick={() => speak(lang.sample, lang.key)}  /* 試聽固定用系統語音，才聽得出差別 */
                       className="px-4 py-2.5 rounded-xl bg-[#f3e9d6] text-[#b07d0a] font-black text-sm hover:bg-[#ece0c9] transition-colors flex items-center gap-1.5 shrink-0"
                       title="試聽"
                     >

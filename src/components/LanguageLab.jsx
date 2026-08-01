@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { BookMarked, BookOpen, Check, Flame, GraduationCap, Lightbulb, Plane, Search, Star, Volume2 } from 'lucide-react';
 import { updateRoom } from '../lib/roomStore';
 import { getLocalDateStr } from '../utils/date';
 import { computeStreak, daysUntil, dayNumberFromDateStr, pickDaily } from '../utils/dailyPick';
-import { hasVoiceFor, onVoicesReady, speak } from '../utils/speech';
+import { speak } from '../utils/speech';
 import { CZECH_WORDS, DAILY_TIPS, ENGLISH_WORDS, PHRASE_SCENES, STREAK_CHEERS, TERMS_BY_ID } from '../constants/languageData';
 import { TOTAL_DAYS } from '../constants/curriculum';
 import LanguageWordCard from './LanguageWordCard';
 import LanguageQuiz from './LanguageQuiz';
 import CourseTab from './CourseTab';
 import VocabBook from './VocabBook';
+import VoiceSettings from './VoiceSettings';
 
 /** 全站 index.css 的 unlayered `p/span { white-space: nowrap }` 會壓過 utility class，靠 inline style 放行換行 */
 const WRAP = { whiteSpace: 'normal', overflowWrap: 'anywhere' };
@@ -32,7 +33,6 @@ export default function LanguageLab({ role, roomData }) {
   const [flippedIds, setFlippedIds] = useState(() => new Set());
   const [quizDone, setQuizDone] = useState(false);
   const [editingDeparture, setEditingDeparture] = useState(false);
-  const [voiceTick, setVoiceTick] = useState(0);
 
   const today = getLocalDateStr();
   const dayNumber = useMemo(() => dayNumberFromDateStr(today), [today]);
@@ -67,10 +67,6 @@ export default function LanguageLab({ role, roomData }) {
 
   const departureDate = typeof roomData?.czDepartureDate === 'string' ? roomData.czDepartureDate : '';
   const daysLeft = daysUntil(departureDate, today);
-
-  // 語音清單是非同步載入的，載好後重新判斷有沒有捷克語音
-  useEffect(() => onVoicesReady(() => setVoiceTick((t) => t + 1)), []);
-  const czechVoiceMissing = useMemo(() => !hasVoiceFor('cs'), [voiceTick]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFlip = useCallback((id) => {
     setFlippedIds((prev) => {
@@ -245,11 +241,7 @@ export default function LanguageLab({ role, roomData }) {
         })}
       </div>
 
-      {czechVoiceMissing && (
-        <p className="text-[12px] text-[#8a6d3b] font-bold bg-[#fdf3d8] border-l-4 border-[#daa520] rounded-r-xl px-4 py-3" style={WRAP}>
-          🔈 系統目前沒有捷克語語音，發音鈕會用預設語音硬唸。macOS：系統設定 → 輔助使用 → 朗讀內容 → 系統語音 → 管理語音，下載「Čeština」後重整就會準了。
-        </p>
-      )}
+      <VoiceSettings />
 
       {subTab === 'today' && (
         <div className="space-y-6">

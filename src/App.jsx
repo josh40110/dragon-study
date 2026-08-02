@@ -3,6 +3,7 @@ import { BookOpen, CalendarDays, Coffee, Heart, Home, Languages, Sparkles } from
 import { updateRoom } from './lib/roomStore';
 import AnimatedWindow from './components/AnimatedWindow';
 import LanguageLab from './components/LanguageLab';
+import WishBoard from './components/WishBoard';
 import MotivationalBoard from './components/MotivationalBoard';
 import PixelArt from './components/PixelArt';
 import RealTimeClock from './components/RealTimeClock';
@@ -29,10 +30,21 @@ const END_STUDY_PENDING_KEY = 'dragon-study-pending-end-study';
 const MAIN_TABS = [
   { key: 'room', label: '共讀小屋', icon: Home },
   { key: 'language', label: '龍龍語言教室', icon: Languages },
+  { key: 'wish', label: '許願池', icon: Sparkles },
 ];
 
+/**
+ * 把某一天的專注秒數寫進歷史表。整張表一起寫（而不是只寫單一 key），
+ * 因為 localStorage 離線模式只做淺層合併，只寫一個 key 會把其他日子洗掉。
+ */
+function mergeStudyByDate(current, dateKey, seconds) {
+  const base = current && typeof current === 'object' ? current : {};
+  if (base[dateKey] === seconds) return base;
+  return { ...base, [dateKey]: seconds };
+}
+
 /** 與「暫時休息」按鈕相同的 Firestore 欄位（結束專注） */
-function buildEndStudyFirestoreUpdates({ roleKey, exactElapsed, roomLastActiveDate, nowMs = Date.now() }) {
+function buildEndStudyFirestoreUpdates({ roleKey, exactElapsed, roomLastActiveDate, studyByDate, nowMs = Date.now() }) {
   const currentDateStr = getLocalDateStrFromTime(nowMs);
   const updates = {};
   if (roomLastActiveDate !== currentDateStr) {
@@ -44,6 +56,8 @@ function buildEndStudyFirestoreUpdates({ roleKey, exactElapsed, roomLastActiveDa
   updates[`${roleKey}StartTime`] = null;
   updates[`${roleKey}LastHeartbeat`] = null;
   updates[`${roleKey}DailyTotal`] = exactElapsed;
+  // 每天的累計會被隔天歸零，所以要另外留一份歷史給日曆與結算看
+  updates[`${roleKey}StudyByDate`] = mergeStudyByDate(studyByDate, currentDateStr, exactElapsed);
   updates.lastActiveDate = currentDateStr;
   return updates;
 }
@@ -79,9 +93,21 @@ export default function App() {
   /** 專注中定期寫心跳，讓對方知道我還在。正常關頁由 pagehide 收尾，這是當機時的補網。 */
   useEffect(() => {
     if (!role || !isStudying) return undefined;
-    const field = `${role}LastHeartbeat`;
     const beat = () => {
-      void updateRoom({ [field]: Date.now() }, { merge: true }).catch(() => {
+      const rd = roomDataRef.current;
+      const nowMs = Date.now();
+      // 順便把當下累計寫進歷史：不增加寫入次數，就算之後當機，日曆最多只差一分鐘
+      void updateRoom(
+        {
+          [`${role}LastHeartbeat`]: nowMs,
+          [`${role}StudyByDate`]: mergeStudyByDate(
+            rd?.[`${role}StudyByDate`],
+            getLocalDateStrFromTime(nowMs),
+            computeRoleTotalElapsed(rd, role, nowMs),
+          ),
+        },
+        { merge: true },
+      ).catch(() => {
         /* 單次心跳漏掉沒關係，下一拍會補上 */
       });
     };
@@ -103,6 +129,7 @@ export default function App() {
         // computeRoleTotalElapsed 會自動截到最後一次心跳，不會把當機的空白算進去
         exactElapsed: computeRoleTotalElapsed(rd, role, nowMs),
         roomLastActiveDate: rd.lastActiveDate,
+        studyByDate: rd[`${role}StudyByDate`],
         nowMs,
       }),
       { merge: true },
@@ -148,7 +175,13 @@ export default function App() {
       const nowMs = Date.now();
       const exactElapsed = computeRoleTotalElapsed(s.roomData, roleKey, nowMs);
       const roomLastActiveDate = s.roomData?.lastActiveDate;
-      const updates = buildEndStudyFirestoreUpdates({ roleKey, exactElapsed, roomLastActiveDate, nowMs });
+      const updates = buildEndStudyFirestoreUpdates({
+        roleKey,
+        exactElapsed,
+        roomLastActiveDate,
+        studyByDate: s.roomData?.[`${roleKey}StudyByDate`],
+        nowMs,
+      });
       try {
         sessionStorage.setItem(
           END_STUDY_PENDING_KEY,
@@ -220,6 +253,7 @@ export default function App() {
         roleKey: key,
         exactElapsed,
         roomLastActiveDate: rd.lastActiveDate ?? pending.roomLastActiveDate,
+        studyByDate: rd[`${key}StudyByDate`],
         nowMs,
       }),
       { merge: true },
@@ -448,6 +482,7 @@ export default function App() {
           roleKey,
           exactElapsed,
           roomLastActiveDate: roomData.lastActiveDate,
+          studyByDate: roomData[`${roleKey}StudyByDate`],
           nowMs,
         }),
         { merge: true },
@@ -683,6 +718,8 @@ export default function App() {
         onClose={closeCalendarModal}
         completedByDate={calendarCompletedByDate}
         roleLabel={role === 'left' ? '呱呱' : '花花'}
+        leftStudyByDate={roomData.leftStudyByDate}
+        rightStudyByDate={roomData.rightStudyByDate}
       />
       <DailySettlementModal
         open={showDailySettlement}
@@ -693,6 +730,8 @@ export default function App() {
         guaguaItems={guaguaItems}
         huahuaRate={huahuaRate}
         guaguaRate={guaguaRate}
+        huahuaSeconds={rightElapsed}
+        guaguaSeconds={leftElapsed}
       />
       <aside className={`${showDailySettlement ? 'hidden' : 'hidden md:flex'} fixed left-0 top-0 h-full w-20 bg-[#fdf9f1] border-r-2 border-[#e6dac1] z-[180] flex-col items-center py-6`}>
         <button
@@ -838,6 +877,8 @@ export default function App() {
 
       <main className="max-w-6xl 2xl:max-w-[1520px] mx-auto p-4 2xl:px-6 md:pl-24 2xl:pl-28 space-y-8 2xl:space-y-7 mt-4 2xl:mt-3">
         {activeTab === 'language' && <LanguageLab role={role} roomData={roomData} />}
+
+        {activeTab === 'wish' && <WishBoard role={role} roomData={roomData} />}
 
         {activeTab === 'room' && (
         <div className="space-y-8 2xl:space-y-7">

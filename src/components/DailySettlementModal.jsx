@@ -1,18 +1,32 @@
-import { CheckCircle2, Sparkles, Trophy, X } from 'lucide-react';
+import { CheckCircle2, Sparkles, Timer, Trophy, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { memo } from 'react';
 
-const ResultCard = memo(function ResultCard({ title, items, rate, visible }) {
+function formatDuration(seconds) {
+  if (!seconds) return '0 分';
+  if (seconds < 60) return `${seconds} 秒`;
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.round((seconds % 3600) / 60);
+  if (hours > 0) return minutes > 0 ? `${hours} 小時 ${minutes} 分` : `${hours} 小時`;
+  return `${minutes} 分`;
+}
+
+const ResultCard = memo(function ResultCard({ title, items, rate, seconds, visible }) {
   return (
     <div
       className={`rounded-2xl border-2 border-[#e6dac1] bg-[#f7f0e2] p-4 transform-gpu will-change-[transform,opacity] transition-[opacity,transform] duration-300 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
       }`}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <h4 className="text-[#b07d0a] font-black text-xl">{title}</h4>
-        <span className="text-xs font-black px-2 py-1 rounded-full bg-[#f0e5d0] text-[#5b4636]">完成率 {rate}%</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-black px-2 py-1 rounded-full bg-[#fff7e3] border border-[#daa520]/50 text-[#b07d0a] flex items-center gap-1">
+            <Timer size={12} /> 專注 {formatDuration(seconds)}
+          </span>
+          <span className="text-xs font-black px-2 py-1 rounded-full bg-[#f0e5d0] text-[#5b4636]">完成率 {rate}%</span>
+        </div>
       </div>
       <div className="text-sm text-[#4a3526] font-bold mb-2">完成數量：{items.length}</div>
       {items.length === 0 ? (
@@ -40,6 +54,8 @@ function DailySettlementModal({
   guaguaItems,
   huahuaRate,
   guaguaRate,
+  huahuaSeconds = 0,
+  guaguaSeconds = 0,
 }) {
   useEffect(() => {
     if (!open) return;
@@ -80,8 +96,8 @@ function DailySettlementModal({
         </div>
 
         <div className="p-6 space-y-4 overflow-y-auto max-h-[64vh]">
-          <ResultCard title="花花" items={huahuaItems} rate={huahuaRate} visible={showHuahua} />
-          <ResultCard title="呱呱" items={guaguaItems} rate={guaguaRate} visible={showGuagua} />
+          <ResultCard title="花花" items={huahuaItems} rate={huahuaRate} seconds={huahuaSeconds} visible={showHuahua} />
+          <ResultCard title="呱呱" items={guaguaItems} rate={guaguaRate} seconds={guaguaSeconds} visible={showGuagua} />
 
           {showSummary && (
             <div className="rounded-2xl border-2 border-[#daa520]/60 bg-[#fff7e3] p-4 transition-[opacity,transform] duration-300 transform-gpu will-change-[transform,opacity]">
@@ -90,6 +106,10 @@ function DailySettlementModal({
               </div>
               <div className="text-[#4a3526] font-bold no-wrap-scroll">
                 花花完成率 <span className="text-[#22c55e]">{huahuaRate}%</span>，呱呱完成率 <span className="text-[#22c55e]">{guaguaRate}%</span>
+              </div>
+              <div className="text-[#4a3526] font-bold mt-1 no-wrap-scroll">
+                今天兩人一起專注了 <span className="text-[#b07d0a]">{formatDuration(huahuaSeconds + guaguaSeconds)}</span>
+                <span className="text-[#9a8568] text-sm">（花花 {formatDuration(huahuaSeconds)}、呱呱 {formatDuration(guaguaSeconds)}）</span>
               </div>
             </div>
           )}

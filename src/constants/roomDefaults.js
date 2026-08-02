@@ -79,6 +79,9 @@ export const createInitialRoomData = () => ({
   rightGoals: [],
   leftCompletedByDate: {},
   rightCompletedByDate: {},
+  // 每日專注秒數的歷史：{ 'YYYY-MM-DD': 秒數 }，日曆用
+  leftStudyByDate: {},
+  rightStudyByDate: {},
   leftNudge: 0,
   rightNudge: 0,
   // 龍龍語言教室
@@ -86,6 +89,8 @@ export const createInitialRoomData = () => ({
   leftLangDates: [],
   rightLangDates: [],
   czDepartureDate: null,
+  // 許願池：未開發功能的許願清單
+  wishes: [],
   // 100 天課程各自的進度
   leftCourseDays: [],
   rightCourseDays: [],

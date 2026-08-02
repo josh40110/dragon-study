@@ -1,5 +1,27 @@
-import { Check, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Timer, X } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
+
+/** 日曆格子用的極簡寫法：45m / 1.5h */
+function formatShort(seconds) {
+  if (!seconds || seconds < 60) return '';
+  if (seconds < 3600) return `${Math.round(seconds / 60)}m`;
+  return `${(seconds / 3600).toFixed(1)}h`;
+}
+
+/** 詳細區用的完整寫法 */
+function formatDuration(seconds) {
+  if (!seconds) return '沒有紀錄';
+  if (seconds < 60) return `${seconds} 秒`;
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.round((seconds % 3600) / 60);
+  if (hours > 0) return minutes > 0 ? `${hours} 小時 ${minutes} 分` : `${hours} 小時`;
+  return `${minutes} 分`;
+}
+
+function toSeconds(map, dateKey) {
+  const value = map?.[dateKey];
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+}
 
 function buildMonthCells(viewDate) {
   const year = viewDate.getFullYear();
@@ -24,6 +46,7 @@ const CalendarDayCell = memo(function CalendarDayCell({
   dateKey,
   dateNumber,
   doneCount,
+  studySeconds,
   isCurrentMonth,
   isSelected,
   onSelectDate,
@@ -36,8 +59,13 @@ const CalendarDayCell = memo(function CalendarDayCell({
       } ${isCurrentMonth ? 'text-[#4a3526]' : 'text-[#c9b48c]'}`}
     >
       <div className="text-sm font-bold">{dateNumber}</div>
+      {studySeconds > 0 && (
+        <div className="absolute left-2 bottom-1.5 text-[11px] font-black text-[#b07d0a] tabular-nums">
+          {formatShort(studySeconds)}
+        </div>
+      )}
       {doneCount > 0 && (
-        <div className="absolute right-2 bottom-2 w-5 h-5 rounded-full bg-[#16a34a] text-white flex items-center justify-center">
+        <div className="absolute right-1.5 bottom-1.5 w-5 h-5 rounded-full bg-[#16a34a] text-white flex items-center justify-center">
           <Check size={12} strokeWidth={3} />
         </div>
       )}
@@ -45,7 +73,14 @@ const CalendarDayCell = memo(function CalendarDayCell({
   );
 });
 
-export default memo(function CompletionCalendarModal({ open, onClose, completedByDate, roleLabel }) {
+export default memo(function CompletionCalendarModal({
+  open,
+  onClose,
+  completedByDate,
+  roleLabel,
+  leftStudyByDate,
+  rightStudyByDate,
+}) {
   const [viewDate, setViewDate] = useState(() => new Date());
   const [selectedDateKey, setSelectedDateKey] = useState(() => toDateKey(new Date()));
 
@@ -69,6 +104,22 @@ export default memo(function CompletionCalendarModal({ open, onClose, completedB
 
   const selectedList = useMemo(() => completedByDate?.[selectedDateKey] || [], [completedByDate, selectedDateKey]);
 
+  /** 格子上顯示的是兩個人加起來的專注時間 */
+  const totalSecondsMap = useMemo(() => {
+    const map = new Map();
+    [leftStudyByDate, rightStudyByDate].forEach((source) => {
+      if (!source || typeof source !== 'object') return;
+      Object.entries(source).forEach(([dateKey, seconds]) => {
+        if (!Number.isFinite(seconds) || seconds <= 0) return;
+        map.set(dateKey, (map.get(dateKey) || 0) + Math.floor(seconds));
+      });
+    });
+    return map;
+  }, [leftStudyByDate, rightStudyByDate]);
+
+  const selectedGuagua = toSeconds(leftStudyByDate, selectedDateKey);
+  const selectedHuahua = toSeconds(rightStudyByDate, selectedDateKey);
+
   const handlePrevMonth = useCallback(() => {
     setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
   }, []);
@@ -89,7 +140,7 @@ export default memo(function CompletionCalendarModal({ open, onClose, completedB
         <div className="flex items-center justify-between px-6 py-4 border-b-2 border-[#e6dac1]">
           <div className="no-wrap-scroll pr-2">
             <h3 className="text-[#b07d0a] font-black text-2xl">日曆</h3>
-            <p className="text-[#9a8568] text-sm font-bold">{roleLabel} 完成紀錄</p>
+            <p className="text-[#9a8568] text-sm font-bold">{roleLabel} 完成紀錄 · 雙方專注時間</p>
           </div>
           <button
             onClick={onClose}
@@ -136,6 +187,7 @@ export default memo(function CompletionCalendarModal({ open, onClose, completedB
                   dateKey={cell.dateKey}
                   dateNumber={cell.date.getDate()}
                   doneCount={doneCount}
+                  studySeconds={totalSecondsMap.get(cell.dateKey) || 0}
                   isCurrentMonth={isCurrentMonth}
                   isSelected={isSelected}
                   onSelectDate={handleSelectDate}
@@ -145,6 +197,24 @@ export default memo(function CompletionCalendarModal({ open, onClose, completedB
           </div>
 
           <div className="mt-6 border-t-2 border-[#e6dac1] pt-4">
+            <h4 className="font-black text-[#b07d0a] mb-3 no-wrap-scroll flex items-center gap-2">
+              <Timer size={18} />
+              {selectedDateKey} 專注時間
+            </h4>
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              {[
+                { name: '呱呱', seconds: selectedGuagua },
+                { name: '花花', seconds: selectedHuahua },
+              ].map((person) => (
+                <div key={person.name} className="rounded-2xl border-2 border-[#e6dac1] bg-[#f7f0e2] px-4 py-3">
+                  <div className="text-[11px] font-black text-[#9a8568]">{person.name}</div>
+                  <div className={`font-black text-lg tabular-nums ${person.seconds > 0 ? 'text-[#b07d0a]' : 'text-[#c0ad8c]'}`}>
+                    {formatDuration(person.seconds)}
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <h4 className="font-black text-[#b07d0a] mb-2 no-wrap-scroll">{selectedDateKey} 完成事項</h4>
             {selectedList.length === 0 ? (
               <div className="text-[#9a8568] text-sm font-bold">這一天尚無完成任務</div>

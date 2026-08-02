@@ -27,7 +27,10 @@ try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
-    getRoomRef = () => doc(db, 'rooms', 'shared-room');
+    // 開發時可用 .env.development.local 的 VITE_ROOM_ID 指向測試房間，避免污染兩人的真實資料。
+    // 只在 dev 模式載入，正式 build 一定是 shared-room。
+    const roomId = import.meta.env.VITE_ROOM_ID || 'shared-room';
+    getRoomRef = () => doc(db, 'rooms', roomId);
   }
 } catch (e) {
   console.error('Firebase Init Error:', e);

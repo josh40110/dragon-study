@@ -95,14 +95,17 @@ export default function LanguageLab({ role, roomData }) {
     [roomData?.langStarred],
   );
 
+  /** 可以取消：誤點的話再按一次就把今天的打卡收回（跟 100 天課程的完成鈕一致） */
   const handleCheckIn = useCallback(async () => {
-    if (!role || checkedInToday) return;
+    if (!role) return;
     const field = role === 'left' ? 'leftLangDates' : 'rightLangDates';
-    const next = [...new Set([...myDates, today])].sort().slice(-400);
+    const next = checkedInToday
+      ? myDates.filter((d) => d !== today)
+      : [...new Set([...myDates, today])].sort().slice(-400);
     try {
       await updateRoom({ [field]: next }, { merge: true });
     } catch (err) {
-      console.error('語言打卡失敗:', err);
+      console.error(checkedInToday ? '取消語言打卡失敗:' : '語言打卡失敗:', err);
     }
   }, [checkedInToday, myDates, role, today]);
 
@@ -194,15 +197,15 @@ export default function LanguageLab({ role, roomData }) {
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button
             onClick={handleCheckIn}
-            disabled={checkedInToday}
+            title={checkedInToday ? '按一下取消今天的打卡' : '記錄今天有學'}
             className={`px-5 py-3 rounded-2xl font-black transition-all flex items-center gap-2 ${
               checkedInToday
-                ? 'bg-[#e8f7e9] border-2 border-[#16a34a] text-[#166534] cursor-default'
+                ? 'bg-[#e8f7e9] border-2 border-[#16a34a] text-[#166534] hover:bg-[#dcf0de] active:translate-y-0.5'
                 : 'bg-gradient-to-b from-[#57c25c] to-[#369a3f] text-white shadow-[0_6px_0_#2b7a33] active:translate-y-1 active:shadow-[0_2px_0_#2b7a33]'
             }`}
           >
             <Check size={18} strokeWidth={3} />
-            {checkedInToday ? '今天已完成 ✓' : '完成今日學習 · 打卡'}
+            {checkedInToday ? '今天已完成 ✓（點此取消）' : '完成今日學習 · 打卡'}
           </button>
 
           <div className="flex items-center gap-2 text-sm font-bold text-[#9a8568]" style={WRAP}>

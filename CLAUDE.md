@@ -46,6 +46,33 @@ tools/tts/.venv/bin/python tools/tts/generate_audio.py --reference tools/tts/ref
 約 2 秒/筆，只會補新的。改完別忘了 `manifest.json`（腳本會自動重建，
 若只手動刪改音檔則要跑 `--manifest-only`）。
 
+## 計時行為（不可破壞的三條）
+
+這是這個 app 的核心語意，任何改動都不能違反。已於測試房間實測驗證通過。
+
+1. **每天自動刷新**：計時器顯示的是「今天」的累計，跨過午夜自動歸零，
+   不需要任何人按按鈕、也不需要重新整理。
+   - 實作在 `hooks/useStudyTimer.js` 的 `computeRoleElapsedParts()`：只有
+     `roomData.lastActiveDate === 今天` 時才把 `xxxDailyTotal` 算進去，否則當 0。
+   - 這是**讀取時判斷**，不是靠寫入重設，所以隔天打開就是 0，不會殘留昨天的數字。
+   - 若專注中跨過午夜，當前 session 從今天 00:00 起算（同一個函式的 else 分支）。
+   - 別為了「效能」把這個判斷改成只在啟動時算一次，那會讓開著的頁面跨日不歸零。
+
+2. **關掉頁面自動下線**：離開頁面時該角色的 `xxxStudying` 必須變成 `false`，
+   對方看到的狀態要立刻變成離線。
+   - 實作在 `App.jsx` 的 `persistEndStudyOnLeave`（`pagehide` + `beforeunload`），
+     並用 `fetch(keepalive)` 的 Firestore REST PATCH 補強，因為關頁時
+     `setDoc` 常來不及送出。
+   - **已知缺口**：瀏覽器被強制結束（當機、強制結束、手機系統回收分頁）時
+     兩個事件都不會觸發，對方會看到殘留的「專注中」。目前只有同分頁重新整理
+     時的 sessionStorage 補寫，沒有心跳機制。要真正補起來需要
+     heartbeat + 讀取時判定逾時，尚未實作。
+
+3. **累計時間保留到下次開啟**：下線不等於歸零。離開時把當下的精確秒數寫進
+   `xxxDailyTotal`，同一天再打開要接續顯示，不能從 0 重來。
+   - 三處寫入必須維持一致：`buildEndStudyFirestoreUpdates()`、
+     「暫時休息」按鈕、`persistEndStudyOnLeave`。改其中一處就要同步改另外兩處。
+
 ## 硬規則
 
 - **絕對不要 commit `.env`**（Firebase 金鑰）。`.gitignore` 已涵蓋 `.env` 與 `.env.*`，

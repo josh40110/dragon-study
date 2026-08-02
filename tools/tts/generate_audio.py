@@ -55,10 +55,17 @@ def encode(wav_path: Path, out_path: Path) -> None:
     )
 
 
-def prepare_text(text: str, kind: str) -> str:
+# XTTS 的捷克語數字展開遇到阿拉伯數字會丟 NotImplementedError，
+# 這裡只改「唸出來的內容」，app 上顯示的原文不動。
+SPOKEN_OVERRIDES = {
+    "cs-odjezd-ex": "Odjezd v osm patnáct z nástupiště tři.",
+}
+
+
+def prepare_text(item: dict) -> str:
     """XTTS 對太短的輸入容易出現雜音或亂唸，單字補上句號穩定很多。"""
-    clean = text.strip()
-    if kind == "term" and not clean.endswith((".", "!", "?", "。")):
+    clean = SPOKEN_OVERRIDES.get(item["id"], item["text"]).strip()
+    if item["kind"] == "term" and not clean.endswith((".", "!", "?", "。")):
         clean = f"{clean}."
     return clean
 
@@ -130,7 +137,7 @@ def main() -> int:
     done = 0
 
     for index, item in enumerate(items, start=1):
-        text = prepare_text(item["text"], item["kind"])
+        text = prepare_text(item)
         try:
             out = model.inference(
                 text,

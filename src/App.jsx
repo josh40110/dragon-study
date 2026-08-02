@@ -17,7 +17,11 @@ import { auth, getFirestoreRestPatchUrl } from './lib/firebase';
 import { getLocalDateStr, getLocalDateStrFromTime } from './utils/date';
 import useNudgeEffect from './hooks/useNudgeEffect';
 import useRoomSync from './hooks/useRoomSync';
-import useStudyTimer, { computeRoleTotalElapsed } from './hooks/useStudyTimer';
+import useStudyTimer, {
+  HEARTBEAT_INTERVAL_MS,
+  computeRoleTotalElapsed,
+  isRoleStudying,
+} from './hooks/useStudyTimer';
 import { firestorePatchKeepalive } from './utils/firestoreRestPatch';
 
 const END_STUDY_PENDING_KEY = 'dragon-study-pending-end-study';
@@ -38,6 +42,7 @@ function buildEndStudyFirestoreUpdates({ roleKey, exactElapsed, roomLastActiveDa
   }
   updates[`${roleKey}Studying`] = false;
   updates[`${roleKey}StartTime`] = null;
+  updates[`${roleKey}LastHeartbeat`] = null;
   updates[`${roleKey}DailyTotal`] = exactElapsed;
   updates.lastActiveDate = currentDateStr;
   return updates;
@@ -54,10 +59,14 @@ export default function App() {
   const [settlementStep, setSettlementStep] = useState('huahua');
   const receiveNudge = useNudgeEffect(roomData, role);
 
-  const isStudying = role === 'left' ? roomData.leftStudying : roomData.rightStudying;
-  const leftDragonIsStudying = roomData?.leftStudying || false;
-  const rightDragonIsStudying = roomData?.rightStudying || false;
   const { leftElapsed, rightElapsed, myElapsed, mySession, setCurrentTime } = useStudyTimer(roomData, role);
+
+  // 一律用心跳感知的判斷，不要直接讀 roomData.xxxStudying：
+  // 對方當機時欄位還是 true，但人已經不在了。useStudyTimer 每 500ms 觸發重繪，
+  // 所以這裡每次 render 重算就等於持續偵測。
+  const leftDragonIsStudying = isRoleStudying(roomData, 'left');
+  const rightDragonIsStudying = isRoleStudying(roomData, 'right');
+  const isStudying = role === 'left' ? leftDragonIsStudying : rightDragonIsStudying;
 
   const unloadStudyRef = useRef({ role: null, isStudying: false, roomData: null });
   const idTokenRef = useRef(null);
@@ -66,6 +75,39 @@ export default function App() {
   useEffect(() => {
     roomDataRef.current = roomData;
   }, [roomData]);
+
+  /** 專注中定期寫心跳，讓對方知道我還在。正常關頁由 pagehide 收尾，這是當機時的補網。 */
+  useEffect(() => {
+    if (!role || !isStudying) return undefined;
+    const field = `${role}LastHeartbeat`;
+    const beat = () => {
+      void updateRoom({ [field]: Date.now() }, { merge: true }).catch(() => {
+        /* 單次心跳漏掉沒關係，下一拍會補上 */
+      });
+    };
+    beat();
+    const id = setInterval(beat, HEARTBEAT_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [role, isStudying]);
+
+  /** 上次是當機離開的：心跳已經過期，把停在最後一次心跳的時間結算掉，別讓狀態卡在專注中。 */
+  useEffect(() => {
+    if (!roomReady || !role) return;
+    const rd = roomDataRef.current;
+    if (!rd?.[`${role}Studying`]) return;
+    if (isRoleStudying(rd, role)) return;
+    const nowMs = Date.now();
+    void updateRoom(
+      buildEndStudyFirestoreUpdates({
+        roleKey: role,
+        // computeRoleTotalElapsed 會自動截到最後一次心跳，不會把當機的空白算進去
+        exactElapsed: computeRoleTotalElapsed(rd, role, nowMs),
+        roomLastActiveDate: rd.lastActiveDate,
+        nowMs,
+      }),
+      { merge: true },
+    ).catch((err) => console.error('清除逾時的專注狀態失敗:', err));
+  }, [roomReady, role]);
 
   useEffect(() => {
     unloadStudyRef.current = { role, isStudying, roomData };
@@ -432,6 +474,7 @@ export default function App() {
     }
     updates[fieldStudying] = true;
     updates[fieldStartTime] = Date.now();
+    updates[`${roleKey}LastHeartbeat`] = Date.now();
     updates.lastActiveDate = currentDateStr;
     setCurrentTime(Date.now());
     await updateRoom(updates, { merge: true });
@@ -595,37 +638,37 @@ export default function App() {
           <h1 className="text-4xl font-black text-[#b07d0a] mb-4 tracking-wider">呱花秘密基地</h1>
           <p className="text-[#5b4636] mb-8 font-bold leading-relaxed text-lg">
             嘿！夥伴現在的狀態是？<br/>
-            {roomData.leftStudying || roomData.rightStudying ? (
+            {leftDragonIsStudying || rightDragonIsStudying ? (
               <span className="text-[#b07d0a] animate-pulse">🔥 有人在努力中，快加入吧！</span>
             ) : (
               <span className="text-[#9a8568]">目前基地很安靜，可以盡情補眠...</span>
             )}
           </p>
           <div className="flex gap-4">
-            <button onClick={() => setRole('left')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.leftStudying ? 'bg-[#fff7e3] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.25)]' : 'bg-[#f3e9d6] border-transparent hover:border-[#caa53f] hover:bg-[#ece0c9]'}`}>
+            <button onClick={() => setRole('left')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${leftDragonIsStudying ? 'bg-[#fff7e3] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.25)]' : 'bg-[#f3e9d6] border-transparent hover:border-[#caa53f] hover:bg-[#ece0c9]'}`}>
               <div className="relative z-10 flex flex-col items-center">
-                <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mb-4 transition-transform group-hover:scale-110 ${!roomData.leftStudying && 'grayscale opacity-50'}`} />
-                <span className={`font-black text-xl block ${roomData.leftStudying ? 'text-[#b07d0a]' : 'text-[#9a8568]'}`}>
-                  {roomData.leftStudying ? '呱呱專注中' : '我是呱呱'}
+                <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mb-4 transition-transform group-hover:scale-110 ${!leftDragonIsStudying && 'grayscale opacity-50'}`} />
+                <span className={`font-black text-xl block ${leftDragonIsStudying ? 'text-[#b07d0a]' : 'text-[#9a8568]'}`}>
+                  {leftDragonIsStudying ? '呱呱專注中' : '我是呱呱'}
                 </span>
-                {roomData.leftStudying && (
+                {leftDragonIsStudying && (
                    <span className="text-[10px] text-[#7a6450] opacity-70 font-mono mt-2 block tracking-tighter">掛機專注中...</span>
                 )}
               </div>
-              {roomData.leftStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#daa520]/10 to-transparent pointer-events-none" />}
+              {leftDragonIsStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#daa520]/10 to-transparent pointer-events-none" />}
             </button>
 
-            <button onClick={() => setRole('right')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${roomData.rightStudying ? 'bg-[#fff7e3] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.25)]' : 'bg-[#f3e9d6] border-transparent hover:border-[#caa53f] hover:bg-[#ece0c9]'}`}>
+            <button onClick={() => setRole('right')} className={`flex-1 py-6 rounded-3xl border-4 transition-all relative overflow-hidden group ${rightDragonIsStudying ? 'bg-[#fff7e3] border-[#daa520] shadow-[0_0_20px_rgba(218,165,32,0.25)]' : 'bg-[#f3e9d6] border-transparent hover:border-[#caa53f] hover:bg-[#ece0c9]'}`}>
               <div className="relative z-10 flex flex-col items-center">
-                <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mb-4 transition-transform group-hover:scale-110 ${!roomData.rightStudying && 'grayscale opacity-50'}`} />
-                <span className={`font-black text-xl block ${roomData.rightStudying ? 'text-[#b07d0a]' : 'text-[#9a8568]'}`}>
-                  {roomData.rightStudying ? '花花專注中' : '我是花花'}
+                <PixelArt art={SPRITES.dragonSit} palette={PALETTES.dragon} pixelSize={4} className={`mb-4 transition-transform group-hover:scale-110 ${!rightDragonIsStudying && 'grayscale opacity-50'}`} />
+                <span className={`font-black text-xl block ${rightDragonIsStudying ? 'text-[#b07d0a]' : 'text-[#9a8568]'}`}>
+                  {rightDragonIsStudying ? '花花專注中' : '我是花花'}
                 </span>
-                {roomData.rightStudying && (
+                {rightDragonIsStudying && (
                    <span className="text-[10px] text-[#7a6450] opacity-70 font-mono mt-2 block tracking-tighter">掛機專注中...</span>
                 )}
               </div>
-              {roomData.rightStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#daa520]/10 to-transparent pointer-events-none" />}
+              {rightDragonIsStudying && <div className="absolute inset-0 bg-gradient-to-t from-[#daa520]/10 to-transparent pointer-events-none" />}
             </button>
           </div>
         </div>

@@ -63,15 +63,24 @@ tools/tts/.venv/bin/python tools/tts/generate_audio.py --reference tools/tts/ref
    - 實作在 `App.jsx` 的 `persistEndStudyOnLeave`（`pagehide` + `beforeunload`），
      並用 `fetch(keepalive)` 的 Firestore REST PATCH 補強，因為關頁時
      `setDoc` 常來不及送出。
-   - **已知缺口**：瀏覽器被強制結束（當機、強制結束、手機系統回收分頁）時
-     兩個事件都不會觸發，對方會看到殘留的「專注中」。目前只有同分頁重新整理
-     時的 sessionStorage 補寫，沒有心跳機制。要真正補起來需要
-     heartbeat + 讀取時判定逾時，尚未實作。
+   - 當機、強制結束、手機系統回收分頁時兩個事件都不會觸發，因此另有**心跳**補網：
+     專注中每分鐘寫一次 `xxxLastHeartbeat`，超過 `HEARTBEAT_STALE_MS`（4 分鐘）
+     沒跳就一律視為離線。
+   - **判斷在不在線一律用 `isRoleStudying(roomData, roleKey)`，不要直接讀
+     `roomData.xxxStudying`**——當機時那個欄位還是 `true`。App.jsx 裡的登入畫面、
+     龍龍動畫、按鈕狀態全部走這個函式。
+   - 4 分鐘的門檻是為了吸收兩台裝置的時鐘誤差（心跳寫的是寫入端的 `Date.now()`，
+     由對方的 `Date.now()` 比對）。想調短要先想清楚時鐘不同步會誤判成離線。
+   - 沒有心跳欄位的資料一律當作在線，那是心跳上線前就開始的 session；
+     判成過期會把人家累積的時間結算成 0。這個 fallback 不要拿掉。
 
 3. **累計時間保留到下次開啟**：下線不等於歸零。離開時把當下的精確秒數寫進
    `xxxDailyTotal`，同一天再打開要接續顯示，不能從 0 重來。
-   - 三處寫入必須維持一致：`buildEndStudyFirestoreUpdates()`、
-     「暫時休息」按鈕、`persistEndStudyOnLeave`。改其中一處就要同步改另外兩處。
+   - 四處寫入必須維持一致：`buildEndStudyFirestoreUpdates()`、「暫時休息」按鈕、
+     `persistEndStudyOnLeave`、心跳逾時的自我修復 effect。改一處就要同步改其他三處。
+   - 心跳過期時結算的是「開始 → 最後一次心跳」，**不含當機後的空白**。
+     實作在 `computeRoleElapsedParts()` 的 `effectiveNow`：過期就凍結在心跳時間點。
+     這樣當機三小時後再打開，不會平白多出三小時的專注紀錄。
 
 ## 硬規則
 

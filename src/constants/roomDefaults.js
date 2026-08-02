@@ -69,6 +69,9 @@ export const createInitialRoomData = () => ({
   rightStudying: false,
   leftStartTime: null,
   rightStartTime: null,
+  // 專注中每分鐘更新；停止跳動代表那台裝置當機或被系統回收
+  leftLastHeartbeat: null,
+  rightLastHeartbeat: null,
   leftDailyTotal: 0,
   rightDailyTotal: 0,
   lastActiveDate: getLocalDateStr(),

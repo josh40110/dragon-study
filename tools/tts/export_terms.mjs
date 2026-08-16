@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 import { CZECH_WORDS, ENGLISH_WORDS, PHRASE_SCENES, ALL_TERMS } from '../../src/constants/languageData.js';
+import { DIALOGUE_DAYS } from '../../src/constants/dialogues.js';
 import { CZ_GRAMMAR } from '../../src/constants/grammarCzech.js';
 import { EN_GRAMMAR } from '../../src/constants/grammarEnglish.js';
 
@@ -48,6 +49,18 @@ CZ_GRAMMAR.forEach((lesson) => {
 });
 EN_GRAMMAR.forEach((lesson) => {
   lesson.examples.forEach(([sentence], index) => add(`${lesson.id}-e${index}`, sentence, 'en', 'sentence'));
+});
+
+// 5. 30 天情境對話：每句捷克文與英文，加上該課的單字（捷克 + 英文對照）
+DIALOGUE_DAYS.forEach((lesson) => {
+  lesson.lines.forEach((line) => {
+    add(line.csId, line.cs, 'cs', 'sentence');
+    add(line.enId, line.en, 'en', 'sentence');
+  });
+  lesson.words.forEach((word) => {
+    add(word.id, word.term, 'cs', 'term');
+    add(word.enId, word.en, 'en', 'term');
+  });
 });
 
 const stats = items.reduce((acc, item) => {

@@ -1,24 +1,27 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BookMarked, BookOpen, Check, Flame, GraduationCap, Lightbulb, Plane, Search, Star, Volume2 } from 'lucide-react';
+import { BookMarked, BookOpen, Check, Flame, GraduationCap, Lightbulb, MessagesSquare, Plane, Search, Star, Volume2 } from 'lucide-react';
 import { updateRoom } from '../lib/roomStore';
 import { getLocalDateStr } from '../utils/date';
 import { computeStreak, daysUntil, dayNumberFromDateStr, pickDaily } from '../utils/dailyPick';
 import { pronounce, loadClipManifest } from '../utils/voice';
-import { CZECH_WORDS, DAILY_TIPS, ENGLISH_WORDS, PHRASE_SCENES, STREAK_CHEERS, TERMS_BY_ID } from '../constants/languageData';
-import { TOTAL_DAYS } from '../constants/curriculum';
+import { CZECH_WORDS, DAILY_TIPS, ENGLISH_WORDS, STREAK_CHEERS, TERMS_BY_ID } from '../constants/languageData';
+import { DIALOGUE_WORDS, TOTAL_DIALOGUE_DAYS, getDialogueDay } from '../constants/dialogues';
 import LanguageWordCard from './LanguageWordCard';
 import LanguageQuiz from './LanguageQuiz';
-import CourseTab from './CourseTab';
+import DialogueCourse, { DialogueLesson } from './DialogueCourse';
+import GrammarBook from './GrammarBook';
 import VocabBook from './VocabBook';
 import VoiceSettings from './VoiceSettings';
 
 /** 全站 index.css 的 unlayered `p/span { white-space: nowrap }` 會壓過 utility class，靠 inline style 放行換行 */
 const WRAP = { whiteSpace: 'normal', overflowWrap: 'anywhere' };
 
-const WORDS_BY_ID = TERMS_BY_ID;
+/** 收藏可能來自單字大全、每日精選，或對話單字，查表要三邊都涵蓋 */
+const WORDS_BY_ID = new Map([...TERMS_BY_ID, ...DIALOGUE_WORDS.map((w) => [w.id, w])]);
 const SUB_TABS = [
-  { key: 'today', label: '今日一課', icon: GraduationCap },
-  { key: 'course', label: `${TOTAL_DAYS} 天課程`, icon: BookOpen },
+  { key: 'today', label: '今日一課', icon: MessagesSquare },
+  { key: 'course', label: `${TOTAL_DIALOGUE_DAYS} 天對話`, icon: GraduationCap },
+  { key: 'grammar', label: '文法大全', icon: BookOpen },
   { key: 'vocab', label: '單字大全', icon: Search },
   { key: 'quiz', label: '小測驗', icon: Flame },
   { key: 'book', label: '單字本', icon: BookMarked },
@@ -42,10 +45,15 @@ export default function LanguageLab({ role, roomData }) {
   const today = getLocalDateStr();
   const dayNumber = useMemo(() => dayNumberFromDateStr(today), [today]);
 
+  // 今天輪到第幾天的對話（30 天一輪，兩個人看到的是同一天）
+  const todayLesson = useMemo(
+    () => getDialogueDay((((dayNumber % TOTAL_DIALOGUE_DAYS) + TOTAL_DIALOGUE_DAYS) % TOTAL_DIALOGUE_DAYS) + 1),
+    [dayNumber],
+  );
+
   const czWords = useMemo(() => pickDaily(CZECH_WORDS, dayNumber, 3), [dayNumber]);
   const enWords = useMemo(() => pickDaily(ENGLISH_WORDS, dayNumber, 3, 11), [dayNumber]);
   const todayWords = useMemo(() => [...czWords, ...enWords], [czWords, enWords]);
-  const scene = useMemo(() => pickDaily(PHRASE_SCENES, dayNumber, 1)[0], [dayNumber]);
   const dailyTip = useMemo(() => pickDaily(DAILY_TIPS, dayNumber, 1, 5)[0], [dayNumber]);
   const cheer = useMemo(() => pickDaily(STREAK_CHEERS, dayNumber, 1, 3)[0], [dayNumber]);
 
@@ -122,12 +130,12 @@ export default function LanguageLab({ role, roomData }) {
   const allFlipped = flippedTodayCount === todayWords.length;
   const quizPool = useMemo(() => {
     const seen = new Set();
-    return [...todayWords, ...starredWords].filter((w) => {
+    return [...todayLesson.words, ...todayWords, ...starredWords].filter((w) => {
       if (!w || seen.has(w.id)) return false;
       seen.add(w.id);
       return true;
     });
-  }, [starredWords, todayWords]);
+  }, [starredWords, todayLesson, todayWords]);
 
   return (
     <div className="space-y-6">
@@ -139,7 +147,7 @@ export default function LanguageLab({ role, roomData }) {
               🐉 龍龍語言教室
             </h2>
             <p className="text-[#9a8568] font-bold text-sm mt-1" style={WRAP}>
-              每天三個捷克字、三個英文字，加一頁真的用得到的生活會話。
+              每天一段真的會用到的對話，先聽會話、再學裡面的單字。
             </p>
           </div>
 
@@ -155,12 +163,12 @@ export default function LanguageLab({ role, roomData }) {
             <button
               onClick={() => setSubTab('course')}
               className="px-4 py-3 rounded-2xl bg-[#f3e9d6] border-2 border-[#e6dac1] hover:border-[#caa53f] transition-colors text-center"
-              title="打開 100 天課程"
+              title="打開 30 天對話課程"
             >
               <div className="flex items-center justify-center gap-1.5 text-[#4a3526] font-black text-xl">
                 <BookOpen size={18} className="text-[#b07d0a]" />
                 {myCourseDays.length}
-                <span className="text-sm text-[#9a8568]">/{TOTAL_DAYS}</span>
+                <span className="text-sm text-[#9a8568]">/{TOTAL_DIALOGUE_DAYS}</span>
               </div>
               <div className="text-[10px] text-[#9a8568] font-black mt-0.5">課程進度</div>
             </button>
@@ -253,10 +261,18 @@ export default function LanguageLab({ role, roomData }) {
 
       {subTab === 'today' && (
         <div className="space-y-6">
-          {/* 今日單字 */}
+          {/* 今天的情境對話 + 該對話的單字（含小測驗） */}
+          <DialogueLesson
+            lesson={todayLesson}
+            starredSet={starredSet}
+            onToggleStar={handleToggleStar}
+            showQuiz={false}
+          />
+
+          {/* 補充：每日精選字卡 */}
           <section>
             <div className="flex items-center justify-between mb-3 gap-3">
-              <h3 className="text-[#b07d0a] font-black text-lg">今日單字</h3>
+              <h3 className="text-[#b07d0a] font-black text-lg">加碼單字</h3>
               <span className="text-[#9a8568] font-black text-sm">
                 翻開 {flippedTodayCount} / {todayWords.length} {allFlipped && '🎉'}
               </span>
@@ -274,64 +290,6 @@ export default function LanguageLab({ role, roomData }) {
               ))}
             </div>
           </section>
-
-          {/* 今日情境會話 */}
-          {scene && (
-            <section className="bg-[#fdf9f1] border-4 border-[#e6dac1] rounded-[2rem] p-6 shadow-[0_8px_0_#e0d3b6]">
-              <div className="flex items-center gap-3 mb-1">
-                <span className="text-3xl">{scene.icon}</span>
-                <div className="min-w-0">
-                  <h3 className="text-[#b07d0a] font-black text-lg">今日實用情境 · {scene.title}</h3>
-                  <p className="text-[#9a8568] font-bold text-xs" style={WRAP}>{scene.subtitle}</p>
-                </div>
-              </div>
-
-              <div className="mt-4 space-y-2.5">
-                {scene.lines.map((line, index) => (
-                  <div key={line.cs} className="bg-[#f7f0e2] border-2 border-[#e6dac1] rounded-2xl p-3.5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-[#4a3526] font-black text-[15px] leading-snug" style={WRAP}>
-                          🇨🇿 {line.cs}
-                        </p>
-                        <p className="text-[#b3a084] font-mono text-[11px] mt-0.5" style={WRAP}>
-                          {line.pron}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => pronounce({ id: `${scene.id}-l${index}-cs`, text: line.cs, lang: 'cs' })}
-                        className="p-2 rounded-xl bg-[#f3e9d6] text-[#b07d0a] hover:bg-[#ece0c9] transition-colors shrink-0"
-                        title="唸捷克文"
-                      >
-                        <Volume2 size={16} />
-                      </button>
-                    </div>
-                    <div className="flex items-start justify-between gap-3 mt-2 pt-2 border-t border-[#e6dac1]">
-                      <p className="text-[#5f7a3a] font-bold text-[13px] leading-snug" style={WRAP}>
-                        🇬🇧 {line.en}
-                      </p>
-                      <button
-                        onClick={() => pronounce({ id: `${scene.id}-l${index}-en`, text: line.en, lang: 'en' })}
-                        className="p-1.5 rounded-lg bg-[#f3e9d6] text-[#7a8f4a] hover:bg-[#ece0c9] transition-colors shrink-0"
-                        title="唸英文"
-                      >
-                        <Volume2 size={14} />
-                      </button>
-                    </div>
-                    <p className="text-[#8a755b] font-bold text-[13px] mt-1.5" style={WRAP}>
-                      {line.zh}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {scene.tip && (
-                <p className="mt-4 text-[13px] text-[#8a6d3b] font-bold bg-[#fdf3d8] border-l-4 border-[#daa520] rounded-r-xl px-4 py-3" style={WRAP}>
-                  🧭 {scene.tip}
-                </p>
-              )}
-            </section>
-          )}
 
           {/* 龍龍小知識 */}
           {dailyTip && (
@@ -353,8 +311,10 @@ export default function LanguageLab({ role, roomData }) {
       )}
 
       {subTab === 'course' && (
-        <CourseTab role={role} roomData={roomData} starredSet={starredSet} onToggleStar={handleToggleStar} />
+        <DialogueCourse role={role} roomData={roomData} starredSet={starredSet} onToggleStar={handleToggleStar} />
       )}
+
+      {subTab === 'grammar' && <GrammarBook />}
 
       {subTab === 'vocab' && <VocabBook starredSet={starredSet} onToggleStar={handleToggleStar} />}
 

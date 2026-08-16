@@ -47,3 +47,27 @@ th {
 .no-wrap-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(176, 125, 10, 0.85);
 }
+/* 羊皮紙底色上的捲軸（對話視窗用；custom-scrollbar 是深色 modal 專用的） */
+.parchment-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(176, 125, 10, 0.5) rgba(230, 218, 193, 0.6);
+}
+
+.parchment-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.parchment-scrollbar::-webkit-scrollbar-track {
+  background: rgba(230, 218, 193, 0.6);
+  border-radius: 999px;
+}
+
+.parchment-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #e2c076 0%, #c9a24a 100%);
+  border: 2px solid #fbf6ea;
+  border-radius: 999px;
+}
+
+.parchment-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #d9b25d 0%, #b8912f 100%);
+}

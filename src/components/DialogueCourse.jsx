@@ -105,11 +105,18 @@ export function DialogueLesson({ lesson, starredSet, onToggleStar, showQuiz = tr
         </h4>
         <p className="text-[#8a6d3b] font-black text-sm mb-4" style={WRAP}>目標：{lesson.goal}</p>
 
-        <div className="space-y-2.5">
+        {/* 對話固定在一個視窗高度內捲動，不然一課十幾句會把整頁撐得很長 */}
+        <div
+          className="space-y-2.5 overflow-y-auto overscroll-contain pr-2 parchment-scrollbar [scrollbar-gutter:stable] rounded-2xl bg-[#fbf6ea] border-2 border-[#e6dac1] p-3"
+          style={{ maxHeight: 'min(60vh, 520px)' }}
+        >
           {lesson.lines.map((line, index) => (
             <DialogueLine key={line.csId} line={line} index={index} />
           ))}
         </div>
+        <p className="text-[11px] text-[#b3a084] font-black mt-2 text-center">
+          共 {lesson.lines.length} 句 · 往下捲看完整段對話 ↓
+        </p>
 
         {lesson.tip && (
           <p className="mt-4 text-[13px] text-[#8a6d3b] font-bold bg-[#fdf3d8] border-l-4 border-[#daa520] rounded-r-xl px-4 py-3" style={WRAP}>

@@ -99,3 +99,13 @@ export default function useStudyTimer(roomData, role) {
 
   return { leftElapsed, rightElapsed, myElapsed, mySession, setCurrentTime };
 }
+
+/**
+ * 這段 session 實際結束的時刻。
+ * 心跳過期（當機／強制關閉）時以最後一次心跳為準，不把離線的空白算進去。
+ */
+export function effectiveEndMs(roomData, roleKey, nowMs = Date.now()) {
+  const beat = getHeartbeatMs(roomData, roleKey);
+  if (beat != null && nowMs - beat > HEARTBEAT_STALE_MS) return beat;
+  return nowMs;
+}

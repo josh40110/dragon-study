@@ -89,6 +89,8 @@ export const createInitialRoomData = () => ({
   leftLangDates: [],
   rightLangDates: [],
   czDepartureDate: null,
+  // 打卡紀錄：每次專注的開始／結束／長度（毫秒），只留最近 60 筆
+  sessions: [],
   // 許願池：未開發功能的許願清單
   wishes: [],
   // 100 天課程各自的進度

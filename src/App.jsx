@@ -9,6 +9,7 @@ import PixelArt from './components/PixelArt';
 import RealTimeClock from './components/RealTimeClock';
 import RunningDragonIcon from './components/RunningDragonIcon';
 import Steam from './components/Steam';
+import StudyLogPanel from './components/StudyLogPanel';
 import TaskPanel from './components/TaskPanel';
 import CompletionCalendarModal from './components/CompletionCalendarModal';
 import DailySettlementModal from './components/DailySettlementModal';
@@ -21,11 +22,20 @@ import useRoomSync from './hooks/useRoomSync';
 import useStudyTimer, {
   HEARTBEAT_INTERVAL_MS,
   computeRoleTotalElapsed,
+  effectiveEndMs,
   isRoleStudying,
 } from './hooks/useStudyTimer';
 import { firestorePatchKeepalive } from './utils/firestoreRestPatch';
 
 const END_STUDY_PENDING_KEY = 'dragon-study-pending-end-study';
+
+/**
+ * 小屋的「設計尺寸」。裡面所有擺設都是照這個寬度配置的，
+ * 實際房間變窄時整層一起等比縮放，構圖比例才不會跑掉
+ * （只縮擺設不縮龍，龍就會顯得過大）。
+ */
+const ROOM_DESIGN_W = 1400;
+const ROOM_DESIGN_H = (ROOM_DESIGN_W * 9) / 16;
 
 const MAIN_TABS = [
   { key: 'room', label: '共讀小屋', icon: Home },
@@ -43,8 +53,26 @@ function mergeStudyByDate(current, dateKey, seconds) {
   return { ...base, [dateKey]: seconds };
 }
 
+/** 打卡紀錄只留最近 60 筆，免得房間文件無限長大 */
+const MAX_SESSIONS = 60;
+
+function appendSession(sessions, entry) {
+  const base = Array.isArray(sessions) ? sessions : [];
+  if (!entry) return base;
+  return [...base, entry].slice(-MAX_SESSIONS);
+}
+
 /** 與「暫時休息」按鈕相同的 Firestore 欄位（結束專注） */
-function buildEndStudyFirestoreUpdates({ roleKey, exactElapsed, roomLastActiveDate, studyByDate, nowMs = Date.now() }) {
+function buildEndStudyFirestoreUpdates({
+  roleKey,
+  exactElapsed,
+  roomLastActiveDate,
+  studyByDate,
+  sessions,
+  startMs,
+  endMs,
+  nowMs = Date.now(),
+}) {
   const currentDateStr = getLocalDateStrFromTime(nowMs);
   const updates = {};
   if (roomLastActiveDate !== currentDateStr) {
@@ -59,6 +87,19 @@ function buildEndStudyFirestoreUpdates({ roleKey, exactElapsed, roomLastActiveDa
   // 每天的累計會被隔天歸零，所以要另外留一份歷史給日曆與結算看
   updates[`${roleKey}StudyByDate`] = mergeStudyByDate(studyByDate, currentDateStr, exactElapsed);
   updates.lastActiveDate = currentDateStr;
+
+  // 這一段專注的打卡紀錄：太短的（誤觸）不留
+  const start = Number(startMs);
+  const end = Number(endMs ?? nowMs);
+  if (Number.isFinite(start) && Number.isFinite(end) && end - start >= 1000) {
+    updates.sessions = appendSession(sessions, {
+      id: `${roleKey}-${start}`,
+      by: roleKey,
+      start,
+      end,
+      ms: end - start,
+    });
+  }
   return updates;
 }
 
@@ -73,7 +114,7 @@ export default function App() {
   const [settlementStep, setSettlementStep] = useState('huahua');
   const receiveNudge = useNudgeEffect(roomData, role);
 
-  const { leftElapsed, rightElapsed, myElapsed, mySession, setCurrentTime } = useStudyTimer(roomData, role);
+  const { leftElapsed, rightElapsed, mySession, setCurrentTime } = useStudyTimer(roomData, role);
 
   // 一律用心跳感知的判斷，不要直接讀 roomData.xxxStudying：
   // 對方當機時欄位還是 true，但人已經不在了。useStudyTimer 每 500ms 觸發重繪，
@@ -81,6 +122,28 @@ export default function App() {
   const leftDragonIsStudying = isRoleStudying(roomData, 'left');
   const rightDragonIsStudying = isRoleStudying(roomData, 'right');
   const isStudying = role === 'left' ? leftDragonIsStudying : rightDragonIsStudying;
+
+  /** 小屋實際寬高 → 內容層縮放倍率 */
+  const roomRef = useRef(null);
+  const [roomScale, setRoomScale] = useState(1);
+  useEffect(() => {
+    const el = roomRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (!width || !height) return;
+      setRoomScale(Math.min(width / ROOM_DESIGN_W, height / ROOM_DESIGN_H));
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+    // 小屋要選完角色、切到共讀小屋分頁才存在，兩個都要當相依，否則 ref 還是空的
+  }, [activeTab, role]);
+
+  const roomLayerStyle = {
+    width: ROOM_DESIGN_W,
+    height: ROOM_DESIGN_H,
+    transform: `translate(-50%, -50%) scale(${roomScale})`,
+  };
 
   const unloadStudyRef = useRef({ role: null, isStudying: false, roomData: null });
   const idTokenRef = useRef(null);
@@ -130,6 +193,9 @@ export default function App() {
         exactElapsed: computeRoleTotalElapsed(rd, role, nowMs),
         roomLastActiveDate: rd.lastActiveDate,
         studyByDate: rd[`${role}StudyByDate`],
+        sessions: rd.sessions,
+        startMs: rd[`${role}StartTime`],
+        endMs: effectiveEndMs(rd, role, nowMs),
         nowMs,
       }),
       { merge: true },
@@ -180,6 +246,9 @@ export default function App() {
         exactElapsed,
         roomLastActiveDate,
         studyByDate: s.roomData?.[`${roleKey}StudyByDate`],
+        sessions: s.roomData?.sessions,
+        startMs: s.roomData?.[`${roleKey}StartTime`],
+        endMs: nowMs,
         nowMs,
       });
       try {
@@ -254,6 +323,9 @@ export default function App() {
         exactElapsed,
         roomLastActiveDate: rd.lastActiveDate ?? pending.roomLastActiveDate,
         studyByDate: rd[`${key}StudyByDate`],
+        sessions: rd.sessions,
+        startMs: rd[`${key}StartTime`],
+        endMs: pending.ts ?? nowMs,
         nowMs,
       }),
       { merge: true },
@@ -483,6 +555,9 @@ export default function App() {
           exactElapsed,
           roomLastActiveDate: roomData.lastActiveDate,
           studyByDate: roomData[`${roleKey}StudyByDate`],
+          sessions: roomData.sessions,
+          startMs: roomData[`${roleKey}StartTime`],
+          endMs: nowMs,
           nowMs,
         }),
         { merge: true },
@@ -868,34 +943,33 @@ export default function App() {
           <span className="text-xs font-bold text-[#8a755b] bg-[#f0e5d0] px-3 py-1 rounded-full hidden md:block no-wrap-scroll">
             你是 {role === 'left' ? '呱呱' : '花花'}
           </span>
-          <div className="relative overflow-hidden bg-gradient-to-b from-[#3a2817] to-[#1b120b] px-6 2xl:px-7 py-2 2xl:py-2.5 rounded-2xl border border-[#daa520]/50 shadow-[inset_0_2px_6px_rgba(0,0,0,0.55),0_4px_12px_rgba(120,90,55,0.22)]">
-            <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent" />
-            <span className="relative text-2xl 2xl:text-3xl font-mono font-bold tracking-[0.12em] tabular-nums text-[#f4cd57] drop-shadow-[0_0_8px_rgba(244,205,87,0.45)]">{formatTime(myElapsed)}</span>
-          </div>
         </div>
       </header>
 
-      <main className="max-w-6xl 2xl:max-w-[1520px] mx-auto p-4 2xl:px-6 md:pl-24 2xl:pl-28 space-y-8 2xl:space-y-7 mt-4 2xl:mt-3">
+      <main className="max-w-6xl xl:max-w-[1560px] 2xl:max-w-[1800px] mx-auto p-4 2xl:px-6 md:pl-24 2xl:pl-28 space-y-8 2xl:space-y-7 mt-4 2xl:mt-3">
         {activeTab === 'language' && <LanguageLab role={role} roomData={roomData} />}
 
         {activeTab === 'wish' && <WishBoard role={role} roomData={roomData} />}
 
         {activeTab === 'room' && (
         <div className="space-y-8 2xl:space-y-7">
-        {/* 背景與動畫區域 */}
-        <section className="relative w-full aspect-[21/9] md:aspect-[16/9] bg-[#3a2723] rounded-[4rem] 2xl:rounded-[4.6rem] overflow-hidden border-[12px] 2xl:border-[14px] border-[#2c1d1a] shadow-[0_30px_70px_rgba(74,52,33,0.35)] flex flex-col items-center">
+        {/* 背景與動畫區域 ＋ 右側打卡紀錄（等高並排；窄螢幕改上下堆疊） */}
+        <div className="flex flex-col lg:flex-row items-stretch gap-5 2xl:gap-6">
+        <section ref={roomRef} className="relative flex-1 min-w-0 aspect-[21/9] md:aspect-[16/9] bg-[#3a2723] rounded-[4rem] 2xl:rounded-[4.6rem] overflow-hidden border-[12px] 2xl:border-[14px] border-[#2c1d1a] shadow-[0_30px_70px_rgba(74,52,33,0.35)] flex flex-col items-center">
           <div className="absolute inset-0 bg-[#4e342e]" />
+          {/* 擺設與角色都放在同一個設計尺寸的圖層裡，整層一起縮放，比例永遠一致 */}
+          <div className="absolute left-1/2 top-1/2 origin-center" style={roomLayerStyle}>
           <div className="absolute top-[6%] left-[4%] z-10 opacity-100 drop-shadow-[0_20px_30px_rgba(0,0,0,0.5)]"><AnimatedWindow /></div>
           
           {/* 勵志電子牆 */}
-          <div className="absolute top-[8%] right-[6%] z-10 opacity-95">
+          <div className="absolute top-[8%] right-[6%] z-10 opacity-95 origin-top-right scale-[1.75]">
              <MotivationalBoard />
           </div>
           
           <div className="absolute top-4 md:top-6 left-1/2 -translate-x-1/2 z-10"><RealTimeClock /></div>
           
           {/* 左側：呱呱 */}
-          <div className="absolute bottom-[28%] left-[25%] -translate-x-1/2 z-20 flex justify-center items-end">
+          <div className="absolute bottom-[28%] left-[25%] -translate-x-1/2 origin-bottom scale-[1.4] z-20 flex justify-center items-end">
              {role === 'right' && (
                <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-xl border border-[#daa520]/50 text-[#daa520] font-mono text-sm font-bold z-50 tracking-wider shadow-[0_0_10px_rgba(0,0,0,0.6)]">
                  {formatTime(leftElapsed)}
@@ -913,7 +987,7 @@ export default function App() {
           </div>
           
           {/* 右側：花花 */}
-          <div className="absolute bottom-[28%] left-[75%] -translate-x-1/2 z-20 flex justify-center items-end">
+          <div className="absolute bottom-[28%] left-[75%] -translate-x-1/2 origin-bottom scale-[1.4] z-20 flex justify-center items-end">
              {role === 'left' && (
                <div className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-xl border border-[#daa520]/50 text-[#daa520] font-mono text-sm font-bold z-50 tracking-wider shadow-[0_0_10px_rgba(0,0,0,0.6)]">
                  {formatTime(rightElapsed)}
@@ -930,11 +1004,14 @@ export default function App() {
              )}
           </div>
           
+          </div>
+
           <div className="absolute bottom-0 left-0 w-full h-[32%] z-30 bg-[#4e342e] border-t-[20px] border-[#795548] shadow-[0_-20px_40px_rgba(0,0,0,0.6)]">
              <div className="absolute top-0 left-0 w-full h-2 bg-white/10" />
              <div className="absolute top-[-20px] left-0 w-full h-2 bg-black/20" />
           </div>
 
+          <div className="absolute left-1/2 top-1/2 origin-center z-40 pointer-events-none" style={roomLayerStyle}>
           <div className="absolute bottom-0 w-full h-full z-40 pointer-events-none">
              <div className={`absolute inset-0 transition-all duration-700 ${leftDragonIsStudying ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                  <div className="absolute bottom-[10%] left-[12%] z-[41] flex flex-col items-center">
@@ -956,14 +1033,19 @@ export default function App() {
                  </div>
              </div>
           </div>
+          </div>
+
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 z-[50] pointer-events-none" />
         </section>
+
+        <StudyLogPanel roomData={roomData} role={role} />
+        </div>
 
         <div className="px-6 md:px-12 2xl:px-14 space-y-6 2xl:space-y-5">
           
           <button
             onClick={handleToggleStudy}
-            className={`group w-full py-7 2xl:py-8 rounded-[2.5rem] 2xl:rounded-[2.8rem] font-black text-2xl 2xl:text-[2rem] transition-all duration-150 flex items-center justify-center relative overflow-hidden active:translate-y-[6px] ${
+            className={`group w-full max-w-2xl mx-auto py-4 2xl:py-4.5 rounded-[1.8rem] font-black text-lg 2xl:text-xl transition-all duration-150 flex items-center justify-center relative overflow-hidden active:translate-y-[4px] ${
               isStudying
                 ? 'bg-gradient-to-b from-[#f3c44e] to-[#dca01d] text-[#5a3c0e] shadow-[0_9px_0_#a9760a,0_16px_28px_rgba(176,125,10,0.35)] active:shadow-[0_3px_0_#a9760a]'
                 : 'bg-gradient-to-b from-[#57c25c] to-[#369a3f] text-white shadow-[0_9px_0_#2b7a33,0_16px_28px_rgba(46,125,50,0.35)] active:shadow-[0_3px_0_#2b7a33]'
@@ -971,14 +1053,14 @@ export default function App() {
           >
             <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent" />
             {isStudying ? (
-              <div className="relative flex items-center gap-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.18)]"><Coffee size={34} /> 暫時休息</div>
+              <div className="relative flex items-center gap-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.18)]"><Coffee size={24} /> 暫時休息</div>
             ) : (
               <div className="relative flex items-center justify-center gap-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.18)]">
-                <BookOpen size={34} />
+                <BookOpen size={24} />
                 <span>開始專注</span>
                 <label
                   onClick={(e) => e.stopPropagation()}
-                  className={`flex items-center gap-2 cursor-pointer font-bold text-base px-4 py-2 rounded-full ml-3 border transition-all duration-200 active:scale-95 ${isPomodoro ? 'bg-white text-[#d23f31] border-white shadow-[0_2px_8px_rgba(0,0,0,0.15)]' : 'bg-black/15 text-white border-white/40 hover:bg-black/25'}`}
+                  className={`flex items-center gap-1.5 cursor-pointer font-bold text-sm px-3 py-1.5 rounded-full ml-2 border transition-all duration-200 active:scale-95 ${isPomodoro ? 'bg-white text-[#d23f31] border-white shadow-[0_2px_8px_rgba(0,0,0,0.15)]' : 'bg-black/15 text-white border-white/40 hover:bg-black/25'}`}
                 >
                   <input type="checkbox" checked={isPomodoro} onChange={e => setIsPomodoro(e.target.checked)} className="w-4 h-4 accent-[#e74c3c] cursor-pointer" />
                   🍅 番茄鐘

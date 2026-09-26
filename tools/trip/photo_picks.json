@@ -1,0 +1,810 @@
+{
+ "_說明": "每個地點挑好的 Wikimedia Commons 照片，第一張是主圖。寫成 {\"file\": 檔名, \"note\": \"示意\"} 的代表照片不是那個地方本身（例如用別家的菜色照），頁面上會標「示意圖」。改完跑 tools/tts/.venv/bin/python tools/trip/build_photos.py",
+ "fun-prg-market": [
+  "File:Prague by night christmas.jpg",
+  "File:Christmas market Prague 2021 04.jpg",
+  "File:Night in Prague-PICT0975.jpg",
+  "File:Prague night.JPG"
+ ],
+ "fun-prg-orloj": [
+  "File:Prague September 2016-14.jpg",
+  "File:Prague 07-2016 View from Old Town Hall Tower img6.jpg",
+  "File:Prague 07-2016 View from Old Town Hall Tower img4.jpg",
+  "File:The Prague Astronomical Clock in Old Town - 8559.jpg"
+ ],
+ "fun-prg-castle": [
+  "File:Czech-2013-Prague-View from Charles Bridge of Prague Castle.jpg",
+  "File:Hradschin Prag.jpg",
+  "File:Prag, Prager Burg -- 2019 -- 6537.jpg",
+  "File:Castillo de Praga, Praga, República Checa, 2022-07-02, DD 209.jpg"
+ ],
+ "fun-prg-charles": [
+  "File:20190817 Widok na Most Karola i Zamek na Hradczanach z Wieży Staromiejskiej Mostu Karola 2038 5630 DxO.jpg",
+  "File:Castillo de Praga y puente Carlos, Praga, República Checa, 2022-07-01, DD 14-16 HDR.jpg",
+  "File:Praha Charles Bridge 20170430 01.jpg",
+  "File:Prague skyline at dawn.jpg"
+ ],
+ "fun-prg-malastrana": [
+  "File:Prague 07-2016 Certovka.jpg",
+  "File:CharlesBridgeMalaStranaPragueCzechRepublic.jpg",
+  "File:Prague 07-2016 View from Lesser Town Nicholas Church img4.jpg",
+  "File:20190817 View of Malá Strana from Petřín 1354 5556.jpg"
+ ],
+ "fun-prg-klementinum": [
+  "File:Clementinum baroque library 2.jpg",
+  "File:Klementinum – Révové nádvoří s kašnou.jpg",
+  "File:Klementinum – průčelí z Mariánského náměstí.jpg"
+ ],
+ "fun-prg-strahov": [
+  "File:Teologický sál Strahovské knihovny 02.jpg",
+  "File:Strahov library.jpg",
+  "File:Strahov Monastery Library.jpg"
+ ],
+ "fun-prg-josefov": [
+  "File:Spanish Synagogue in Prague Interior 2 MK.jpg",
+  "File:Praha Old Jewish Cemetery 20170501 04.jpg",
+  "File:Prag, Jüdischer Zeremoniensaal -- 2019 -- 6749.jpg",
+  "File:Praha Spanish Synagogue Rose Window 01.jpg"
+ ],
+ "fun-prg-obecni": [
+  "File:Casa municipal, Praga, República Checa, 2022-07-02, DD 09.jpg",
+  "File:The Municipal House (Obecni Dum) ceiling, Prague - 8875.jpg",
+  "File:The Fronton of Municipal House. Prague, Czech Republic.jpg",
+  "File:Municipal House, Prague.jpg"
+ ],
+ "fun-prg-petrin": [
+  "File:Castillo de Praga, Praga, República Checa, 2022-07-02, DD 209.jpg",
+  "File:Petřín tower 05 2018.jpg",
+  "File:Prague 07-2016 Petrin Funicular.jpg",
+  "File:20190817 View of Malá Strana from Petřín 1354 5556.jpg"
+ ],
+ "fun-prg-vysehrad": [
+  "File:Praha 2, Pevnost Vyšehrad 20170808 014.jpg",
+  "File:Basilica of St Peter and St Paul - panoramio (2).jpg",
+  "File:View of Prague and St. Vitus Cathedral from Vyšehrad. Czech Republic.jpg",
+  "File:Basilica of St Peter and St Paul - panoramio.jpg"
+ ],
+ "fun-ck-town": [
+  "File:View of Český Krumlov from the castle, 20250504 1305 8880.jpg",
+  "File:Český Krumlov, stadspanorama met zámecké schody op de voorgrond en het kasteel Dm117583-874 (met toren) op de achtergrond IMG 6100 2018-07-31 11.10.jpg",
+  "File:Český Krumlov, deel van Státní hrad a zámek Dm117583-874 Český Krumlov passage 2 IMG 6095 2018-07-31 10.59.jpg",
+  "File:Český Krumlov Castle, Czechia, 20250504 1248 8849.jpg"
+ ],
+ "fun-vie-rathaus": [
+  "File:Wien - Christkindlmarkt, Rathausplatz.JPG",
+  "File:20231222.Christkindlmarkt in Wien, Rathausplatz.-032.jpg",
+  "File:20231222.Christkindlmarkt in Wien, Rathausplatz.-039.jpg",
+  "File:Wiener Christkindlmarkt am Rathausplatz 24.JPG"
+ ],
+ "fun-vie-schoenbrunn": [
+  "File:Schloss Schönbrunn Wien 2014 (Zuschnitt 2).jpg",
+  "File:Gloriette Schönbrunn Wien (Zuschnitt).jpg",
+  "File:Palacio de Schönbrunn, Viena, Austria, 2020-02-02, DD 07-09 HDR.jpg"
+ ],
+ "fun-vie-stephansdom": [
+  "File:WLM - 2020 - Stephansdom - 02.jpg",
+  "File:Catedral de San Esteban, Viena, Austria, 2020-01-31, DD 80.jpg",
+  "File:Wien, Stephansdom -- 2018 -- 3292.jpg",
+  "File:2017-09-15 Austria, Vienna DSC 4379 DxO.jpg"
+ ],
+ "fun-vie-belvedere": [
+  "File:Palacio Belvedere, Viena, Austria, 2020-02-01, DD 93-95 HDR.jpg",
+  "File:Belvedere, Vienna September 2016.jpg",
+  "File:Palacio Belvedere, Viena, Austria, 2020-02-01, DD 87-89 HDR.jpg"
+ ],
+ "fun-vie-opera": [
+  "File:Ópera, Viena, Austria, 2020-01-31, DD 117-119 HDR.jpg",
+  "File:Staatsoper-DSC 0231a.jpg",
+  "File:Staatsoper Wien DSC 5273w.jpg"
+ ],
+ "fun-vie-hofburg": [
+  "File:Neue Burg, Hofburg, Viena, Austria, 2020-01-31, DD 143-145 HDR.jpg",
+  "File:Wien - Neue Hofburg.JPG",
+  "File:Monumento al emperador Francisco I y Amalienburg, Hofburg, Viena, Austria, 2020-01-31, DD 134-136 HDR.jpg",
+  "File:Dome Hofburg Vienna.jpg"
+ ],
+ "fun-vie-spittelberg": [
+  "File:Christmas market vienna 201266.jpg",
+  "File:Spittelberg Weihnachtsmarkt 2023 01.jpg",
+  "File:2004 12 06 Wien Advent 129 (51061361403).jpg",
+  "File:Bécs 102 (4282262814).jpg"
+ ],
+ "fun-vie-khm": [
+  "File:Kunsthistorisches Museum Wien, das Café.JPG",
+  "File:Café-Restaurant im Kunsthistorischen Museum 2.jpg",
+  "File:Kunsthistorisches Museum Wien (Grand staircase) 3.jpg",
+  "File:Grand staircase ceiling with Apotheosis of the Renaissance fresco (Kunsthistorischen Museum).jpg"
+ ],
+ "fun-vie-treasury": [
+  "File:Weltliche Schatzkammer Wien (177).JPG",
+  "File:Weltliche Schatzkammer Wien (171).JPG",
+  "File:Wien, Hofburg -- 2018 -- 3187.jpg"
+ ],
+ "fun-vie-prater": [
+  "File:Riesenrad, Prater 12.jpg",
+  "File:Wien, Prater, Riesenrad -- 2018 -- 3165.jpg",
+  "File:Prater Riesenrad Wien Praterstern nachts.JPG"
+ ],
+ "fun-szg-market": [
+  "File:Salzburg - Altstadt - Christkindlmarkt - 2021 12 05-1.jpg",
+  "File:Salzburg - Altstadt - Domplatz Christkindlmarkt - 2023 12 12-14.jpg",
+  "File:Salzburg - Altstadt - Domplatz Christkindlmarkt - 2023 12 12-7.jpg",
+  "File:Salzburg - Altstadt - Domplatz Christkindlmarkt - 2023 12 12-11.jpg"
+ ],
+ "fun-szg-fortress": [
+  "File:Salzburg - Panorama (nachts).jpg",
+  "File:Festung Hohensalzburg von Nordost.jpg",
+  "File:View of Salzburg from Hohensalzburg Castle. Austria.jpg",
+  "File:20230610 View Hohensalzburg Castle 03.jpg"
+ ],
+ "fun-szg-oldtown": [
+  "File:Calle Getreide, Salzburgo, Austria, 2019-05-19, DD 57.jpg",
+  "File:Salzburg 2014 10.jpg",
+  "File:Fachada de la casa natal de Mozart, Salzburgo, Austria, 2019-05-19, DD 56.jpg",
+  "File:Salzburg Cathedral (Inside) - Mozart Baptized place 3. - Mozart-Complexes World under Water (Cross' 3 Corners-Channels).jpg"
+ ],
+ "fun-szg-mirabell": [
+  "File:Vier Elementebrunnen im Mirabellgarten Salzburg-0400.jpg",
+  "File:Salzburg Mirabellgarten-8098.jpg",
+  "File:1819 - Salzburg - Mirabellgarten and Festung Hohensalzburg.JPG",
+  "File:Salzburg Mirabellgarten Festung.jpg"
+ ],
+ "fun-szg-hellbrunn": [
+  "File:Adventmarktbude.jpg",
+  "File:Hellbrunn Orangerie at night.jpg",
+  "File:Hellbrunn Palace, Salzburg, Austria, 20260502 0902 0612.jpg"
+ ],
+ "fun-szg-silentnight": [
+  "File:Oberndorf Stille-Nacht-Platz.JPG",
+  "File:Oberndorf, Stille-Nacht-Kapelle (1).jpg",
+  "File:Stille-Nacht-Kapelle Oberndorf bei Salzburg - Altar Detail.jpg",
+  "File:Oberndorf laufen.jpg"
+ ],
+ "fun-hal-village": [
+  "File:Hallstatt winter.jpg",
+  "File:Blue Hallstatt (204466021).jpeg",
+  "File:Hallstatt - Zentrum .JPG",
+  "File:Hallstatter See (203187435).jpeg"
+ ],
+ "fun-hal-skywalk": [
+  "File:Obertraun.JPG",
+  "File:Hallstatt - Rudolfsturm.JPG",
+  "File:Hallstatt, Rudolfsturm 01.jpg"
+ ],
+ "fun-sto-gamlastan": [
+  "File:Julmarknad på Stortorget, Gamla stan, Stockholm, 2017b.jpg",
+  "File:Skeppsbrokajen Gamla Stan from Skeppsholmen Stockholm 2016 01.jpg",
+  "File:Storkyrkan and Kungliga slottet Stockholm 2016 01.jpg",
+  "File:Julmarknad på Stortorget, Gamla stan, Stockholm, 2017d.jpg"
+ ],
+ "fun-sto-skansen": [
+  "File:Skansens julmarknad 2013.jpg",
+  "File:Skansens julmarknad 2013j.jpg",
+  "File:Skansens julmarknad 2013c.jpg",
+  "File:Skansens julmarknad 2013k.jpg"
+ ],
+ "fun-sto-vasa": [
+  "File:Regalskeppet Vasa baug babord (1).jpg",
+  "File:Vasa museum, Stockholm ( 1090658).jpg",
+  "File:Vasamuseet SS Sankt Erik Stockholm 2016 01.jpg",
+  "File:Model of life aboard the Vasa ship, Vasa Museum, Stockholm, Sweden julesvernex2.jpg"
+ ],
+ "fun-sto-metro": [
+  "File:T Centralen January 2015.jpg",
+  "File:T-centralen metro station december 2017 01.jpg",
+  "File:Kungsträdgården Metro station May 2014 04.jpg",
+  "File:Kungsträdgården Metro station May 2014 01.jpg"
+ ],
+ "fun-sto-lucia": [
+  {
+   "file": "File:Lucia (31528327081).jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Right Livelihood Award 2009-award ceremony-27.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Lucia på Naturhistoriska riksmuseet.jpg",
+   "note": "示意"
+  }
+ ],
+ "fun-sto-cityhall": [
+  "File:Gyllene salen 2012a.jpg",
+  "File:Stockholms Stadshuset City Hall Stockholm 2016 01.jpg",
+  "File:At Stockholm 2019 096.jpg",
+  "File:Stockholms stadshus February 2026 02.jpg"
+ ],
+ "fun-sto-palace": [
+  "File:Stockholms slott August 2015 01.jpg",
+  "File:Storkyrkan and Kungliga slottet Stockholm 2016 01.jpg",
+  "File:Slottet September 2014 01.jpg",
+  "File:Military orchestra in front of the Stockholm Palace 01.jpg"
+ ],
+ "fun-lap-skystation": [
+  {
+   "file": "File:20221226 - Abisko - Aurore boréale 1.jpg",
+   "note": "示意"
+  },
+  "File:Aurora sky station view.jpg",
+  "File:Aurora sky station.jpg",
+  {
+   "file": "File:Aurora in Abisko National Park.jpg",
+   "note": "示意"
+  }
+ ],
+ "fun-lap-dogsled": [
+  {
+   "file": "File:Öjön December 2014 03.jpg",
+   "note": "示意"
+  },
+  "File:KirunaDogsled.jpg",
+  {
+   "file": "File:Sled dog on Svalbard with heterochromia.jpg",
+   "note": "示意"
+  }
+ ],
+ "fun-lap-icehotel": [
+  "File:Ice Hotel Church Jukkasjärvi.jpg",
+  "File:Icebar Icehotel Jukkasjärvi 2012.JPG",
+  "File:Icehotel entrance.jpg"
+ ],
+ "fun-lap-sami": [
+  {
+   "file": "File:Reindeer in Holmajärvi.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Reindeers at Lake Torneträsk, Abisko area, Swedish Lapland.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Gabna sameby i Nord-Sverige (1).jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Child's coat, Sami people, Torne Lapland, Sweden, reindeer fur and sheepskin, No. 1933.14.0011 - Etnografiska museet - Stockholm, Sweden - DSC01298.JPG",
+   "note": "示意"
+  }
+ ],
+ "fun-lap-canyon": [
+  "File:Abisko Canyon.jpg",
+  "File:Abisko Canyon Ice Climbing.jpg",
+  "File:Sweden 20160227 131315 17 19 21 23 (25376287374).jpg",
+  "File:Sweden 20160227131456 (26671877345).jpg"
+ ],
+ "fun-lap-church": [
+  "File:Kiruna church.jpg",
+  "File:Kiruna kyrka August 2017 05.jpg",
+  "File:Kiruna kyrka September 2017 04.jpg",
+  "File:Kiruna kyrka September 2017 08.jpg"
+ ],
+ "fun-lap-lkab": [
+  "File:Kiruna Mine at Night.jpg",
+  "File:Kiruna Mine at Sunset.jpg",
+  "File:Kiruna September 2017 01.jpg",
+  "File:Kiirunavaara Malmbanan September 2017 01.jpg"
+ ],
+ "fun-lap-auroratour": [
+  {
+   "file": "File:Northern lights band swirls above Vuopajanniemi, Inari, Lapland, Finland, 2018 March.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Aurora borealis over Saana fell.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Slightly swirly northern lights bands above Vuopajanniemi, Inari, Lapland, Finland, 2018 March.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Gentle but wide green aurora display over Levi, Kittilä, Lapland, Finland, 2023 September - 2.jpg",
+   "note": "示意"
+  }
+ ],
+ "fun-nar-fjell": [
+  "File:2019-08-11 Narvik filjet 10.jpg",
+  "File:2019-08-11 Narvik filjet 4.jpg",
+  "File:2019-08-11 Narvik filjet 12.jpg"
+ ],
+ "food-prg-lokal": [
+  {
+   "file": "File:Praha, U Černého vola, lokál.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Cisterna plzeňského piva.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Prag Krusovice.JPG",
+   "note": "示意"
+  }
+ ],
+ "food-prg-louvre": [
+  "File:Prague Café Louvre Interior 3.jpg",
+  "File:Prague Praha 2014 Holmstad coffe kaffe at cafe Louvre.JPG",
+  "File:Prague Praha 2014 Holmstad Cafè Louvre.jpg",
+  "File:Café Louvre, Národní 1987-22, 110 00 Prague 1, Czechia 01.jpg"
+ ],
+ "food-prg-kantyna": [
+  {
+   "file": "File:Knedlo vepro zelo czech food.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Pečené maso.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Uzená vepřová pečeně s bramborovou kaší.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-prg-dishes": [
+  {
+   "file": "File:20190131 HotelKonvice 1723 (46702244634).jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Svíčková na smetaně.JPG",
+   "note": "示意"
+  },
+  {
+   "file": "File:Knedlo zelo vepřo (3).jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Knedlo vepřo zelo.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-prg-market": [
+  {
+   "file": "File:Trdelník Český Krumlov (1).jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Prague Ham (Pražská šunka) at a food stall 01.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Glühwein-Zubereitung.JPG",
+   "note": "示意"
+  },
+  {
+   "file": "File:Prague Ham (Pražská šunka) at a food stall 05.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-ck-krcma": [
+  {
+   "file": "File:Český Krumlov, ulice Šatlavská.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Šatlavská 142 (Český Krumlov) 01.JPG",
+   "note": "示意"
+  }
+ ],
+ "food-vie-figlmuller": [
+  "File:The pork schnitzel at the Figlmuller restaurant in Vienna, Austria.jpg",
+  "File:Figlmüller Wollzeile Wien.JPG",
+  "File:Figlmüller Bäckerstraße 1.jpg"
+ ],
+ "food-vie-plachutta": [
+  {
+   "file": "File:Heuriger Zum Renner Tafelspitz Apfelkren.jpg",
+   "note": "示意"
+  },
+  "File:110123 Plachutta 05.jpg",
+  "File:110123 Plachutta 19.jpg",
+  {
+   "file": "File:Tafelspitz.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-vie-cafe": [
+  "File:Cafe Central Wien 2015-i.JPG",
+  "File:Sachertorte in Vienna.jpg",
+  "File:Vault Café Central Vienna Wien.jpg",
+  "File:Wien, Café Central -- 2018 -- 3135.jpg"
+ ],
+ "food-vie-wurstel": [
+  "File:Wien 01 Würstelstand Bitzinger a.jpg",
+  {
+   "file": "File:Eitrige 16er Blech.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Eitrige.jpg",
+   "note": "示意"
+  },
+  "File:Wien 01 Würstelstand bei der Albertina mit Albrechtsbrunnen.jpg"
+ ],
+ "food-szg-augustiner": [
+  "File:Augustinerbräu Mülln Abt-Nicolaus-Saal 01.jpg",
+  "File:Salzburg - Augustiner Bräu (b).JPG",
+  "File:AUT — Bundesland Salzburg — Salzburg (Stadt) — Augustinergasse 4-6 (Augustiner Bräu Kloster Mülln Nasenschild) Mattes 2021.jpg",
+  "File:AUT — Bundesland Salzburg — Salzburg (Stadt) — Augustinergasse 4-6 (Augustiner Bräu Kloster Mülln — Riesenfass) Mattes 2021.jpg"
+ ],
+ "food-szg-tomaselli": [
+  "File:Café Tomaselli, Salzburgo, Austria, 2019-05-19, DD 54.jpg",
+  "File:2013 Salzburg Austria (143156089).jpeg",
+  "File:Salzburger Nockerln 04 gastronomie 001.jpg",
+  "File:Salzburg Kiosk Cafe Tomaselli Alter Markt-1903.jpg"
+ ],
+ "food-szg-bosna": [
+  "File:Salzburg - Altstadt - Getreidegasse 33 Durchgang - 2019 09 05 - Bosna-Grill 2.jpg",
+  {
+   "file": "File:2174 - Salzburg - Bosna.JPG",
+   "note": "示意"
+  },
+  {
+   "file": "File:Bosna Wien Dr Karl Renner Ring.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-hal-fish": [
+  {
+   "file": "File:GER — BY – Regierungsbezirk Oberbayern – Landkreis Miesbach — Gemeinde Kreuth — Gemeindeteil Wildbad Kreuth — Wildbad Kreuth 1 (Saibling geräuchert) 2020.JPG",
+   "note": "示意"
+  },
+  {
+   "file": "File:Saibling geräuchert Hopfenmühle (2).jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Arctic char at restaurant Kappeli.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-sto-julbord": [
+  {
+   "file": "File:Privat julbord.JPG",
+   "note": "示意"
+  },
+  {
+   "file": "File:Glazed Christmas ham with orange slices 1.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Smörgåsbord.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Julbord.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-sto-meatballs": [
+  {
+   "file": "File:Köttbullar och potatismos från Cronwalls gatukök i Falköping 8579.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Koettbullar stockholm2006.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Köttbullar - Mama's Meetballs 2024-02-11.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-sto-saluhall": [
+  "File:Östermalms Saluhall, Stockholm, Sweden (13735585323).jpg",
+  "File:Stockholm Östermalms saluhall (52588933901).jpg",
+  "File:Östermalms saluhall, 20230226.jpg",
+  "File:Östermalms saluhall March 2020 06.jpg"
+ ],
+ "food-sto-fika": [
+  {
+   "file": "File:One layer of cardamom buns on grate.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Cinnamon bun - Black Mocha 2024-01-08.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Homemade Cinnamon rolls 06.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Homemade Cinnamon rolls 05.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-sto-pelikan": [
+  "File:Restaurang Pelikan, 2017.jpg",
+  "File:Pelikan, skylt 2017a.jpg",
+  "File:RestaurangPelikan.JPG",
+  "File:Restaurang Pelikanen, 2017a.jpg"
+ ],
+ "food-sto-xmas": [
+  {
+   "file": "File:2005 baking of saffron buns 04.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Glögg kastrull.JPG",
+   "note": "示意"
+  },
+  {
+   "file": "File:Round gingersnaps.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Saffron bun 20051213 001.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-lap-stf": [
+  "File:Norrsken2.jpg",
+  "File:Sweden 20160227 123243 (25489767082).jpg",
+  "File:Abisko Turiststation.jpg"
+ ],
+ "food-lap-reindeer": [
+  {
+   "file": "File:Finnbiff.JPG",
+   "note": "示意"
+  },
+  {
+   "file": "File:Sautéed reindeer as a convenience meal.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Jokkmokksdagarna, Huddinge centrum - 20241026 - 01.jpg",
+   "note": "示意"
+  }
+ ],
+ "food-lap-ripan": [
+  {
+   "file": "File:On The Plate (53066110546).jpg",
+   "note": "示意"
+  }
+ ],
+ "stay-prg-old": [
+  "File:Prague (130666263).jpeg",
+  "File:Little quarter rooftops - panoramio.jpg",
+  "File:Magic Sunset (53948400).jpeg",
+  "File:View from Old Town Hall, Prague, Czech Republic.jpg"
+ ],
+ "stay-prg-vinohrady": [
+  "File:Vánoční trh na Mírovém náměstí v Praze, 24. 11. 2021 (4).jpg",
+  "File:13-12-31-metro-praha-by-RalfR-076.jpg",
+  "File:Vánoční trh na Mírovém náměstí v Praze, 24. 11. 2021 (1).jpg"
+ ],
+ "stay-prg-station": [
+  "File:Praha hlavní nádraží - Historická Budova.jpg",
+  "File:Praha hl. n.jpg",
+  "File:Praha hlavní nádraží 2020.jpg"
+ ],
+ "stay-ck-old": [
+  "File:Schloss Český Krumlov bei Nacht.jpg",
+  "File:Český Krumlov, zámek v noci (16).jpg",
+  "File:Český Krumlov, Latrán, pohled k bráně.jpg"
+ ],
+ "stay-vie-1": [
+  "File:Graben, Vienna, 2006 (02).jpg",
+  "File:Graben, Vienna, 2006 (01).jpg",
+  "File:Wien - Graben (2).JPG"
+ ],
+ "stay-vie-6-7": [
+  "File:Wien 07 Mariahilfer Straße Shopping f.jpg",
+  "File:Vienna Trolley 4560 (5591511725).jpg",
+  "File:Mariahilfer Straße, Vienna, 2006 (03).jpg"
+ ],
+ "stay-vie-hbf": [
+  "File:Wien Hbf 2023 07.jpg",
+  "File:Estación central de FF.CC., Viena, Austria, 2020-02-01, DD 10.jpg",
+  "File:Siemens ES-64 U on the trail end of a RailJet trainset.jpg",
+  "File:Estación central de FF.CC., Viena, Austria, 2020-02-01, DD 09.jpg"
+ ],
+ "stay-szg-old": [
+  "File:Old Town Salzburg across the Salzach river.jpg",
+  "File:Salzburg - Panorama (nachts)2.jpg",
+  "File:Salzburg pano 2659-18-3246-1.jpg"
+ ],
+ "stay-szg-hbf": [
+  "File:Salzburg Hauptbahnhof Mittelbahnsteig-1927-2.jpg",
+  "File:11-12-23-bahnhof-salzburg-by-RalfR-08.jpg",
+  "File:Salzburg 2014 01.jpg"
+ ],
+ "stay-hal-town": [
+  "File:Winter town (Unsplash).jpg",
+  "File:Hallstatt at night.jpg",
+  "File:Marktplatz, Hallstatt, 17.05.2019.jpg"
+ ],
+ "stay-hal-near": [
+  "File:A-Hallstatt-salzw-blick-obertraun.jpg",
+  "File:Kongress und Theaterhaus Bad Ischl DSC 3295w.jpg",
+  "File:Trinkhalle Bad Ischl DSC 3230w.jpg",
+  "File:IMG 0900 - Obertraun from Hoher Dachstein.JPG"
+ ],
+ "stay-sto-central": [
+  "File:Stockholms centralstation September 2015 01.jpg",
+  "File:The facade of Stockholms Centralstation, seen from Centralplan, Photo 2.jpg",
+  "File:The old station clock at the Stockholm Central Station with details of the facade.jpg"
+ ],
+ "stay-sto-gamla": [
+  "File:Munkbroleden with Kornhamstorg at Gamla Stan, Stockholm, Sweden 01.jpg",
+  "File:Row of houses behind a pedestrian tunnel in Gamla Stan.jpg",
+  "File:Skeppsbron 24 September 2012 02.jpg"
+ ],
+ "stay-sto-soder": [
+  "File:Södermalm June 2014.jpg",
+  "File:Monteliusvägen 2015.jpg",
+  "File:Söder Mälarstrand Torkel Knutssonsgatan Södermalm 2019 08 16 Kronprinsesse Märtha Borgila.jpg",
+  "File:Slussen Stan May 2015.jpg"
+ ],
+ "stay-lap-stf": [
+  "File:Abisko Turiststation in Winter.jpg",
+  "File:Abisko Turiststation huts in Winter.jpg",
+  "File:Abisko Turiststation in Abisko, Kiruna, Norrbottens län, Sweden, 2022 June.jpg"
+ ],
+ "stay-lap-village": [
+  "File:View to Riehppecohkka, Jalgesvárri and Sørdalen from Abisko, Norrbotten, Sweden, 2015 April.jpg",
+  "File:20221226 - Abisko - Aurore boréale 2.jpg",
+  "File:Abisko - KMB - 16000300023822.jpg"
+ ],
+ "stay-lap-icehotel": [
+  "File:Dragon icehotel.jpg",
+  "File:Room Icehotel Jukkasjärvi 2012.JPG"
+ ],
+ "stay-lap-kiruna": [
+  "File:Winter in Kiruna, Sweden, 2023.jpg",
+  "File:LKAB mine.jpg",
+  "File:Kirunas nya centrum September 2017 12.jpg"
+ ],
+ "stay-nar-town": [
+  "File:Norway Narvik 3.jpg",
+  "File:View towards Kjerringstraumen bridge, Stortinden and Valletindan in Narvik, Nordland, Norway, 2023 September.jpg"
+ ],
+ "mv-prg-59": [
+  "File:T-Bus stop in front of the Terminal 1, Prague Airport 2024b.jpg",
+  "File:59-es trolibusz, Prága (416, 20240711).jpg",
+  "File:Interior of Škoda-Solaris 24m trolleybus (2).jpg"
+ ],
+ "mv-prg-ae": [
+  "File:Irisbus Agora S of Airport Express line (Prague).JPG",
+  "File:Nádraží Holešovice, zastávka Airport Express.jpg"
+ ],
+ "mv-prg-vie": [
+  {
+   "file": "File:13-03-30-ČD-371-by-RalfR-04.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:RJ 596 near Pfarrwerfen, 13.12.2016.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:8090 727 RJ Guntramsdorf.jpg",
+   "note": "示意"
+  }
+ ],
+ "mv-prg-szg": [
+  {
+   "file": "File:Railjet 860 approaches Jenbach, 30.12.2016.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Poertschach Bahnhofsbereich Drautalbahn II Railjet 02022015 218.jpg",
+   "note": "示意"
+  },
+  "File:11-12-23-bahnhof-salzburg-by-RalfR-08.jpg"
+ ],
+ "mv-prg-ck": [
+  "File:RegioJet Irizar i8.jpg",
+  {
+   "file": "File:(NLD-South Holland) Student Agency 326 CZ-9AY 5821 RegioJet 540 2025-06-06.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:IRIZARPB.jpg",
+   "note": "示意"
+  }
+ ],
+ "mv-ck-shuttle": [
+  {
+   "file": "File:Horní Planá, Soutěžní (01).jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:Kostel sv. Jošta v Českém Krumlově.JPG",
+   "note": "示意"
+  }
+ ],
+ "mv-vie-szg": [
+  "File:2018-05-04 (114) WESTbahn 4110 with motion blur at Bahnhof Ybbs an der Donau.jpg",
+  "File:Westbahn CRRC 2 Testdrive - Penzing.jpg",
+  "File:Westbahn 4110 Bahnhof Wien Meidling-9018.jpg"
+ ],
+ "mv-szg-hal": [
+  "File:Salzwelten ferry.jpg",
+  "File:Hallstatt train station 03.jpg",
+  "File:Hallstatt train station boat stop.jpeg"
+ ],
+ "mv-hal-vie": [
+  "File:Hallstatt 20130901 03.jpg",
+  "File:ÖBB 4024 at Hallstatt Bhf.jpeg",
+  "File:Hallstatt 20130901 01.jpg"
+ ],
+ "mv-vie-airport": [
+  "File:At Vienna 2025 187.jpg",
+  "File:At Vienna 2025 186.jpg",
+  "File:13-05-22-wien-48.jpg"
+ ],
+ "mv-vie-arn": [
+  "File:OE-LZR A320neo Austrian ARN 02.jpg",
+  {
+   "file": "File:OE-LBN Austrian Airlines Airbus A320-214 - cn 768 takeoff from Schiphol (AMS - EHAM), The Netherlands, 16may2014, pic-4.JPG",
+   "note": "示意"
+  },
+  "File:08-APR-2022 - OS313 VIE-ARN (A320 - OE-LZA) (04).jpg",
+  "File:ARNterm2.jpg"
+ ],
+ "mv-arn-city": [
+  "File:I11 479 Bf Stockholm C, »Arlanda-Express«.jpg",
+  "File:Arlanda express.jpg",
+  "File:X3 EMU.jpg"
+ ],
+ "mv-night-train": [
+  "File:SJ night train in the Björnfjell.jpg",
+  "File:SJ Rc 6 Vassijaure.jpg",
+  "File:SJ Nattåg - 20240426 - 05.jpg",
+  "File:SJ Nattåg - 20240426 - 02.jpg"
+ ],
+ "mv-fly-krn": [
+  "File:Kiruna Airport in Winter Aerial.jpg",
+  "File:Scandinavian Airlines Kiruna.jpg"
+ ],
+ "mv-krn-abisko": [
+  {
+   "file": "File:IORE beim Torneträsk.jpg",
+   "note": "示意"
+  },
+  "File:20221226 - Abisko östra 1.jpg",
+  "File:Wintertime Abisko.jpg",
+  "File:19.07.23 Abisko Östra Rc6 1392 (53066244710).jpg"
+ ],
+ "mv-ofoten": [
+  "File:Ofotfjord, Dec 2012.JPG",
+  "File:Ofotbanen Class 68 on Ofotbanen.jpg",
+  {
+   "file": "File:LKAB Iore train.jpg",
+   "note": "示意"
+  },
+  {
+   "file": "File:MTAB IORE Søsterbekk - Norddalen.jpg",
+   "note": "示意"
+  }
+ ],
+ "mv-krn-home": [
+  "File:Kiruna Airport Terminal in Winter.jpg",
+  "File:Kiruna Airport terminal (DSCF0850).jpg"
+ ],
+ "mv-evenes": [
+  "File:Norwegian Air Shuttle Boeing 787-800 (12273094113).jpg",
+  "File:Tjeldsund Evenes IMG 4885 ramsundet evenes airport.JPG",
+  "File:Evenes runway (12273077513).jpg"
+ ],
+ "mv-prague-pid": [
+  "File:Prague 07-2016 tram at Andel img1.jpg",
+  "File:2025-02-02 Tram 8754.jpg",
+  "File:Prague 07-2016 Metro img6 LineB Andel.jpg"
+ ],
+ "mv-vienna-wl": [
+  "File:Vienna Ring Tram 4866 Schwedenplatz Wien 26 July 2020 JM (2).jpg",
+  "File:Wagramer Str-2013-08-17-IMG 3662.jpg",
+  "File:ULF B1 727 L41 Waehringer Strasse.jpg"
+ ],
+ "mv-stockholm-sl": [
+  "File:Rådhuset metro station in August 2019.jpg",
+  "File:Djurgården 9 October 2019 01.jpg",
+  "File:X60 Riddarholmen September 2012.jpg",
+  "File:Globen metro station May 2016.jpg"
+ ]
+}

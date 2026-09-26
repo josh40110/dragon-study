@@ -1,0 +1,523 @@
+{
+ "food-prg-louvre": {
+  "type": "eat",
+  "page": "Prague/New Town and Vysehrad",
+  "section": "Eat",
+  "name": "Café Louvre",
+  "content": "Once frequented by Franz Kafka, this cafe is now a popular hotspot for a Prague locals. Their separate dining room offers French cuisine, for those looking for a different option than Czech food.",
+  "address": "Narodní třída 20",
+  "url": "http://www.cafelouvre.cz/",
+  "lastedit": "2022-05-01",
+  "via": "name"
+ },
+ "food-sto-saluhall": {
+  "type": "eat",
+  "page": "Stockholm/Östermalm",
+  "section": "Eat",
+  "name": "Östermalms Saluhall",
+  "alt": "Östermalmshallen",
+  "content": "A legacy market hall in a beautiful 1880s redbrick building, with all kinds of expensive food, especially seafood, meat and cheese, as well as a food court. Re-opened in 2020 after a renovation.",
+  "address": "Östermalmstorg",
+  "url": "http://www.saluhallen.com/",
+  "via": "wikidata"
+ },
+ "food-szg-augustiner": {
+  "type": "drink",
+  "page": "Salzburg",
+  "section": "Drink",
+  "name": "Augustiner Bräustübl",
+  "content": "Augustine monks have been brewing here since 1621. Today it's Austria's largest beer hall, with a lovely garden outside when the weather is nice and enormous inside halls when it isn't. Grab a table, a few ceramic steins of Märzenbier beer straight from the barrel, and pick your favorite Austrian dishes from the market-style shops. Or you can bring your own food (not drinks!) if you want.",
+  "address": "Lindhofstrasse 7",
+  "url": "http://www.augustinerbier.at/",
+  "lastedit": "2022-09-01",
+  "via": "name"
+ },
+ "food-szg-tomaselli": {
+  "type": "drink",
+  "page": "Salzburg",
+  "section": "Drink",
+  "name": "Tomaselli",
+  "content": "Alter Markt 9. A traditional Viennese coffee house, the oldest in Salzburg. Try the Einspänner and Sacher cake!",
+  "url": "http://www.tomaselli.at/en/",
+  "via": "wikidata"
+ },
+ "food-vie-cafe": {
+  "type": "drink",
+  "page": "Vienna/Innere Stadt",
+  "section": "Drink",
+  "name": "Café Central",
+  "content": "One of the most famous Vienna coffee houses, which opened in 1876, has been authentically restored. Beautiful premises inside the Palais Ferstel, it is too touristy and a bit more expensive for having a meal, but can be worth it for a cup of coffee. There is an occasional pianist that is delightful to hear.",
+  "address": "Herrengasse 14",
+  "url": "https://www.cafecentral.wien/",
+  "via": "wikidata"
+ },
+ "fun-ck-town": {
+  "type": "see",
+  "page": "Český Krumlov",
+  "section": "See",
+  "name": "Český Krumlov State Castle and Chateau",
+  "content": "The most-visited site in town and is composed of the Little Castle (Hrádek) hosting the Castle Museum, the six-storey Chateau Tower from the Renaissance period, the Chateau, the Baroque Castle Theatre, the Chateau Garden, the Gothic Wenceslaus Cellars, and a lapidary with stone sculptures. You can walk through the complex for free, or you can pay for a visit to the Castle Museum, the observation gallery of the Chateaux Tower, two different guided tours of the Chateau interiors or the Baroque Castle Theatre. Plan at least two hours for your visit, and buy supplies for a picnic lunch in the Chateau Garden at the grocery across the ulice from the entrance on Latrán.…",
+  "url": "http://www.ckrumlov.cz/uk/zamek/oinf/i_sthrza.htm",
+  "via": "name"
+ },
+ "fun-hal-village": {
+  "page": "Hallstatt",
+  "pageOnly": true,
+  "content": "Hallstatt is a small town overlooking the Hallstätter See (Lake Hallstatt) in the Salzkammergut, in Upper Austria. Hallstatt is spectacularly picturesque, due to its location on a narrow rocky west bank of the lake with the sheer rising mountains behind it. Considered by some to be one of the most beautiful places on earth, Hallstatt is sometimes called \"the pearl of Austria\". It used to be a sleepy settlement nestled by a large salt mine.",
+  "edited": "2026-09-12",
+  "via": "page"
+ },
+ "fun-lap-church": {
+  "type": "see",
+  "page": "Kiruna",
+  "section": "See",
+  "name": "Kiruna kyrka",
+  "alt": "Kiruna Church",
+  "content": "Kiruna Kyrka is one of Sweden's largest wooden buildings and is famous for its special tent like structure. It was built 1907-1912 by architect Gustaf Wickman and was voted Sweden's best-looking church and the foremost Swedish pre-1950 construction.",
+  "url": "http://www.jukkasjarviforsamling.se",
+  "via": "wikidata"
+ },
+ "fun-lap-icehotel": {
+  "type": "sleep",
+  "page": "Jukkasjärvi",
+  "section": "Sleep",
+  "name": "Ice Hotel",
+  "alt": "Ishotellet",
+  "content": "A hotel constructed entirely out of ice. There are many copycats now, but this is the original. Outdoor activities such as dogsled tours are arranged by the hotel but reservation may be advisable, and cheaper alternatives may be available from companies in nearby Kiruna. Remember that winter in Lapland can be very cold, and though Ishotellet provides snowsuits and boots, you may need to bring equipment such as expedition-grade gloves, face masks, and goggles depending on conditions. Read the weather forecast. It is also possible to visit the ice hotel as a tourist attraction without actually spending a night there. It is worth seeing the ice sculptures in the rooms and in the floors.…",
+  "address": "Marknadsvägen 63",
+  "url": "http://www.icehotel.com/",
+  "via": "pin"
+ },
+ "fun-lap-lkab": {
+  "type": "do",
+  "page": "Kiruna",
+  "section": "Do",
+  "name": "Kiruna mine",
+  "alt": "LKAB Visitor Center",
+  "content": "Almost 3-hour guided tour to the iron mine takes you to the mininge company's (LKAB) visitor centre 540 metres underground. The history, as well as ongoing mining operations and Kiruna town moving due to the mine subsidence, effecting large parts of the city, is discussed. The tour can be booked in the information centre or online. The mine is part of the Norrbotten Megasystem, a 500-kilometre long industrial cluster.",
+  "address": "Kiruna",
+  "url": "http://www.kirunalapland.se/en/see-do/guided-tours-to-lkabs-visitor-centre/",
+  "lastedit": "2021-06-21",
+  "via": "name"
+ },
+ "fun-nar-fjell": {
+  "type": "do",
+  "page": "Narvik",
+  "section": "Do",
+  "name": "Ski at Narvikfjellet",
+  "content": "The ski station is located so that you can contemplate the fjords as you ski down the slopes.",
+  "url": "https://www.narvikfjellet.no/",
+  "lastedit": "2022-04-14",
+  "via": "name"
+ },
+ "fun-prg-castle": {
+  "type": "see",
+  "page": "Prague/Castle and Lesser Town",
+  "section": "See",
+  "name": "Prague Castle",
+  "alt": "Pražský Hrad",
+  "content": "The former seat of the King and is now the seat of the Czech president. This is Prague's number one tourist attraction so expect huge crowds and possibly long lines, especially during high tourist season. Your best bet is to come early, as soon as the castle opens. Similar to other royal palaces, there is an hourly changing of the guard ceremony. At noon, the ceremony includes fanfare at a flag ceremony in the first courtyard.",
+  "url": "https://www.hrad.cz/en/prague-castle-for-visitors",
+  "via": "wikidata"
+ },
+ "fun-prg-charles": {
+  "type": "see",
+  "page": "Prague/Castle and Lesser Town",
+  "section": "See",
+  "name": "Charles Bridge",
+  "alt": "Karlův Most",
+  "content": "connects the Old Town with Lesser Town. Commissioned by Czech king and Holy Roman Emperor Charles IV and constructed between 1357 and 1402, it is one of the most interesting historical stone bridges in Europe. It is 516 meters long with 16 arches. Baroque statues (a total of 30) began to be placed here in the 17th century. The best time to visit the bridge is in the quiet morning or in the evening at sunset, when one can enjoy a view of the fully lit Prague Castle.",
+  "via": "wikidata"
+ },
+ "fun-prg-josefov": {
+  "type": "see",
+  "page": "Prague/Old Town and Josefov",
+  "section": "See",
+  "name": "Jewish Museum",
+  "content": "This is not a single site but consists of four synagogues, the Old Jewish Cemetery and the Memorial Hall - entrance to all being covered by a single ticket. A combined ticket that includes the Old-New Synagogue can be obtained at a considerable extra cost but the interest of the building justifies it.",
+  "address": "U Staré školy 1",
+  "url": "http://www.jewishmuseum.cz/aindex.htm",
+  "via": "pin"
+ },
+ "fun-prg-kutna": {
+  "page": "Kutná Hora",
+  "pageOnly": true,
+  "content": "Kutná Hora is a town in the Central Bohemia region of the Czech Republic. Although Kutná Hora has some comparatively drab modern architecture, it is inscribed on the UNESCO World Heritage List for the Historical Town Centre, including the Church of St Barbara and the Cathedral of Our Lady at Sedlec. At both ends of the town there are some beautiful buildings, and the higher points of the town are home to restored older architecture, with Medieval, Gothic, Renaissance and Baroque buildings.",
+  "edited": "2026-09-24",
+  "via": "page"
+ },
+ "fun-prg-malastrana": {
+  "type": "see",
+  "page": "Prague/Castle and Lesser Town",
+  "section": "See",
+  "name": "The Lennon Wall",
+  "content": "This historic graffiti wall, near a Venetian-like canal with water wheel and close to the Charles Bridge, used to be a source of irritation to the communist regime. a wall in Prague, Czechia. After the 1980 murder of John Lennon, a mural of John Lennon was painted by an unknown artist. As more people expanded upon it, the wall became a place for free expression of then communist Czechoslovakia. It is now an open-air gallery, with restricted space for marking with pencils, markers, or chalk.",
+  "lastedit": "2024-12-29",
+  "via": "wikidata"
+ },
+ "fun-prg-market": {
+  "type": "see",
+  "page": "Prague/Old Town and Josefov",
+  "section": "See",
+  "name": "Old Town Square",
+  "alt": "Staroměstské náměstí",
+  "content": "The center of the eventful history of Prague. The Gothic, Renaissance and Baroque buildings were preserved here. The Historical Centre, including most of the city’s major sites, became a UNESCO-listed site in 1992.",
+  "via": "wikidata"
+ },
+ "fun-prg-obecni": {
+  "type": "see",
+  "page": "Prague/Old Town and Josefov",
+  "section": "See",
+  "name": "Municipal House",
+  "alt": "Obecní dům",
+  "content": "Nám. Republiky 5. The Obecní dům was built near the Powder Tower (a storage place for gunpowder and a major trade route entry into the city) on a site called King's Court where once a royal residence stood. In 1901, the Prague Civic Society made a proposal to city authorities to build a center for official and social Czech events. As happened so many other times in recent Prague history, the Czechs were trying to balance the grand buildings erected by the German-speaking community of Prague with suitable edifices of their own.…",
+  "url": "http://www.obecnidum.cz/",
+  "lastedit": "2018-08-26",
+  "via": "wikidata"
+ },
+ "fun-prg-orloj": {
+  "type": "see",
+  "page": "Prague/Old Town and Josefov",
+  "section": "See",
+  "name": "Astronomical Clock",
+  "alt": "Pražský orloj",
+  "content": "The Astronomical Clock located on a side tower of the Old Town Hall (reasonably enough, on Old Town Square) is easy to find—just wait until a few minutes before the hour and look for a large group of tourists standing around waiting for something to happen! Still, Orloj is one of the most popular gathering places in Prague. The closer you are to the astronomical clock, the more astronomical the prices in restaurants and stores. Built in 1410 and thought of as an example of 15th century high-tech device, projected with the participation of maths and astronomy professors at Prague University.…",
+  "url": "http://www.orloj600let.cz/",
+  "lastedit": "2026-09-19",
+  "via": "wikidata"
+ },
+ "fun-prg-petrin": {
+  "type": "see",
+  "page": "Prague/Castle and Lesser Town",
+  "section": "See",
+  "name": "Petřín Lookout Tower",
+  "alt": "Petřínská rozhledna'",
+  "content": "A smaller version of the Eiffel Tower on the top of Petrin Hill overlooking Prague. The grounds near the tower contain a formal rose garden which is free to walk around. With a height of just under 60 m, it is about 1/5th scale of the Paris Eiffel tower, and was constructed shortly after its Parisian counterpart at the end of the 19th century. The tower has 2 viewing platforms, one about halfway, and one at the top. A complete ascent takes about 220 steps. Strong winds (which are common in Prague) make the tower wobble, which can be felt on the upper deck and can induce motion sickness in some visitors.",
+  "lastedit": "2024-06-21",
+  "via": "wikidata"
+ },
+ "fun-prg-strahov": {
+  "type": "see",
+  "page": "Prague/Castle and Lesser Town",
+  "section": "See",
+  "name": "Strahov Monastery",
+  "content": "A monastery on the mountain. Worth a visit for both its picture gallery and its notable Renaissance library.",
+  "url": "http://www.strahovmonastery.cz",
+  "via": "wikidata"
+ },
+ "fun-prg-vysehrad": {
+  "type": "see",
+  "page": "Prague/New Town and Vysehrad",
+  "section": "See",
+  "name": "Vyšehrad",
+  "alt": "\"The High Castle\"",
+  "content": "Seat of Czech princes for centuries before Prague Castle was built. Site of St. Paul and Peter's Cathedral, and of the famous Vyšehrad cemetery known as 'Slavín', burial grounds of extraordinary Czechs. Don't forget to visit the casemate of Vyšehrad; they are picturesque, and you can see originals of some statues from Charles Bridge. From the ramparts of Vyšehrad, you'll have an excellent view of Prague castle, Vltava, Smíchov (former workers' slum and industrial quarter of town) and Podskalí (area under Vyšehrad, once inhabited almost entirely by raftsmen).…",
+  "via": "wikidata"
+ },
+ "fun-sto-cityhall": {
+  "type": "see",
+  "page": "Stockholm/Kungsholmen",
+  "section": "See",
+  "name": "Stockholm City Hall",
+  "alt": "Stadshuset",
+  "content": "The city hall, where the Nobel Prize Banquet takes place every year, is an imposing brick building in the city centre. Guided tours are held daily, and allow you to see the impressive halls used for the Nobel festivities, the Blue Hall and the Golden Hall. The tower offers a great view of the Old Town and can be climbed (optionally, a lift can take you half the way).",
+  "address": "Hantverkargatan 1",
+  "url": "http://international.stockholm.se/the-city-hall/",
+  "via": "wikidata"
+ },
+ "fun-sto-gamlastan": {
+  "type": "see",
+  "page": "Stockholm/Gamla stan",
+  "section": "See",
+  "name": "Stortorget",
+  "content": "Stockholm's oldest square, dated back to the 13th century. While the square was used for corporal punishment during most of its history, the most infamous event was the 1520 Stockholm Bloodbath, where Danish king Kristian II (who since then has been known as Kristian the Tyrant in Sweden) had a hundred Swedish noblemen and dignitaries executed for heresy. The massacre caused an uprising against the Danes, in which Gustav Vasa became Sweden's first sovereign king in 1523. A cannonball is stuck in a building wall at Skomakaregatan.…",
+  "via": "wikidata"
+ },
+ "fun-sto-palace": {
+  "type": "see",
+  "page": "Stockholm/Gamla stan",
+  "section": "See",
+  "name": "Royal Palace",
+  "alt": "Kungliga Slottet",
+  "content": "At times referred to by Swedes at the \"Royal Castle\". Built between 1697 and 1754, dominating the north-eastern part of the Old Town, the Royal Palace is the official residence of the monarch of Sweden. However, the Royal family lives at Drottningholm in Ekerö, using the Royal Palace only for official ceremonies. It is open to the public unless being used for a state ceremony. Entrance ticket includes The Royal Apartments, the Tre Kronor Museum, the Treasury, and Gustav III's Museum of Antiquities.",
+  "url": "https://www.kungligaslotten.se/english.html",
+  "lastedit": "2020-01-30",
+  "via": "wikidata"
+ },
+ "fun-sto-skansen": {
+  "type": "see",
+  "page": "Stockholm/Djurgården",
+  "section": "See",
+  "name": "Skansen",
+  "content": "Founded in 1891, Skansen is the world's oldest open-air museum, containing a zoological garden specializing in Nordic fauna, such as moose, reindeer, bear, wolf, lynx and wolverine. It features over 150 historic buildings from previous centuries, relocated from all parts of Sweden. Museum guides in historic costumes further enhance this attraction, and demonstrate domestic crafts such as weaving, spinning, and glass blowing. The Skansen area is fairly large (700 metres across) with steep slopes and limited public transport (there is a funicular and an escalator to the upper area) so be prepared for long walks.…",
+  "address": "Main entrance from Djurgårdsvägen",
+  "url": "https://www.skansen.se/en/",
+  "via": "wikidata"
+ },
+ "fun-sto-vasa": {
+  "type": "see",
+  "page": "Stockholm/Djurgården",
+  "section": "See",
+  "name": "Vasa Museum",
+  "alt": "Vasamuseet",
+  "content": "This museum displays the Vasa, an original warship built for the Thirty Years War which sank in Stockholm Harbour on its maiden voyage in 1628, during the heyday of the Swedish Empire. Salvaged in 1961, the ship is almost wholly preserved, and is the only one of its kind and quality in the world. A must-see, especially since it is uncertain whether current methods of preservation will be able to maintain her condition in years to come. There are adequate lifts to enable travellers with motion disabilities to see all levels of the ship.…",
+  "address": "Galärvarvsvägen 14",
+  "url": "http://www.vasamuseet.se/",
+  "via": "wikidata"
+ },
+ "fun-szg-fortress": {
+  "type": "see",
+  "page": "Salzburg",
+  "section": "See",
+  "name": "Hohensalzburg Fortress",
+  "alt": "Festung",
+  "content": "On top of a mountain, the Festung offers breathtaking views of Salzburg and the Alps. One area of the fortress offers visitors the chance to look down on a field below to find only one house, the executioner's residence. It was believed to live anywhere near the executioner was bad luck. Inside the fortress is a museum of medieval weapons, life on the fortress, and torture instruments. Public concerts are often held here in the evenings, reservations are recommended. On nights with concerts, it is possible to remain within the walls past dark. To avoid the vertical hike up to the fortress, a funicular is available to ride, for a fee. It's the oldest funicular in Austria.",
+  "address": "Mönchsberg 34",
+  "url": "https://www.festung-hohensalzburg.at/en/",
+  "lastedit": "2018-09-10",
+  "via": "wikidata"
+ },
+ "fun-szg-hellbrunn": {
+  "type": "see",
+  "page": "Salzburg",
+  "section": "See",
+  "name": "Schloss Hellbrunn",
+  "content": "Once the summer palace of the Archbishops of Salzburg it has lots of clever fountains and pretty gardens. When you take the tour stand next to the guide otherwise you will get wet. Hellbrunn is surrounded by vast gardens, including a good children's playground with swings and flying fox (zip wire), and a cold wading pool, and is a perfect place for a picnic or a long walk through the green. In the Steintheater (Stone Theater), the first opera in Middle Europe was conducted. Children and adults alike are amused. There is an excellent and substantial zoo within the grounds.",
+  "address": "Fürstenweg 37",
+  "url": "https://www.hellbrunn.at/en/",
+  "lastedit": "2018-09-10",
+  "via": "wikidata"
+ },
+ "fun-szg-mirabell": {
+  "type": "see",
+  "page": "Salzburg",
+  "section": "See",
+  "name": "Schloss Mirabell",
+  "content": "Next to the Salzach river and the Mozarteum University of Music and Arts lies a beautiful castle with gardens, built by an archbishop for his beloved courtesan. Watch out for the \"Garden of Dwarfs\" and the Garden of Roses. Inside, you find the marble stairs of Raffael Donner, and the world's most beautiful wedding hall, the Marble Hall. If you plan to marry there, reservations should be made at least a year in advance. Weddings in English are only held on Tuesday and Friday. If you don't speak German, you can't get married any other day!",
+  "url": "https://www.salzburg.info/en/sights/top10/mirabell-palace-gardens",
+  "via": "wikidata"
+ },
+ "fun-szg-oldtown": {
+  "type": "see",
+  "page": "Salzburg",
+  "section": "See",
+  "name": "Mozarts Geburtshaus",
+  "alt": "Mozart's birth house",
+  "content": "From 1747 to 1773 the Mozart family lived in this house in the heart of Salzburg, where W.A. Mozart was born on 27 January 1756. The house is now a popular museum devoted to Mozart and his family, with interesting memorabilia and letters. Well worth a quick visit.",
+  "address": "Getreidegasse 9",
+  "url": "https://mozarteum.at/en/mozart-museums/mozarts-birthplace",
+  "via": "wikidata"
+ },
+ "fun-szg-silentnight": {
+  "type": "see",
+  "page": "Oberndorf bei Salzburg and Laufen (Bavaria)",
+  "section": "See",
+  "name": "Silent Night Chapel",
+  "content": "Franz Gruber added the melody to Joseph Mohr's poem on Christmas in the early 19th century in church on this site, thereby creating the Christmas carol \"Silent Night\", which was first performed with guitar and vocals. The original church was damaged by flooding, demolished and then replaced by the current chapel, which stands next to Joseph Mohr's home and a museum that houses various displays on Mohr, Gruber, and Silent Night and also a gift shop. The gift shop sells various Silent Night-themed items, such as candles and snow globes.",
+  "address": "7 Stille Nacht Platz",
+  "via": "wikidata"
+ },
+ "fun-vie-belvedere": {
+  "type": "see",
+  "page": "Vienna/Landstraße",
+  "section": "See",
+  "name": "Schloß Belvedere",
+  "alt": "Belvedere Palace",
+  "content": "Intended as a summer residence for Prince Eugene of Savoy, was outside the city walls. Its two palace segments, the Upper and Lower Belvedere, later became the permanent home of the Austrian Gallery.",
+  "url": "http://www.belvedere.at/en",
+  "via": "wikidata"
+ },
+ "fun-vie-hofburg": {
+  "type": "see",
+  "page": "Vienna/Innere Stadt",
+  "section": "See",
+  "name": "Kaiserappartements",
+  "alt": "Imperial Apartments",
+  "content": "This trio of museums includes the Imperial Apartments (Kaiserappartements), Sisi Museum, and Imperial Silver Collection (Silberkammer). The Imperial Apartments and Sisi Museum include 22 state rooms of the residential and state apartments of Emperor Franz Joseph I and Empress Elisabeth (popularly known as Sisi) and show 19th-century imperial life. The Imperial Silver Collection displays unique items of the glittering world of imperial dining.",
+  "address": "Michaelerplatz",
+  "url": "http://www.hofburg-wien.at/en.html",
+  "via": "pin"
+ },
+ "fun-vie-khm": {
+  "type": "see",
+  "page": "Vienna/Innere Stadt",
+  "section": "See",
+  "name": "Kunsthistorisches Museum",
+  "alt": "Museum of Fine Arts",
+  "content": "One of the world's greatest art museums and in a palace that is a work of art itself. Serious art fans may wish to devote more than a day to its treasures. There is no other word to describe the Kunst other than mind-boggling. It contains a world-class exhibit of the Habsburgs' art collection, including Raphael, Titian, Caravaggio, Bosch, and Brueghel. The museum has an excellent collection of ancient Egyptian, Greek, and Roman art. The coin & medals collection is also exhaustive in its scope. The museum cafe is a bit pricey, but good, and in a beautiful setting. Hand-held photography is permitted.",
+  "address": "Maria-Theresien-Platz",
+  "url": "http://www.khm.at/",
+  "via": "wikidata"
+ },
+ "fun-vie-opera": {
+  "type": "do",
+  "page": "Vienna/Innere Stadt",
+  "section": "Do",
+  "name": "Wiener Staatsoper",
+  "alt": "Vienna State Opera",
+  "content": "Probably the most-beloved symbol of Viennese arts, and one of the first buildings to be rebuilt in the postwar era. It was built from 1861-1869 under the direction of architects Eduard van der Nüll and August von Siccardsburg for then-emperor Franz Josef I. The first performance was Don Giovanni, an opera by Austrian native Mozart, on 25 May 1869. The architecture of the opera was barely tolerated by the picky Viennese when it opened. Van der Nüll did not take these criticisms of his work lightly and committed suicide. A few weeks later, von Siccardsburg died of a heart attack. Doubly cursed, the opera building succumbed to bombs less than 100 years later, during World War II.…",
+  "address": "Opernring 2",
+  "url": "http://www.wiener-staatsoper.at",
+  "via": "wikidata"
+ },
+ "fun-vie-prater": {
+  "type": "see",
+  "page": "Vienna/Inner East",
+  "section": "See",
+  "name": "Riesenrad",
+  "alt": "Giant Ferris Wheel",
+  "content": "An English engineering firm (Walter Basset) built the giant Ferris wheel from 1896-97. Others of the same era, built for world exhibitions and other parks in Chicago, London, Paris, etc. have long since been torn down. The Riesenrad has become a well-known symbol of Vienna, featured in many movies (most famously in The Third Man) and picture postcards. It has 15 gondolas, some of which are incredibly ornate and large enough to host an extended family inside, offering a spectacular panorama of the city. Additionally, the cabins are available to rent, for cocktails, dinners, or special events. The travelling time is 10-20 minutes.",
+  "address": "Riesenradplatz 1",
+  "url": "http://www.wienerriesenrad.com/en",
+  "lastedit": "2021-02-14",
+  "via": "wikidata"
+ },
+ "fun-vie-rathaus": {
+  "type": "see",
+  "page": "Vienna/Innere Stadt",
+  "section": "See",
+  "name": "Wiener Rathaus",
+  "alt": "Vienna City Hall",
+  "content": "Designed by Friedrich von Schmidt (the architect of the Cologne Cathedral) and completed in 1883, this is the most significant neo-Gothic building in Vienna, with a 103m-high clock tower. There is a very pleasant park with two fountains in front of the building facing the Ring.",
+  "address": "Friedrich-Schmidt-Platz 1",
+  "url": "http://www.wien.info/en/locations/vienna-city-hall",
+  "via": "wikidata"
+ },
+ "fun-vie-schoenbrunn": {
+  "type": "see",
+  "page": "Vienna/Hietzing",
+  "section": "See",
+  "name": "Schönbrunn Palace",
+  "alt": "Schloss Schönbrunn",
+  "content": "Inscribed on the UNESCO World Heritage List in 1996. It is the ultimate palace experience in Vienna, because the Habsburg summer palace can be found here. It is comparable in grandeur to Versailles and is definitely a must-see in Vienna. The palace has seen its fair share of excitement over the years, including a meeting between John F. Kennedy and Nikita Khruschchev at the height of the cold war. There are two possible tours available, the Imperial Tour showing 22 rooms and the Grand Tour showing 40 rooms. The shorter tour takes you into the west wing including the apartments of Emperor Franz Joseph and Empress Elisabeth (Sisi), as well as the imposing state rooms in the central wing.…",
+  "url": "http://www.schoenbrunn.at/en",
+  "lastedit": "2018-10-29",
+  "via": "wikidata"
+ },
+ "fun-vie-stephansdom": {
+  "type": "see",
+  "page": "Vienna/Innere Stadt",
+  "section": "See",
+  "name": "Stephansdom",
+  "alt": "St. Stephen's Cathedral",
+  "content": "Yet another patchwork of architectural styles, but predominantly Gothic. None of the original construction remains, the oldest extant sections are the thirteenth century Giant Gate (Riesentor) and Towers of the Heathens (Heidentürme), both of which are Romanesque. In 1511, building in Gothic style ceased due to being out of fashion. The main altar has a Baroque panel showing St. Stephen, Christianity's first martyr. The organised tour is worth it, since some of the finest works of art in the cathedral can only be seen with a guide, such as Emperor Frederick III's red marble sepulcher and the immense Gothic carved Altar of Wiener Neustadt.…",
+  "address": "Stephansplatz 3",
+  "url": "https://www.stephanskirche.at/",
+  "via": "wikidata"
+ },
+ "fun-vie-treasury": {
+  "type": "see",
+  "page": "Vienna/Innere Stadt",
+  "section": "See",
+  "name": "Schatzkammer",
+  "alt": "Imperial Treasury; aka the Secular and Ecclesiastical Treasures",
+  "content": "The best part of the Hofburg and an absolute must. It contains the Habsburgs' collection of jewels, crowns, and other valuables, perhaps the best on the Continent. Second only to a tour of the Kunsthistorisches Museum, of which the Schatzkammer is a part. There are 20 rooms of priceless treasures that give a fairly accurate representation of the ceremonial Habsburg court life over the centuries.",
+  "address": "Hofburg Schweizerhof",
+  "url": "http://www.kaiserliche-schatzkammer.at/",
+  "via": "wikidata"
+ },
+ "stay-ck-old": {
+  "page": "Český Krumlov",
+  "pageOnly": true,
+  "content": "Český Krumlov (German: Krumau) is a beautiful town of 14,600 inhabitants in Southern Bohemia, in the Czech Republic. Like Prague, the town is situated on the Vltava River and is full of Baroque buildings housing cafes and bars, features a spectacular castle (the second largest in the Czech Republic), and an old-town square. The town's appearance is little changed since the 18th century and the buildings have been well maintained and restored. In 1992, Cesky Krumlov was added to the UNESCO World Heritage List. The town is very popular among tourists, who outnumber the local population in the summer and are still a notable presence during Christmas time.",
+  "edited": "2026-07-26",
+  "via": "page"
+ },
+ "stay-hal-town": {
+  "page": "Hallstatt",
+  "pageOnly": true,
+  "content": "Hallstatt is a small town overlooking the Hallstätter See (Lake Hallstatt) in the Salzkammergut, in Upper Austria. Hallstatt is spectacularly picturesque, due to its location on a narrow rocky west bank of the lake with the sheer rising mountains behind it. Considered by some to be one of the most beautiful places on earth, Hallstatt is sometimes called \"the pearl of Austria\". It used to be a sleepy settlement nestled by a large salt mine.",
+  "edited": "2026-09-12",
+  "via": "page"
+ },
+ "stay-lap-icehotel": {
+  "type": "sleep",
+  "page": "Jukkasjärvi",
+  "section": "Sleep",
+  "name": "Ice Hotel",
+  "alt": "Ishotellet",
+  "content": "A hotel constructed entirely out of ice. There are many copycats now, but this is the original. Outdoor activities such as dogsled tours are arranged by the hotel but reservation may be advisable, and cheaper alternatives may be available from companies in nearby Kiruna. Remember that winter in Lapland can be very cold, and though Ishotellet provides snowsuits and boots, you may need to bring equipment such as expedition-grade gloves, face masks, and goggles depending on conditions. Read the weather forecast. It is also possible to visit the ice hotel as a tourist attraction without actually spending a night there. It is worth seeing the ice sculptures in the rooms and in the floors.…",
+  "address": "Marknadsvägen 63",
+  "url": "http://www.icehotel.com/",
+  "via": "wikidata"
+ },
+ "stay-lap-kiruna": {
+  "page": "Kiruna",
+  "pageOnly": true,
+  "content": "Kiruna (Sami: Giron) in Norrbotten County is Sweden's northernmost city and home to 18,000 citizens. It is the centre of Kiruna Municipality, Kiruna kommun, which also includes several small villages, resorts and settlements scattered around a large wilderness area. Kiruna has been selected for the EU capital of culture 2029.",
+  "edited": "2026-09-12",
+  "via": "page"
+ },
+ "stay-lap-stf": {
+  "type": "sleep",
+  "page": "Abisko and Björkliden",
+  "section": "Sleep",
+  "name": "STF Mountain Station Abisko",
+  "alt": "Abisko turiststation",
+  "url": "http://www.svenskaturistforeningen.se/en/Discover-Sweden/Facilities-and-activities/Lappland/Fjallstationer/STF-Mountain-station-Abisko/The-mountain-station/Rooms-and-cabins/",
+  "via": "wikidata"
+ },
+ "stay-lap-village": {
+  "page": "Abisko and Björkliden",
+  "pageOnly": true,
+  "content": "Abisko is a village in Norrbotten County and the Lappland province in northern Sweden. Abisko nationalpark is a national park around Abisko, . Björkliden is a resort village 7 km northwest of Abisko.",
+  "edited": "2026-09-10",
+  "via": "page"
+ },
+ "stay-nar-town": {
+  "page": "Narvik",
+  "pageOnly": true,
+  "content": "Narvik is a city in Nordland in northern Norway. The town of Narvik has a population of about 14,000, while the entire municipality has a population of about 18,000. The city sits along the southern shore of the Ofot Fjord, and is the centre of the Ofoten district.",
+  "edited": "2026-09-12",
+  "via": "page"
+ },
+ "stay-prg-old": {
+  "page": "Prague/Old Town and Josefov",
+  "pageOnly": true,
+  "content": "The right bank section of District Prague 1, the oldest settled area, consists of the Old Town of Prague (Czech: Staré město) and the Jewish Town (Czech: Josefov).",
+  "edited": "2026-09-19",
+  "via": "page"
+ },
+ "stay-sto-central": {
+  "page": "Stockholm/Norrmalm",
+  "pageOnly": true,
+  "content": "Norrmalm [nɔrˈmalm], also known as City, is the central borough of Stockholm, bordering to Östermalm to the east at Birger Jarlsgatan, the Old Town to the south, Kungsholmen to the south-west, and Vasastan north-west of Tegnérgatan. The small Skeppsholmen island can be reached across a bridge. Here you find Stockholm Central Station, Scandinavia's busiest station for railway, metro and buses. Norrmalm also contains the central business district and several government functions, and many famous museums, stage venues and restaurants.",
+  "edited": "2026-09-12",
+  "via": "page"
+ },
+ "stay-sto-gamla": {
+  "page": "Stockholm/Gamla stan",
+  "pageOnly": true,
+  "content": "Gamla stan pronounced gamlaˈstɑːn, the Old Town, also known as Staden mellan broarna (\"the town between the bridges\") is the Old Town in Stockholm, containing genuine cultural heritage, as well as tourist traps. The district is made up by the main island Stadsholmen, with the smaller islands Helgeandsholmen with the Swedish Parliament and Riddarholmen with several nobility palaces, today occupied by various government functions.",
+  "edited": "2026-09-13",
+  "via": "page"
+ },
+ "stay-sto-soder": {
+  "page": "Stockholm/Södermalm",
+  "pageOnly": true,
+  "content": "Södermalm [sødərˈmalm] (or just Söder) is the southern borough of central Stockholm, consisting of the island of Södermalm proper, two smaller islands connected to it from the west (Långholmen [ˈlɔŋˈhɔlmən] and Reimersholme [rejməʂˈhɔlmə]), as well as the neighbourhood of Hammarby Sjöstad on the opposite bank of the Hammarby Sjö in the east, which is a redeveloped former industrial area that was transformed into a model sustainable residential community. Apart from the administrative borough of Södermalm, this guide also covers other areas surrounding Södermalm on the continental southern sea and lakeshore, which are easy to access from and visit together with Södermalm proper.…",
+  "edited": "2026-09-12",
+  "via": "page"
+ },
+ "stay-szg-old": {
+  "page": "Salzburg",
+  "pageOnly": true,
+  "content": "Salzburg is a city in Austria, near the border with Germany's Bavaria state, with a population of 157,000 (2020). It was the setting for the 1965 movie The Sound of Music, so you may think you know all there is to see in Salzburg if you have seen the movie. Admittedly, it is difficult not to burst into song when you're walking along the Salzach River, or climbing up to the Hohensalzburg fortress, which looms over the city. But there is a lot more to this compact, courtly city than Julie Andrews and Wolfgang Amadeus Mozart, who was born here.",
+  "edited": "2026-09-12",
+  "via": "page"
+ },
+ "stay-vie-1": {
+  "page": "Vienna/Innere Stadt",
+  "pageOnly": true,
+  "content": "Innere Stadt is the inner-most district of Vienna. Its historic centre dates back to Roman ages and has been inscribed on the UNESCO World Heritage list. It is encircled by the Ring Road (Ringstraße), a grand boulevard constructed along the old city walls, which were torn down starting in 1858. Along the Ringstraße are many famous and grand buildings, including the City Hall (Rathaus), the Austrian Parliament, the Hofburg Palace, the Natural History Museum (Naturhistorisches Museum), the Museum of Art History (Kunsthistorisches Museum), and the State Opera House (Wiener Staatsoper). The very central point of Innere Stadt is the famous St.…",
+  "edited": "2026-09-13",
+  "via": "page"
+ },
+ "stay-vie-6-7": {
+  "page": "Vienna/Mariahilf",
+  "pageOnly": true,
+  "content": "Mariahilf is the 6th district of Vienna. Its border to the north is the most famous Viennese shopping street the Mariahilferstrasse, to the west the Gürtel and to the south the Vienna River.",
+  "edited": "2026-09-12",
+  "via": "page"
+ }
+}

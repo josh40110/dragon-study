@@ -96,4 +96,12 @@ export const createInitialRoomData = () => ({
   // 100 天課程各自的進度
   leftCourseDays: [],
   rightCourseDays: [],
+  // 龍龍旅行社：tripDays 為 null 時顯示 constants/tripGuide.js 的預設行程（Notion 版）
+  tripTitle: null,
+  tripStartDate: null,
+  tripDays: null,
+  // 每個項目的標記：{ id, star, booked, dayIds, memo }
+  tripPicks: [],
+  // 自己加的地點：{ id, cat, city, name, desc, url, by, createdAt }
+  tripCustom: [],
 });

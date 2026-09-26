@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, CalendarDays, Coffee, Heart, Home, Languages, Sparkles } from 'lucide-react';
+import { BookOpen, CalendarDays, Coffee, Heart, Home, Languages, Luggage, Sparkles } from 'lucide-react';
 import { updateRoom } from './lib/roomStore';
 import AnimatedWindow from './components/AnimatedWindow';
 import LanguageLab from './components/LanguageLab';
+import TripPlanner from './components/TripPlanner';
 import WishBoard from './components/WishBoard';
 import MotivationalBoard from './components/MotivationalBoard';
 import PixelArt from './components/PixelArt';
@@ -37,10 +38,12 @@ const END_STUDY_PENDING_KEY = 'dragon-study-pending-end-study';
 const ROOM_DESIGN_W = 1400;
 const ROOM_DESIGN_H = (ROOM_DESIGN_W * 9) / 16;
 
+/** short：手機寬度放不下四個全名，改顯示兩個字 */
 const MAIN_TABS = [
-  { key: 'room', label: '共讀小屋', icon: Home },
-  { key: 'language', label: '龍龍語言教室', icon: Languages },
-  { key: 'wish', label: '許願池', icon: Sparkles },
+  { key: 'room', label: '共讀小屋', short: '小屋', icon: Home },
+  { key: 'language', label: '龍龍語言教室', short: '語言', icon: Languages },
+  { key: 'trip', label: '龍龍旅行社', short: '旅行', icon: Luggage },
+  { key: 'wish', label: '許願池', short: '許願', icon: Sparkles },
 ];
 
 /**
@@ -786,8 +789,9 @@ export default function App() {
     );
   }
 
+  // pb-32 是替共讀小屋右下角的「今日結算」浮動按鈕留位置；旅行社的地圖排程要整頁剛好塞滿，不需要
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f3e9d3_0%,#ecdcbf_45%,#e0caa3_100%)] text-[#4a3526] font-sans pb-32 overflow-x-hidden">
+    <div className={`min-h-screen bg-[linear-gradient(180deg,#f3e9d3_0%,#ecdcbf_45%,#e0caa3_100%)] text-[#4a3526] font-sans ${activeTab === 'trip' ? 'pb-2' : 'pb-32'} overflow-x-hidden`}>
       <CompletionCalendarModal
         open={showCalendarModal}
         onClose={closeCalendarModal}
@@ -926,14 +930,15 @@ export default function App() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex-1 lg:flex-none px-4 py-2 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 ${
+                className={`flex-1 lg:flex-none px-2 sm:px-4 py-2 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
                   active
                     ? 'bg-[#fff7e3] text-[#b07d0a] border-2 border-[#daa520] shadow-[0_3px_0_#d8c4a0]'
                     : 'text-[#9a8568] border-2 border-transparent hover:bg-[#ece0c9]'
                 }`}
               >
-                <Icon size={16} />
-                <span className="no-wrap-scroll">{tab.label}</span>
+                <Icon size={16} className="shrink-0" />
+                <span className="no-wrap-scroll sm:hidden">{tab.short}</span>
+                <span className="no-wrap-scroll hidden sm:inline">{tab.label}</span>
               </button>
             );
           })}
@@ -948,6 +953,8 @@ export default function App() {
 
       <main className="max-w-6xl xl:max-w-[1560px] 2xl:max-w-[1800px] mx-auto p-4 2xl:px-6 md:pl-24 2xl:pl-28 space-y-8 2xl:space-y-7 mt-4 2xl:mt-3">
         {activeTab === 'language' && <LanguageLab role={role} roomData={roomData} />}
+
+        {activeTab === 'trip' && <TripPlanner role={role} roomData={roomData} />}
 
         {activeTab === 'wish' && <WishBoard role={role} roomData={roomData} />}
 

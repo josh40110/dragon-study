@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>龍龍旅行社・選照片</title>
+<style>
+  :root {
+    --bg: #f6efe2; --panel: #fdf9f1; --line: #e6dac1; --ink: #4a3526; --soft: #9a8568;
+    --gold: #daa520; --gold-dark: #b07d0a; --blue: #2f6db5; --red: #c0392b; --green: #16a34a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, "PingFang TC", "Noto Sans TC", sans-serif; display: flex; flex-direction: column; }
+  button { font: inherit; cursor: pointer; }
+  a { color: var(--blue); }
+  header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--panel); border-bottom: 2px solid var(--line); flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 900; }
+  .progress { font-weight: 800; color: var(--soft); font-size: 13px; }
+  .save { font-size: 12px; font-weight: 800; color: var(--soft); }
+  .save.err { color: var(--red); }
+  .spacer { flex: 1; }
+  .btn { border: 2px solid var(--line); background: #fff; color: var(--ink); border-radius: 10px; padding: 5px 10px; font-weight: 800; font-size: 13px; }
+  .btn:hover { border-color: var(--gold); }
+  .btn.primary { background: linear-gradient(#f3c44e, #dca01d); border-color: #c48d12; color: #5a3c0e; box-shadow: 0 2px 0 #a9760a; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .layout { flex: 1; min-height: 0; display: grid; grid-template-columns: 310px 1fr; }
+  aside { border-right: 2px solid var(--line); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
+  .filters { padding: 10px; display: grid; gap: 6px; border-bottom: 1px dashed var(--line); }
+  .filters input, .filters select, .searchbar input { width: 100%; padding: 6px 8px; border: 2px solid var(--line); border-radius: 9px; background: #fff; font: inherit; }
+  .list { overflow-y: auto; flex: 1; padding: 4px 6px 20px; }
+  .city { position: sticky; top: 0; background: var(--panel); font-weight: 900; font-size: 12px; color: var(--gold-dark); padding: 8px 6px 4px; z-index: 1; }
+  .row { display: flex; gap: 8px; align-items: center; padding: 5px 6px; border-radius: 10px; cursor: pointer; scroll-margin-top: 34px; }
+  .row:hover { background: #f3e9d6; }
+  .row.active { background: #fff3c4; outline: 2px solid var(--gold); }
+  .row img, .row .noimg { width: 58px; height: 40px; object-fit: cover; border-radius: 6px; flex: none; background: #e6dac1; display: flex; align-items: center; justify-content: center; }
+  .row .t { min-width: 0; flex: 1; }
+  .row .n { font-weight: 800; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .l { font-size: 11px; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .count { font-size: 11px; font-weight: 900; border-radius: 99px; padding: 1px 7px; background: #f0e5d0; color: #8a755b; flex: none; }
+  .count.zero { background: #fde2dc; color: var(--red); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #e67e22; flex: none; }
+  main { overflow-y: auto; min-height: 0; padding: 14px 18px 60px; }
+  .head { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+  .head h2 { margin: 2px 0 0; font-size: 22px; font-weight: 900; }
+  .head .local { color: var(--soft); font-weight: 700; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .chip { font-size: 12px; font-weight: 800; border-radius: 8px; padding: 3px 8px; background: #eaf2fc; color: var(--blue); text-decoration: none; border: 0; }
+  .chip:hover { background: #dbe8f8; }
+  .chip.q { background: #f0e5d0; color: #6b5540; }
+  .chip.q.on { background: #fff3c4; color: var(--gold-dark); outline: 2px solid var(--gold); }
+  .tag { font-size: 11px; font-weight: 900; border-radius: 99px; padding: 2px 8px; background: #f0e5d0; color: #8a755b; }
+  h3 { font-size: 14px; font-weight: 900; color: var(--gold-dark); margin: 18px 0 8px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  h3 small { font-size: 11px; color: var(--soft); font-weight: 700; }
+  .picked { display: flex; gap: 10px; flex-wrap: wrap; min-height: 60px; }
+  .pcard { width: 250px; background: #fff; border: 2px solid var(--line); border-radius: 12px; overflow: hidden; position: relative; }
+  .pcard.main { border-color: var(--gold); box-shadow: 0 0 0 2px #f3c44e55; }
+  .pcard.dragover { outline: 3px dashed var(--blue); }
+  .pcard img { width: 100%; height: 150px; object-fit: cover; display: block; cursor: zoom-in; background: #e6dac1; }
+  .pcard .num { position: absolute; left: 6px; top: 6px; background: rgba(0,0,0,.6); color: #fff; font-size: 11px; font-weight: 900; border-radius: 99px; padding: 1px 8px; }
+  .pcard .num.main { background: var(--gold-dark); }
+  .pcard .pending { position: absolute; right: 6px; top: 6px; background: #e67e22; color: #fff; font-size: 10px; font-weight: 900; border-radius: 99px; padding: 1px 7px; }
+  .pcard .notebadge { position: absolute; left: 6px; top: 30px; background: rgba(0,0,0,.6); color: #fff; font-size: 10px; font-weight: 900; border-radius: 99px; padding: 1px 7px; }
+  .tools { display: flex; gap: 4px; padding: 6px; flex-wrap: wrap; }
+  .tools button { border: 1px solid var(--line); background: #fdf9f1; border-radius: 7px; padding: 2px 7px; font-size: 12px; font-weight: 800; color: #6b5540; }
+  .tools button:hover { border-color: var(--gold); }
+  .tools button.on { background: #fff3c4; border-color: var(--gold); color: var(--gold-dark); }
+  .tools button.del { color: var(--red); margin-left: auto; }
+  .fallback { display: flex; gap: 10px; align-items: center; color: var(--soft); font-weight: 700; font-size: 13px; }
+  .fallback img { width: 160px; height: 100px; object-fit: cover; border-radius: 10px; opacity: .8; }
+  .searchbar { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .searchbar input { flex: 1; min-width: 220px; }
+  .group { margin-top: 14px; }
+  .group-h { font-size: 12px; font-weight: 900; color: #6b5540; margin-bottom: 6px; display: flex; gap: 8px; align-items: center; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .cand { background: #fff; border: 2px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; position: relative; transition: transform .08s; }
+  .cand:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .cand.on { border-color: var(--green); box-shadow: 0 0 0 2px #16a34a55; }
+  .cand img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; background: #e6dac1; }
+  .cand .mark { position: absolute; left: 6px; top: 6px; background: var(--green); color: #fff; font-weight: 900; font-size: 12px; border-radius: 99px; padding: 1px 8px; }
+  .cand .zoom { position: absolute; right: 6px; top: 6px; background: rgba(0,0,0,.55); color: #fff; border: 0; border-radius: 99px; padding: 2px 8px; font-size: 12px; }
+  .cand .meta { padding: 5px 8px 7px; font-size: 11px; color: #6b5540; }
+  .cand .meta .d { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cand .meta .a { color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .q-badge { color: var(--gold-dark); font-weight: 900; }
+  .empty { color: var(--soft); font-weight: 700; padding: 10px 0; }
+  .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--line); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .lightbox { position: fixed; inset: 0; background: rgba(15,10,5,.92); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 16px; color: #fff; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 100%; max-height: 72vh; object-fit: contain; border-radius: 8px; }
+  .lb-info { max-width: 980px; width: 100%; margin-top: 10px; font-size: 13px; }
+  .lb-info .d { font-weight: 800; }
+  .lb-info .c { color: #cdbfa8; font-size: 12px; margin-top: 4px; }
+  .lb-bar { display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .lb-bar .btn { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.25); }
+  .lb-bar .btn.primary { background: linear-gradient(#f3c44e, #dca01d); color: #5a3c0e; }
+  .lb-close { position: absolute; right: 16px; top: 12px; }
+  .log { position: fixed; right: 16px; bottom: 16px; width: min(640px, calc(100vw - 32px)); max-height: 50vh; background: #211a12; color: #f3e9d6; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.35); display: none; flex-direction: column; z-index: 40; }
+  .log.open { display: flex; }
+  .log pre { margin: 0; padding: 10px 12px; overflow: auto; font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; flex: 1; }
+  .log .bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #3a2e20; font-weight: 800; }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #4a3526; color: #fff; padding: 8px 14px; border-radius: 10px; font-weight: 800; display: none; z-index: 60; max-width: 90vw; }
+  .toast.show { display: block; }
+  .kbd { font: 11px ui-monospace, Menlo, monospace; background: #f0e5d0; border-radius: 4px; padding: 0 4px; }
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    aside { max-height: 36vh; border-right: 0; border-bottom: 2px solid var(--line); }
+    .pcard { width: calc(50% - 5px); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🐉 龍龍旅行社・選照片</h1>
+  <span class="progress" id="progress"></span>
+  <span class="spacer"></span>
+  <span class="save" id="save"></span>
+  <button class="btn primary" id="build" disabled>產生網站照片</button>
+</header>
+<div class="layout">
+  <aside>
+    <div class="filters">
+      <input id="find" placeholder="找地點（中文、當地名、id）">
+      <select id="filter">
+        <option value="all">全部地點</option>
+        <option value="none">還沒挑照片的</option>
+        <option value="few">少於 3 張的</option>
+        <option value="dirty">改過、還沒產生的</option>
+        <option value="note">有示意圖的</option>
+      </select>
+    </div>
+    <div class="list" id="list"></div>
+  </aside>
+  <main id="main"><div class="empty">載入中…</div></main>
+</div>
+
+<div class="lightbox" id="lb">
+  <button class="btn lb-close" id="lb-close">關閉 Esc</button>
+  <img id="lb-img" alt="">
+  <div class="lb-info" id="lb-info"></div>
+  <div class="lb-bar">
+    <button class="btn" id="lb-prev">← 上一張</button>
+    <button class="btn primary" id="lb-pick">選這張（空白鍵）</button>
+    <button class="btn" id="lb-next">下一張 →</button>
+  </div>
+</div>
+
+<div class="log" id="log">
+  <div class="bar"><span id="log-title">產生網站照片</span><span class="spacer"></span><button class="btn" id="log-close">收起</button></div>
+  <pre id="log-text"></pre>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const S = {
+  places: [], cities: [], cats: [], queries: {}, built: {}, fallback: {},
+  previous: {},         // 之前兩輪找過的候選（~/.cache/dragon-study/trip-photo-candidates.json）
+  picks: {},            // { id: [{ file, note }] }（存檔時轉回 photo_picks.json 的格式）
+  info: {},             // 檔名 → 候選資料（縮圖、說明、授權）
+  results: {},          // 關鍵字 → 候選陣列
+  loading: new Set(),   // 搜尋中的關鍵字
+  active: null,
+  extraQueries: {},     // 這次自己打的關鍵字 { id: [..] }
+  lb: null,             // { list: [檔名], index }
+};
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const big = (thumb) => thumb && thumb.replace(/\/\d+px-/, '/1280px-');
+
+async function api(path, body) {
+  const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Picker': '1' }, body: JSON.stringify(body || {}) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+function toast(text, ms = 2600) {
+  const el = $('toast');
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+// ── 資料 ──
+function normPicks(raw) {
+  const out = {};
+  for (const [id, list] of Object.entries(raw)) {
+    if (id.startsWith('_')) continue;
+    out[id] = list.map((p) => (typeof p === 'string' ? { file: p, note: '' } : { file: p.file, note: p.note || '' }));
+  }
+  return out;
+}
+const picksOf = (id) => S.picks[id] || [];
+const builtKey = (list) => JSON.stringify((list || []).map((p) => [p.title || p.file, p.note || '']));
+const isDirty = (id) => builtKey(picksOf(id)) !== builtKey(S.built[id]);
+const builtThumb = (id, file) => (S.built[id] || []).find((p) => p.title === file)?.thumb
+  || Object.values(S.built).flat().find((p) => p.title === file)?.thumb;
+const thumbOf = (id, file) => builtThumb(id, file) || S.info[file]?.thumb || '';
+const placeById = (id) => S.places.find((p) => p.id === id);
+const catEmoji = (key) => S.cats.find((c) => c.key === key)?.emoji || '';
+
+function queriesFor(place) {
+  const base = S.queries[place.id] || [];
+  const derived = [];
+  if (!base.length) {
+    const city = S.cities.find((c) => c.key === place.city);
+    const local = (place.local || '').split(/\s*[\/／,]\s*/)[0];
+    if (local) derived.push(`"${local}" ${city ? city.local.split(' / ')[0] : ''}`.trim());
+    if (place.wiki) derived.push(`"${place.wiki.split(':').slice(1).join(':')}"`);
+  }
+  return [...new Set([...base, ...derived, ...(S.extraQueries[place.id] || [])])];
+}
+
+// ── 存檔（每次改動後 0.4 秒自動存）──
+let saveTimer = null;
+function changed() {
+  renderList();
+  renderMain();
+  renderHeader();
+  $('save').textContent = '尚未存檔…';
+  $('save').classList.remove('err');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(save, 400);
+}
+async function save() {
+  const out = {};
+  for (const [id, list] of Object.entries(S.picks)) {
+    if (list.length) out[id] = list.map((p) => (p.note ? { file: p.file, note: p.note } : p.file));
+  }
+  try {
+    const res = await api('/api/picks', { picks: out });
+    $('save').textContent = `✓ 已存進 photo_picks.json（${res.savedAt}）`;
+  } catch (err) {
+    $('save').textContent = `存檔失敗：${err.message}`;
+    $('save').classList.add('err');
+  }
+}
+
+function setPicks(id, list) {
+  S.picks[id] = list;
+  if (!list.length) delete S.picks[id];
+  changed();
+}
+function togglePick(file) {
+  const id = S.active;
+  const list = picksOf(id);
+  if (list.some((p) => p.file === file)) setPicks(id, list.filter((p) => p.file !== file));
+  else setPicks(id, [...list, { file, note: '' }]);
+}
+function movePick(i, step) {
+  const list = [...picksOf(S.active)];
+  const j = i + step;
+  if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  setPicks(S.active, list);
+}
+function makeMain(i) {
+  const list = [...picksOf(S.active)];
+  const [p] = list.splice(i, 1);
+  setPicks(S.active, [p, ...list]);
+}
+function toggleNote(i) {
+  const list = picksOf(S.active).map((p, k) => (k === i ? { ...p, note: p.note ? '' : '示意' } : p));
+  setPicks(S.active, list);
+}
+
+// ── 搜尋 ──
+async function runQuery(query, force = false) {
+  if (S.loading.has(query)) return;
+  S.loading.add(query);
+  renderMain();
+  try {
+    const res = await api('/api/search', { query, force });
+    S.results[query] = res.results;
+    for (const c of res.results) S.info[c.title] = c;
+  } catch (err) {
+    toast(`搜尋「${query}」失敗：${err.message}`);
+    S.results[query] = S.results[query] || [];
+  } finally {
+    S.loading.delete(query);
+    renderMain();
+  }
+}
+
+async function ensureInfo(files, full = false) {
+  const missing = files.filter((f) => !S.info[f] || (full && S.info[f].desc === undefined));
+  if (!missing.length) return;
+  try {
+    Object.assign(S.info, await api('/api/info', { titles: missing }));
+  } catch (err) {
+    toast(`讀取照片資料失敗：${err.message}`);
+  }
+}
+
+async function addByName(text) {
+  let name = text.trim();
+  const m = name.match(/(?:wiki\/|title=)(File:[^?#&]+)/i);
+  if (m) name = decodeURIComponent(m[1]);
+  name = name.replace(/_/g, ' ');
+  if (!/^File:/i.test(name)) name = `File:${name}`;
+  name = name.replace(/^file:/i, 'File:');
+  await ensureInfo([name]);
+  const info = S.info[name];
+  if (!info) return toast(`Commons 找不到「${name}」`);
+  if (!info.free) return toast(`「${name}」的授權是 ${info.license || '不明'}，不能用（只收 CC BY／BY-SA／CC0／公有領域）`, 5000);
+  if (info.mime && info.mime !== 'image/jpeg') toast('提醒：這張不是 JPEG，一樣可以用', 3000);
+  if (picksOf(S.active).some((p) => p.file === name)) return toast('這張已經選了');
+  setPicks(S.active, [...picksOf(S.active), { file: name, note: '' }]);
+  toast('加進去了');
+}
+
+// ── 畫面 ──
+function renderHeader() {
+  const withPicks = S.places.filter((p) => picksOf(p.id).length).length;
+  const dirty = S.places.filter((p) => isDirty(p.id)).length;
+  $('progress').textContent = `已挑 ${withPicks}／${S.places.length} 個地點`;
+  const btn = $('build');
+  btn.disabled = dirty === 0 || btn.dataset.running === '1';
+  btn.textContent = btn.dataset.running === '1' ? '產生中…' : dirty ? `產生網站照片（${dirty} 個地點有改）` : '網站照片是最新的';
+}
+
+function visiblePlaces() {
+  const q = $('find').value.trim().toLowerCase();
+  const f = $('filter').value;
+  return S.places.filter((p) => {
+    if (q && ![p.id, p.name, p.local, p.wiki].some((s) => (s || '').toLowerCase().includes(q))) return false;
+    const n = picksOf(p.id).length;
+    if (f === 'none') return n === 0;
+    if (f === 'few') return n < 3;
+    if (f === 'dirty') return isDirty(p.id);
+    if (f === 'note') return picksOf(p.id).some((x) => x.note);
+    return true;
+  });
+}
+
+function renderList() {
+  const places = visiblePlaces();
+  const html = [];
+  for (const city of S.cities) {
+    const group = places.filter((p) => p.city === city.key);
+    if (!group.length) continue;
+    html.push(`<div class="city">${city.flag} ${esc(city.name)}（${group.length}）</div>`);
+    for (const p of group) {
+      const list = picksOf(p.id);
+      const thumb = list.length ? thumbOf(p.id, list[0].file) : S.fallback[p.id];
+      html.push(`<div class="row${p.id === S.active ? ' active' : ''}" data-id="${esc(p.id)}">
+        ${thumb ? `<img src="${esc(thumb)}" loading="lazy" alt="">` : `<div class="noimg">${catEmoji(p.cat)}</div>`}
+        <div class="t"><div class="n">${catEmoji(p.cat)} ${esc(p.name)}</div><div class="l">${esc(p.local || p.id)}</div></div>
+        ${isDirty(p.id) ? '<span class="dot" title="改過、還沒產生網站照片"></span>' : ''}
+        <span class="count${list.length ? '' : ' zero'}">${list.length}</span>
+      </div>`);
+    }
+  }
+  $('list').innerHTML = html.join('') || '<div class="empty" style="padding:10px">沒有符合的地點</div>';
+}
+
+function renderMain() {
+  const place = placeById(S.active);
+  if (!place) {
+    $('main').innerHTML = '<div class="empty">從左邊選一個地點</div>';
+    return;
+  }
+  const city = S.cities.find((c) => c.key === place.city);
+  const list = picksOf(place.id);
+  const where = city ? city.local.split(' / ')[0] : '';
+  const searchName = `${(place.local || place.name).split(/\s*[\/／,]\s*/)[0]} ${where}`.trim();
+  const wikiUrl = place.wiki ? `https://${place.wiki.split(':')[0]}.wikipedia.org/wiki/${encodeURIComponent(place.wiki.split(':').slice(1).join(':').replace(/ /g, '_'))}` : null;
+  const builtFiles = new Set((S.built[place.id] || []).map((p) => p.title));
+
+  const pickedHtml = list.length
+    ? list.map((p, i) => `<div class="pcard${i === 0 ? ' main' : ''}" draggable="true" data-i="${i}">
+        <img src="${esc(thumbOf(place.id, p.file))}" alt="" data-zoom-picked="${i}">
+        <span class="num${i === 0 ? ' main' : ''}">${i === 0 ? '★ 主圖' : `#${i + 1}`}</span>
+        ${p.note ? `<span class="notebadge">${esc(p.note)}圖</span>` : ''}
+        ${builtFiles.has(p.file) ? '' : '<span class="pending">還沒產生</span>'}
+        <div class="tools">
+          <button data-act="left" data-i="${i}" title="往前">◀</button>
+          <button data-act="right" data-i="${i}" title="往後">▶</button>
+          ${i ? `<button data-act="main" data-i="${i}">設主圖</button>` : ''}
+          <button data-act="note" data-i="${i}" class="${p.note ? 'on' : ''}" title="照片不是這個地方本身（例如別家的菜、別處的極光）">示意</button>
+          <button data-act="del" data-i="${i}" class="del" title="拿掉">✕</button>
+        </div>
+      </div>`).join('')
+    : `<div class="fallback">${S.fallback[place.id] ? `<img src="${esc(S.fallback[place.id])}" alt="">` : ''}
+        <span>還沒挑照片${S.fallback[place.id] ? '，目前網站顯示的是維基條目的預設照片' : ''}。點下面的候選照片就會加進來，第一張是主圖。</span></div>`;
+
+  const card = (c) => {
+    const idx = list.findIndex((p) => p.file === c.title);
+    return `<div class="cand${idx >= 0 ? ' on' : ''}" data-file="${esc(c.title)}" title="${esc(c.desc || c.title)}">
+      <img src="${esc(c.thumb)}" loading="lazy" alt="">
+      ${idx >= 0 ? `<span class="mark">✓ ${idx === 0 ? '主圖' : `#${idx + 1}`}</span>` : ''}
+      <button class="zoom" data-zoom="${esc(c.title)}">🔍 放大</button>
+      <div class="meta">
+        <div class="d">${c.quality ? '<span class="q-badge">★優質 </span>' : ''}${esc(c.desc || c.title.replace(/^File:/, ''))}</div>
+        <div class="a">${c.w}×${c.h}・${esc(c.author)}・${esc(c.license)}</div>
+      </div>
+    </div>`;
+  };
+  const queries = queriesFor(place);
+  const seen = new Set();
+  const previous = S.previous[place.id] || [];
+  previous.forEach((c) => seen.add(c.title));
+  const previousHtml = previous.length
+    ? `<div class="group"><div class="group-h">📦 之前找過的候選 <span class="tag">${previous.length} 張</span></div>
+        <div class="grid">${previous.map(card).join('')}</div></div>`
+    : '';
+  const groups = previousHtml + queries.map((q) => {
+    const results = S.results[q];
+    const loading = S.loading.has(q);
+    let body;
+    if (loading && !results) body = '<div class="empty"><span class="spinner"></span> 搜尋中…</div>';
+    else if (!results) body = `<div class="empty"><button class="chip q" data-run="${esc(q)}">搜尋這組</button></div>`;
+    else {
+      const fresh = results.filter((c) => !seen.has(c.title));
+      fresh.forEach((c) => seen.add(c.title));
+      body = fresh.length
+        ? `<div class="grid">${fresh.map(card).join('')}</div>`
+        : `<div class="empty">${results.length ? '結果都在上面出現過了' : '沒有合適的照片（只收橫式、寬 1200 以上、自由授權的 JPEG）'}</div>`;
+    }
+    return `<div class="group">
+      <div class="group-h">🔎 ${esc(q)} ${results ? `<span class="tag">${results.length} 張</span>` : ''}
+        ${loading && results ? '<span class="spinner"></span>' : ''}
+        ${results ? `<button class="chip q" data-force="${esc(q)}" title="不用快取，重新到 Commons 搜">重搜</button>` : ''}</div>
+      ${body}
+    </div>`;
+  }).join('');
+
+  const idx = visiblePlaces().findIndex((p) => p.id === place.id);
+  $('main').innerHTML = `
+    <div class="head">
+      <div style="flex:1;min-width:260px">
+        <div class="chips"><span class="tag">${catEmoji(place.cat)} ${esc(S.cats.find((c) => c.key === place.cat)?.label || '')}</span>
+          ${city ? `<span class="tag">${city.flag} ${esc(city.name)}</span>` : ''}<span class="tag">${esc(place.id)}</span></div>
+        <h2>${esc(place.name)}</h2>
+        <div class="local">${esc(place.local || '')}</div>
+        <div class="chips">
+          ${wikiUrl ? `<a class="chip" href="${esc(wikiUrl)}" target="_blank" rel="noreferrer">維基條目</a>` : ''}
+          <a class="chip" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(searchName)}" target="_blank" rel="noreferrer">Google 圖片（對照長相）</a>
+          <a class="chip" href="https://commons.wikimedia.org/w/index.php?title=Special:MediaSearch&type=image&search=${encodeURIComponent(searchName)}" target="_blank" rel="noreferrer">在 Commons 自己逛</a>
+        </div>
+      </div>
+      <div class="chips">
+        <button class="btn" id="prev" ${idx <= 0 ? 'disabled' : ''}>← 上一個 <span class="kbd">[</span></button>
+        <button class="btn" id="next" ${idx < 0 || idx >= visiblePlaces().length - 1 ? 'disabled' : ''}>下一個 → <span class="kbd">]</span></button>
+      </div>
+    </div>
+    <h3>已選 ${list.length} 張 <small>第一張是主圖；可以拖拉換順序。「示意」＝照片不是這個地方本身（例如別家的菜色），網站會標「示意圖」</small></h3>
+    <div class="picked" id="picked">${pickedHtml}</div>
+    <h3>候選照片 <small>點一下選／取消；🔍 看大圖和說明（確認真的是這個地方）</small></h3>
+    <div class="chips">${queries.map((q) => `<button class="chip q${S.results[q] ? ' on' : ''}" data-run="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+    <form class="searchbar" id="search-form">
+      <input id="q" placeholder='自己打關鍵字，例如 "Charles Bridge" snow（地名加引號比較準）'>
+      <button class="btn" type="submit">搜尋 Commons</button>
+      <button class="btn" type="button" id="paste">貼上 Commons 檔名／網址</button>
+    </form>
+    ${groups}`;
+}
+
+function openPlace(id) {
+  S.active = id;
+  location.hash = id;
+  renderList();
+  renderMain();
+  $('main').scrollTop = 0;
+  document.querySelector('.row.active')?.scrollIntoView({ block: 'nearest' });
+  const place = placeById(id);
+  ensureInfo(picksOf(id).map((p) => p.file).filter((f) => !builtThumb(id, f))).then(renderMain);
+  for (const q of queriesFor(place)) if (!S.results[q]) runQuery(q);
+}
+
+function step(dir) {
+  const list = visiblePlaces();
+  const i = list.findIndex((p) => p.id === S.active);
+  const next = list[i + dir];
+  if (next) openPlace(next.id);
+}
+
+// ── 放大看 ──
+function openLightbox(list, index) {
+  S.lb = { list, index };
+  renderLightbox();
+  $('lb').classList.add('open');
+}
+async function renderLightbox() {
+  if (!S.lb) return;
+  const file = S.lb.list[S.lb.index];
+  await ensureInfo([file], true);
+  const info = S.info[file] || {};
+  const picked = picksOf(S.active).some((p) => p.file === file);
+  $('lb-img').src = big(info.thumb) || thumbOf(S.active, file);
+  $('lb-info').innerHTML = `
+    <div class="d">${esc(info.desc || file.replace(/^File:/, ''))}</div>
+    <div class="c">${esc(file)}${info.w ? `・${info.w}×${info.h}` : ''}${info.date ? `・拍攝 ${esc(info.date)}` : ''}</div>
+    <div class="c">© ${esc(info.author || '')}・${esc(info.license || '')}・<a href="${esc(info.url || `https://commons.wikimedia.org/wiki/${encodeURIComponent(file.replace(/ /g, '_'))}`)}" target="_blank" rel="noreferrer" style="color:#f3c44e">Commons 原頁</a></div>
+    ${info.cats?.length ? `<div class="c">分類：${info.cats.map(esc).join('、')}</div>` : ''}`;
+  $('lb-pick').textContent = picked ? '取消選這張（空白鍵）' : '選這張（空白鍵）';
+  $('lb-prev').disabled = S.lb.index <= 0;
+  $('lb-next').disabled = S.lb.index >= S.lb.list.length - 1;
+}
+function closeLightbox() {
+  S.lb = null;
+  $('lb').classList.remove('open');
+  $('lb-img').removeAttribute('src');
+}
+function lbStep(dir) {
+  if (!S.lb) return;
+  const i = S.lb.index + dir;
+  if (i < 0 || i >= S.lb.list.length) return;
+  S.lb.index = i;
+  renderLightbox();
+}
+
+// ── 產生網站照片 ──
+async function build() {
+  const btn = $('build');
+  btn.dataset.running = '1';
+  renderHeader();
+  $('log').classList.add('open');
+  $('log-title').textContent = '產生網站照片中…';
+  $('log-text').textContent = '';
+  let code = null;
+  try {
+    const res = await fetch('/api/build', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Picker': '1' }, body: '{}' });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `HTTP ${res.status}`);
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const text = decoder.decode(value, { stream: true });
+      $('log-text').textContent += text.replace(/\n?__EXIT__ (\d+)\n?/, (_, c) => { code = Number(c); return ''; });
+      $('log-text').scrollTop = $('log-text').scrollHeight;
+    }
+  } catch (err) {
+    $('log-text').textContent += `\n失敗：${err.message}`;
+  }
+  $('log-title').textContent = code === 0 ? '✓ 完成！重新整理 app 就看得到新照片' : '⚠️ 沒有完成，看上面的訊息';
+  btn.dataset.running = '';
+  await reload(false);
+}
+
+// ── 事件 ──
+$('find').addEventListener('input', renderList);
+$('filter').addEventListener('change', () => { renderList(); renderMain(); });
+$('list').addEventListener('click', (e) => {
+  const row = e.target.closest('.row');
+  if (row) openPlace(row.dataset.id);
+});
+$('build').addEventListener('click', build);
+$('log-close').addEventListener('click', () => $('log').classList.remove('open'));
+$('lb-close').addEventListener('click', closeLightbox);
+$('lb-prev').addEventListener('click', () => lbStep(-1));
+$('lb-next').addEventListener('click', () => lbStep(1));
+$('lb-pick').addEventListener('click', () => { togglePick(S.lb.list[S.lb.index]); renderLightbox(); });
+$('lb').addEventListener('click', (e) => { if (e.target.id === 'lb') closeLightbox(); });
+
+$('main').addEventListener('click', (e) => {
+  const t = e.target;
+  if (t.id === 'prev') return step(-1);
+  if (t.id === 'next') return step(1);
+  if (t.id === 'paste') {
+    const text = prompt('貼上 Commons 的檔名（File:xxx.jpg）或網址');
+    if (text) addByName(text);
+    return;
+  }
+  if (t.dataset.run) return runQuery(t.dataset.run);
+  if (t.dataset.force) return runQuery(t.dataset.force, true);
+  if (t.dataset.act) {
+    const i = Number(t.dataset.i);
+    if (t.dataset.act === 'left') movePick(i, -1);
+    if (t.dataset.act === 'right') movePick(i, 1);
+    if (t.dataset.act === 'main') makeMain(i);
+    if (t.dataset.act === 'note') toggleNote(i);
+    if (t.dataset.act === 'del') setPicks(S.active, picksOf(S.active).filter((_, k) => k !== i));
+    return;
+  }
+  if (t.dataset.zoomPicked != null) return openLightbox(picksOf(S.active).map((p) => p.file), Number(t.dataset.zoomPicked));
+  if (t.dataset.zoom) {
+    const files = [...document.querySelectorAll('.cand')].map((el) => el.dataset.file);
+    return openLightbox(files, files.indexOf(t.dataset.zoom));
+  }
+  const cand = t.closest('.cand');
+  if (cand) togglePick(cand.dataset.file);
+});
+$('main').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const q = $('q').value.trim();
+  if (!q) return;
+  const id = S.active;
+  S.extraQueries[id] = [...new Set([...(S.extraQueries[id] || []), q])];
+  runQuery(q);
+});
+
+// 已選照片拖拉換順序
+let dragFrom = null;
+$('main').addEventListener('dragstart', (e) => {
+  const card = e.target.closest?.('.pcard');
+  if (card) { dragFrom = Number(card.dataset.i); e.dataTransfer.effectAllowed = 'move'; }
+});
+$('main').addEventListener('dragover', (e) => {
+  const card = e.target.closest?.('.pcard');
+  if (card && dragFrom != null) { e.preventDefault(); card.classList.add('dragover'); }
+});
+$('main').addEventListener('dragleave', (e) => e.target.closest?.('.pcard')?.classList.remove('dragover'));
+$('main').addEventListener('drop', (e) => {
+  const card = e.target.closest?.('.pcard');
+  if (!card || dragFrom == null) return;
+  e.preventDefault();
+  const to = Number(card.dataset.i);
+  const list = [...picksOf(S.active)];
+  const [moved] = list.splice(dragFrom, 1);
+  list.splice(to, 0, moved);
+  dragFrom = null;
+  setPicks(S.active, list);
+});
+$('main').addEventListener('dragend', () => { dragFrom = null; });
+
+// 網址後面的 #項目id 可以直接跳到那個地點（上一頁／下一頁也會跟著換）
+window.addEventListener('hashchange', () => {
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (id !== S.active && placeById(id)) openPlace(id);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest?.('input, textarea, select')) return;
+  if (S.lb) {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') lbStep(-1);
+    if (e.key === 'ArrowRight') lbStep(1);
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); togglePick(S.lb.list[S.lb.index]); renderLightbox(); }
+    return;
+  }
+  if (e.key === '[') step(-1);
+  if (e.key === ']') step(1);
+});
+
+async function reload(first) {
+  const res = await fetch('/api/state');
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  Object.assign(S, { places: data.places, cities: data.cities, cats: data.cats, queries: data.queries, built: data.built, fallback: data.fallback, previous: data.previous });
+  for (const c of Object.values(data.previous).flat()) if (!S.info[c.title]) S.info[c.title] = c;
+  if (first) S.picks = normPicks(data.picks);
+  renderHeader();
+  renderList();
+  if (first) {
+    const fromHash = decodeURIComponent(location.hash.slice(1));
+    openPlace(placeById(fromHash) ? fromHash : S.places[0]?.id);
+  } else {
+    renderMain();
+  }
+}
+reload(true).catch((err) => { $('main').innerHTML = `<div class="empty">載入失敗：${esc(err.message)}</div>`; });
+</script>
+</body>
+</html>

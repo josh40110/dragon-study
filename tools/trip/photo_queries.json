@@ -1,0 +1,525 @@
+{
+  "_說明": "每個地點去 Wikimedia Commons 找照片的關鍵字。冬天／聖誕／夜景優先，因為我們 12 月去。photo_candidates.py 用它產生候選，挑好的寫進 photo_picks.json。",
+  "fun-prg-market": [
+    "Christmas market \"Old Town Square\" Prague",
+    "\"Old Town Square\" Prague Christmas tree",
+    "\"Old Town Square\" Prague night"
+  ],
+  "fun-prg-orloj": [
+    "\"Prague astronomical clock\"",
+    "Prague Orloj",
+    "\"Old Town Hall\" tower Prague"
+  ],
+  "fun-prg-castle": [
+    "\"Prague Castle\"",
+    "\"St. Vitus Cathedral\" Prague",
+    "\"Prague Castle\" night",
+    "\"Prague Castle\" winter"
+  ],
+  "fun-prg-charles": [
+    "\"Charles Bridge\" Prague",
+    "\"Charles Bridge\" sunrise",
+    "\"Charles Bridge\" winter",
+    "\"Charles Bridge\" night"
+  ],
+  "fun-prg-malastrana": [
+    "\"Malá Strana\" Prague",
+    "\"Lennon Wall\" Prague",
+    "\"St. Nicholas Church\" Malá Strana"
+  ],
+  "fun-prg-klementinum": [
+    "Klementinum library",
+    "Clementinum \"Baroque Library Hall\"",
+    "Klementinum"
+  ],
+  "fun-prg-kutna": [
+    "\"Sedlec Ossuary\"",
+    "\"Sedlec Ossuary\" chandelier",
+    "\"St. Barbara's Church\" Kutná Hora"
+  ],
+  "fun-prg-strahov": [
+    "\"Strahov Library\"",
+    "Strahov \"Theological Hall\"",
+    "Strahov \"Philosophical Hall\""
+  ],
+  "fun-prg-josefov": [
+    "\"Spanish Synagogue\" Prague interior",
+    "\"Old Jewish Cemetery\" Prague",
+    "\"Old New Synagogue\" Prague"
+  ],
+  "fun-prg-obecni": [
+    "\"Municipal House\" Prague",
+    "Obecní dům",
+    "Smetana Hall \"Municipal House\""
+  ],
+  "fun-prg-petrin": [
+    "\"Petřín Lookout Tower\"",
+    "\"Petřín funicular\"",
+    "view from Petřín tower Prague"
+  ],
+  "fun-prg-vysehrad": [
+    "Vyšehrad",
+    "Basilica of St. Peter and St. Paul Vyšehrad",
+    "Vyšehrad view Prague"
+  ],
+  "fun-ck-town": [
+    "\"Český Krumlov\"",
+    "\"Český Krumlov\" winter",
+    "\"Český Krumlov Castle\" tower",
+    "\"Český Krumlov\" snow"
+  ],
+  "fun-vie-rathaus": [
+    "\"Wiener Christkindlmarkt\" Rathausplatz",
+    "\"Vienna City Hall\" Christmas market",
+    "\"Rathaus Wien\" Weihnachtsmarkt"
+  ],
+  "fun-vie-schoenbrunn": [
+    "\"Schönbrunn Palace\"",
+    "Schönbrunn Christmas market",
+    "\"Gloriette\" Schönbrunn",
+    "\"Schloss Schönbrunn\" Weihnachtsmarkt"
+  ],
+  "fun-vie-stephansdom": [
+    "\"St. Stephen's Cathedral\" Vienna",
+    "Stephansdom roof",
+    "Stephansdom interior"
+  ],
+  "fun-vie-belvedere": [
+    "\"Upper Belvedere\" Vienna",
+    "\"Belvedere palace\" Vienna",
+    "Belvedere Christmas market",
+    "Gustav Klimt \"The Kiss\""
+  ],
+  "fun-vie-opera": [
+    "\"Vienna State Opera\"",
+    "\"Wiener Staatsoper\" interior",
+    "\"Wiener Staatsoper\" night"
+  ],
+  "fun-vie-hofburg": [
+    "\"Hofburg\" Vienna",
+    "\"Michaelerplatz\" Hofburg",
+    "Hofburg \"Heldenplatz\""
+  ],
+  "fun-vie-spittelberg": [
+    "\"Spittelberg\" Christmas market",
+    "\"Spittelberg\" Wien",
+    "Weihnachtsmarkt \"Spittelberg\""
+  ],
+  "fun-vie-khm": [
+    "\"Kunsthistorisches Museum\"",
+    "\"Kunsthistorisches Museum\" cupola",
+    "\"Kunsthistorisches Museum\" staircase",
+    "\"Hunters in the Snow\" Bruegel"
+  ],
+  "fun-vie-treasury": [
+    "\"Imperial Crown of the Holy Roman Empire\"",
+    "\"Imperial Crown of Austria\"",
+    "Schatzkammer Wien"
+  ],
+  "fun-vie-prater": [
+    "\"Wiener Riesenrad\"",
+    "Riesenrad Prater night",
+    "\"Wiener Prater\" winter"
+  ],
+  "fun-szg-market": [
+    "\"Salzburg Christkindlmarkt\"",
+    "Salzburg Christmas market Domplatz",
+    "\"Salzburger Christkindlmarkt\""
+  ],
+  "fun-szg-fortress": [
+    "\"Hohensalzburg\" Fortress",
+    "Festung \"Hohensalzburg\" winter",
+    "Salzburg panorama \"Hohensalzburg\""
+  ],
+  "fun-szg-oldtown": [
+    "\"Getreidegasse\"",
+    "\"Mozart's birthplace\" Salzburg",
+    "\"Getreidegasse\" signs"
+  ],
+  "fun-szg-mirabell": [
+    "\"Mirabell Gardens\"",
+    "Mirabellgarten Festung",
+    "\"Mirabell Palace\""
+  ],
+  "fun-szg-hellbrunn": [
+    "\"Hellbrunn Palace\"",
+    "\"Hellbrunner Adventzauber\"",
+    "\"Schloss Hellbrunn\" winter"
+  ],
+  "fun-szg-silentnight": [
+    "\"Silent Night Chapel\" Oberndorf",
+    "\"Stille-Nacht-Kapelle\"",
+    "\"Oberndorf bei Salzburg\""
+  ],
+  "fun-hal-village": [
+    "Hallstatt winter",
+    "Hallstatt village lake",
+    "Hallstatt snow",
+    "Hallstatt"
+  ],
+  "fun-hal-skywalk": [
+    "\"Hallstatt Skywalk\"",
+    "\"Welterbeblick\" Hallstatt",
+    "Hallstatt from above"
+  ],
+  "fun-sto-gamlastan": [
+    "\"Stortorget\" Stockholm Christmas market",
+    "\"Stortorget\" Stockholm",
+    "\"Gamla stan\" winter"
+  ],
+  "fun-sto-skansen": [
+    "\"Skansen\" Christmas",
+    "\"Skansen\" Stockholm",
+    "\"Skansen\" winter"
+  ],
+  "fun-sto-vasa": [
+    "\"Vasa ship\" museum",
+    "\"Vasa warship\"",
+    "Vasamuseet"
+  ],
+  "fun-sto-metro": [
+    "\"T-Centralen\" metro station",
+    "Stockholm metro art",
+    "\"Kungsträdgården metro station\""
+  ],
+  "fun-sto-lucia": [
+    "\"Lucia procession\" Sweden",
+    "\"Saint Lucy's Day\" Sweden",
+    "Luciatåg"
+  ],
+  "fun-sto-cityhall": [
+    "\"Stockholm City Hall\"",
+    "Golden Hall \"Stockholm City Hall\"",
+    "Blue Hall \"Stockholm City Hall\""
+  ],
+  "fun-sto-palace": [
+    "\"Stockholm Palace\"",
+    "\"Royal Palace Stockholm\"",
+    "\"Stockholm Palace\" changing of the guard"
+  ],
+  "fun-lap-skystation": [
+    "\"Aurora Sky Station\" Abisko",
+    "Abisko aurora",
+    "Northern lights Abisko"
+  ],
+  "fun-lap-dogsled": [
+    "dog sled Sweden",
+    "husky sledding Lapland",
+    "dog sledding"
+  ],
+  "fun-lap-icehotel": [
+    "\"Icehotel\" Jukkasjärvi",
+    "\"Icehotel\" suite",
+    "\"Icehotel\" Sweden"
+  ],
+  "fun-lap-sami": [
+    "reindeer Lapland Sweden",
+    "Sami reindeer",
+    "reindeer Kiruna"
+  ],
+  "fun-lap-canyon": [
+    "Abiskojåkka",
+    "Abisko canyon",
+    "Abisko National Park winter"
+  ],
+  "fun-lap-church": [
+    "\"Kiruna Church\"",
+    "\"Kiruna kyrka\"",
+    "\"Kiruna Church\" interior"
+  ],
+  "fun-lap-lkab": [
+    "\"Kiruna mine\"",
+    "LKAB Kiruna",
+    "Kiirunavaara"
+  ],
+  "fun-lap-auroratour": [
+    "aurora borealis Sweden",
+    "northern lights Lapland",
+    "aurora Kiruna"
+  ],
+  "fun-nar-fjell": [
+    "Narvik fjord",
+    "\"Narvikfjellet\"",
+    "Narvik winter"
+  ],
+  "food-prg-lokal": [
+    "Lokál Dlouhááá",
+    "Pilsner Urquell tank beer",
+    "Czech beer glass Prague"
+  ],
+  "food-prg-louvre": [
+    "\"Café Louvre\" Prague",
+    "Kavárna Louvre"
+  ],
+  "food-prg-kantyna": [
+    "Kantýna Praha",
+    "Czech roast pork",
+    "steak tartare Czech"
+  ],
+  "food-prg-dishes": [
+    "Svíčková",
+    "Vepřo knedlo zelo",
+    "Smažený sýr",
+    "Czech goulash dumplings"
+  ],
+  "food-prg-market": [
+    "Trdelník",
+    "Prague Christmas market food",
+    "Prague ham Christmas market"
+  ],
+  "food-ck-krcma": [
+    "Krčma v Šatlavské",
+    "\"Český Krumlov\" restaurant",
+    "\"Český Krumlov\" Šatlavská"
+  ],
+  "food-vie-figlmuller": [
+    "Figlmüller",
+    "\"Wiener Schnitzel\""
+  ],
+  "food-vie-plachutta": [
+    "Plachutta",
+    "Tafelspitz"
+  ],
+  "food-vie-cafe": [
+    "\"Café Central\" Vienna",
+    "Sachertorte",
+    "\"Café Sperl\""
+  ],
+  "food-vie-wurstel": [
+    "Würstelstand Wien",
+    "Käsekrainer",
+    "Bitzinger Würstelstand"
+  ],
+  "food-szg-augustiner": [
+    "\"Augustiner Bräu\" Mülln",
+    "\"Augustiner Bräu\"stübl Salzburg"
+  ],
+  "food-szg-tomaselli": [
+    "\"Café Tomaselli\"",
+    "\"Salzburger Nockerl\""
+  ],
+  "food-szg-bosna": [
+    "Bosna Salzburg",
+    "\"Balkan Grill\" Salzburg",
+    "Bosna sausage"
+  ],
+  "food-hal-fish": [
+    "Hallstätter See fish",
+    "smoked char fish",
+    "Reinanke"
+  ],
+  "food-sto-julbord": [
+    "Julbord",
+    "\"Swedish Christmas table\"",
+    "julskinka"
+  ],
+  "food-sto-meatballs": [
+    "\"Swedish meatballs\"",
+    "köttbullar lingonberry"
+  ],
+  "food-sto-saluhall": [
+    "\"Östermalms saluhall\"",
+    "Östermalm market hall interior"
+  ],
+  "food-sto-fika": [
+    "kanelbulle",
+    "cinnamon bun Sweden",
+    "Vete-Katten",
+    "fika Stockholm"
+  ],
+  "food-sto-pelikan": [
+    "Pelikan restaurant Stockholm",
+    "Pelikan Södermalm"
+  ],
+  "food-sto-xmas": [
+    "Lussekatt",
+    "Pepparkakor",
+    "Glögg"
+  ],
+  "food-lap-stf": [
+    "\"Abisko Turiststation\"",
+    "\"Abisko Tourist Station\""
+  ],
+  "food-lap-reindeer": [
+    "Renskav",
+    "sautéed reindeer",
+    "suovas"
+  ],
+  "food-lap-ripan": [
+    "\"Camp Ripan\" Kiruna",
+    "Kiruna restaurant"
+  ],
+  "stay-prg-old": [
+    "\"Malá Strana\" rooftops",
+    "Prague Old Town rooftops",
+    "Prague old town winter"
+  ],
+  "stay-prg-vinohrady": [
+    "Vinohrady Prague",
+    "\"Náměstí Míru\" Christmas market",
+    "Church of \"St. Ludmila\" Prague"
+  ],
+  "stay-prg-station": [
+    "\"Praha hlavní nádraží\"",
+    "Prague main station \"Fanta building\""
+  ],
+  "stay-ck-old": [
+    "\"Český Krumlov\" old town night",
+    "\"Český Krumlov\" street",
+    "\"Český Krumlov\" houses"
+  ],
+  "stay-vie-1": [
+    "Graben Vienna",
+    "Kohlmarkt Vienna Christmas",
+    "Innere Stadt Vienna night"
+  ],
+  "stay-vie-6-7": [
+    "\"Mariahilfer Straße\"",
+    "Neubau Vienna",
+    "\"Spittelberg\" Wien"
+  ],
+  "stay-vie-hbf": [
+    "\"Wien Hauptbahnhof\""
+  ],
+  "stay-szg-old": [
+    "Salzburg old town",
+    "Salzburg Altstadt winter",
+    "Salzach Salzburg"
+  ],
+  "stay-szg-hbf": [
+    "\"Salzburg Hauptbahnhof\""
+  ],
+  "stay-hal-town": [
+    "Hallstatt houses",
+    "Hallstatt night",
+    "Hallstatt market square"
+  ],
+  "stay-hal-near": [
+    "Obertraun",
+    "Bad Ischl",
+    "Bad Goisern"
+  ],
+  "stay-sto-central": [
+    "\"Stockholm Central Station\"",
+    "Stockholms centralstation"
+  ],
+  "stay-sto-gamla": [
+    "\"Gamla stan\"",
+    "\"Gamla stan\" alley",
+    "\"Gamla stan\" winter"
+  ],
+  "stay-sto-soder": [
+    "Södermalm",
+    "\"Monteliusvägen\" view",
+    "Södermalm Stockholm view"
+  ],
+  "stay-lap-stf": [
+    "\"Abisko Turiststation\"",
+    "\"Abisko Tourist Station\" winter"
+  ],
+  "stay-lap-village": [
+    "Abisko village",
+    "Abisko Östra",
+    "Abisko winter"
+  ],
+  "stay-lap-icehotel": [
+    "\"Icehotel\" art suite",
+    "\"Icehotel\" room"
+  ],
+  "stay-lap-kiruna": [
+    "Kiruna winter",
+    "Kiruna town",
+    "Kiruna"
+  ],
+  "stay-nar-town": [
+    "Narvik",
+    "Narvik harbour",
+    "Narvik winter"
+  ],
+  "mv-prg-59": [
+    "Prague trolleybus 59",
+    "\"Nádraží Veleslavín\""
+  ],
+  "mv-prg-ae": [
+    "Airport Express Prague bus",
+    "\"Václav Havel Airport\" Prague terminal"
+  ],
+  "mv-prg-vie": [
+    "Railjet ČD",
+    "Railjet Praha"
+  ],
+  "mv-prg-szg": [
+    "\"Salzburg Hauptbahnhof\" train",
+    "ÖBB Railjet"
+  ],
+  "mv-prg-ck": [
+    "RegioJet bus",
+    "RegioJet"
+  ],
+  "mv-ck-shuttle": [
+    "\"Český Krumlov\" road winter",
+    "Vltava \"Český Krumlov\""
+  ],
+  "mv-vie-szg": [
+    "Westbahn train",
+    "ÖBB Railjet Westbahn"
+  ],
+  "mv-szg-hal": [
+    "Hallstatt ferry",
+    "Hallstatt Markt ferry",
+    "Postbus Salzkammergut"
+  ],
+  "mv-hal-vie": [
+    "\"Hallstatt railway station\"",
+    "Hallstätter See train"
+  ],
+  "mv-vie-airport": [
+    "\"City Airport Train\" Vienna",
+    "\"Vienna International Airport\""
+  ],
+  "mv-vie-arn": [
+    "Austrian Airlines Airbus",
+    "Austrian Airlines aircraft"
+  ],
+  "mv-arn-city": [
+    "\"Arlanda Express\"",
+    "\"Arlanda Express\" train"
+  ],
+  "mv-night-train": [
+    "Norrlandståg",
+    "SJ night train",
+    "Ofotbanen train winter",
+    "Malmbanan winter train"
+  ],
+  "mv-fly-krn": [
+    "\"Kiruna Airport\"",
+    "SAS aircraft winter"
+  ],
+  "mv-krn-abisko": [
+    "Kiruna railway station",
+    "Abisko railway"
+  ],
+  "mv-ofoten": [
+    "Ofotbanen",
+    "\"Ofoten Line\" winter",
+    "Rombaksbotn railway"
+  ],
+  "mv-krn-home": [
+    "\"Kiruna Airport\" terminal"
+  ],
+  "mv-evenes": [
+    "\"Harstad/Narvik Airport\" Evenes"
+  ],
+  "mv-prague-pid": [
+    "Prague tram",
+    "Prague metro station"
+  ],
+  "mv-vienna-wl": [
+    "Vienna tram",
+    "Wiener Linien tram"
+  ],
+  "mv-stockholm-sl": [
+    "Stockholm metro train",
+    "Stockholm tunnelbana"
+  ]
+}

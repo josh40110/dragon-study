@@ -33,3 +33,9 @@ tools/tts/.venv/
 tools/tts/models/
 tools/tts/terms.json
 tools/tts/.tmp.wav
+
+# 龍龍旅行社：Wikivoyage 原始清單隨時可重抓（node tools/trip/fetch_wikivoyage.mjs），不進版控
+tools/trip/wikivoyage/
+
+# Python 快取
+__pycache__/

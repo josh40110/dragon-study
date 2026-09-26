@@ -1,0 +1,93 @@
+/**
+ * 龍龍旅行社：推薦影片（YouTube）。
+ * 每支都用 YouTube oEmbed 確認過影片存在、可以嵌入播放、標題和頻道正確；不要憑印象填影片 id。
+ *   https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=影片id&format=json
+ *   回 401／403 代表作者不給嵌入，這種不要放（頁面裡會播不出來）
+ * title：中文短標題（自己寫的，照原標題內容）；original：影片原標題；channel：頻道名稱
+ * byCity：全程總覽的城市卡；byItem：地點介紹（沒有就用該城市的）
+ */
+const RICK = 'Rick Steves 旅遊節目';
+
+const V = {
+  prgEpisode: { id: 'BFKzX7u-3yg', title: '布拉格：城堡、查理大橋、猶太區', original: 'Prague', channel: "Rick Steves' Europe", note: `${RICK}・完整一集` },
+  prgMarkets: { id: 'fXdsgWUxHaU', title: '布拉格聖誕市集：市中心一路走完', original: 'Prague Christmas Markets: Full City Center Walking Tour (4K 60fps)', channel: 'Prowalk Tours', note: '4K 散步' },
+  prgOldTown: { id: '0TIfTqAAQS8', title: '老城廣場聖誕市集（2025）', original: 'Prague Walk 🇨🇿 Old Town Square Christmas Market 2025 | 4K HDR ASMR', channel: "Let's Walk", note: '4K 散步' },
+  prgCastle: { id: 'isiXydJSK6s', title: '布拉格城堡', original: 'Prague, Czech Republic: Prague Castle - Rick Steves’ Europe Travel Guide - Travel Bite', channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  prgJewish: { id: 'CFD1N6eRWFg', title: '猶太區', original: 'Prague, Czech Republic: Jewish Quarter - Rick Steves’ Europe Travel Guide - Travel Bite', channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  kutnaTour: { id: 'AD2UR-X3SMY', title: '人骨教堂（Sedlec Ossuary）', original: 'Kutna Hora - Sedlec Ossuary: The Bone Church', channel: 'Josh Leo', note: '旅遊 vlog' },
+  kutnaQuiet: { id: 'Oqe2CRPmdmo', title: '人骨教堂內部（無旁白）', original: "Take a look inside Sedlec Ossuary, Czech Republic's Bone Church ⛪️💀🥀 (aesthetic video, no talking)", channel: 'Third Eye Traveller', note: '實拍' },
+  ckRick: { id: 't8-Vo5Qa6rc', title: '庫倫洛夫：波希米亞的時光小鎮', original: "Český Krumlov, Czech Republic: Bohemia's Time-Warp Town", channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  ckWinter: { id: 'W2bHQ9lsY-Q', title: '冬天的庫倫洛夫：城堡到老城（2025）', original: 'Cesky Krumlov, Czech Republic walking tour in winter 2025 4K | Cesky Krumlov Castle and city center', channel: "It's walking!", note: '4K 散步' },
+  ckXmas: { id: 't2TcMWabOkw', title: '聖誕季的庫倫洛夫', original: 'This UNESCO Listed Czech Town Turns Magical at Christmas 🎄 Český Krumlov, South Bohemia 4K', channel: 'Travel Walk Karina', note: '4K 散步' },
+  vieEpisode: { id: 'cfT7P9Vdq7o', title: '維也納：咖啡館、大教堂、音樂', original: 'Vienna', channel: "Rick Steves' Europe", note: `${RICK}・完整一集` },
+  vieRathaus: { id: 'jc23EDS2iFc', title: '市政廳聖誕市集・夜晚（2025）', original: 'Vienna 🇦🇹 Rathausplatz Christmas Market 2025 - Magical Christkindlmarkt at Night | 4K Walking Tour', channel: 'Roman Walks', note: '4K 散步' },
+  vieRathausDay: { id: 'n0nku45MGyE', title: '市政廳聖誕市集（2025）', original: 'Vienna Christmas Market Walk 2025 – Magical Winter Atmosphere AT Rathausplatz (4K)', channel: 'Azure Ambience', note: '4K 散步' },
+  vieSchoenbrunn: { id: 'itplrz2IE8E', title: '美泉宮聖誕市集（2025）', original: 'Vienna Christmas Market 2025 🇦🇹 Walking Tour, Schönbrunn Palace 4K UHD', channel: 'Travel and Adventure Studios', note: '4K 散步' },
+  vieRing: { id: '3jPVdtqthQc', title: '環城大道 Ringstrasse', original: 'Vienna, Austria: The Ringstrasse - Rick Steves’ Europe Travel Guide - Travel Bite', channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  vieDemel: { id: 'NBTcbD3-ux4', title: '老字號甜點咖啡館 Demel', original: 'Vienna, Austria: Café Demel - Rick Steves’ Europe Travel Guide - Travel Bite', channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  szgEpisode: { id: 'TmgOy9fGHjE', title: '薩爾斯堡與周邊', original: 'Salzburg and Surroundings', channel: "Rick Steves' Europe", note: `${RICK}・完整一集` },
+  szgMarket: { id: 'XPwzNfS02sA', title: '薩爾斯堡聖誕市集：主教座堂廣場＋官邸廣場（2025）', original: 'Salzburg Christkindlmarkt 2025 Walking Tour in 4K (Dom & Residenzplatz)', channel: 'Travel with Jeevan', note: '4K 散步' },
+  szgFortress: { id: '0FF9a0PUAws', title: '要塞與僧侶山', original: 'Salzburg, Austria: Hohensalzburg Fortress and Mönchsberg - Rick Steves’ Europe Travel Guide', channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  szgSilentNight: { id: 'j5F3bcTuwe0', title: '《平安夜》誕生的故事', original: 'Silent Night in Salzburg  #ricksteveseurope #christmas', channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  halWinter: { id: 'Md6HD5Z3M-M', title: '冬天的哈修塔特', original: 'HALLSTATT Winter 4K Walking Tour (Austria) - Captions & Immersive Sound [4K Ultra HD/60fps]', channel: 'HP Walking Tours', note: '4K 散步' },
+  halSnow: { id: 'HlMFh3ghDqY', title: '下雪天的哈修塔特一日遊（2025）', original: 'Day trip to snowy Hallstatt: A winter daydream in Austria 2025 | 4K', channel: 'Kwema Travel', note: '4K 旅遊影片' },
+  stoEpisode: { id: 'IZX77XG4Uxs', title: '斯德哥爾摩', original: 'Stockholm', channel: "Rick Steves' Europe", note: `${RICK}・完整一集` },
+  stoMarket: { id: 'Bl1ZLCPWiN0', title: '老城大廣場聖誕市集', original: 'Stockholm Christmas Market Walk 🇸🇪 | Stortorget, Gamla Stan (4K)', channel: 'SwedishSoles Adventures', note: '4K 散步' },
+  stoGamla: { id: 'Wv-sIyaR_QM', title: '老城 Gamla Stan', original: 'Stockholm, Sweden: Gamla Stan - Rick Steves’ Europe Travel Guide - Travel Bite', channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  stoSkansen: { id: 'Effm_LHXUWA', title: 'Skansen 露天博物館', original: 'Stockholm, Sweden: Skansen Open-Air Museum - Rick Steves’ Europe Travel Guide - Travel Bite', channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  stoVasa: { id: 'mnKkY1_91bE', title: '瓦薩沉船博物館', original: 'Stockholm, Sweden: Vasa Warship Museum - Rick Steves’ Europe Travel Guide - Travel Bite', channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  stoCityHall: { id: '4B0mQtICVOo', title: '諾貝爾與市政廳', original: "Stockholm, Sweden: Nobel's Home and City Hall - Rick Steves’ Europe Travel Guide - Travel Bite", channel: "Rick Steves' Europe", note: `${RICK}・短片` },
+  lapSkyStation: { id: 'NkAJBmg3E1Y', title: '阿比斯庫極光站', original: 'Aurora Sky Station, Abisko, Sweden', channel: 'tenorsominutesago', note: '旅客拍攝' },
+  lapChairlift: { id: 'G1N2mSKOdAI', title: '晚上搭纜椅上極光站', original: 'Aurora Sky Station Chairlift Night Visit | Abisko, Sweden', channel: 'Peppy Trails', note: '旅遊 vlog' },
+  lapAbiskoAurora: { id: '6u_eaQT8vZg', title: '在阿比斯庫看極光', original: 'Northern Lights at Abisko | Northern Lights | Aurora | STF Abisko', channel: 'Creativity & Me', note: '旅遊 vlog' },
+  lapNightTrain: { id: '03zvDOSbLdo', title: '夜車：斯德哥爾摩 → 阿比斯庫', original: 'The Arctic Sleeper Train from Stockholm to Abisko', channel: 'Over the Hills', note: '旅遊 vlog' },
+  lapNightTrainNarvik: { id: 'YuxIwwrdXa0', title: '19 小時夜車：斯德哥爾摩 → 納爾維克', original: "🇸🇪🇳🇴19 HOURS on Sweden's Arctic Circle Sleeper Train from Stockholm to Narvik", channel: "Kuga's Travel", note: '旅遊 vlog' },
+  lapDogsled: { id: 'KJX3ACXqxyk', title: '基律納哈士奇狗拉雪橇', original: 'Husky Dog Sledding in Kiruna with Snowdog Arctic Adventures. Come and enjoy the fun.', channel: 'Snowdog Arctic Adventures', note: '業者自己拍的介紹' },
+  lapIcehotel: { id: 'KIHHDcOFiGU', title: '走進冰旅館 ICEHOTEL', original: 'ICEHOTEL Sweden 🇸🇪 | Inside the World’s First Ice Hotel in Jukkasjärvi | Arctic Winter Wonderland ❄️', channel: 'Horizons of Wonder', note: '旅遊影片' },
+  narTrain: { id: '2CQqw5MCVoE', title: '納爾維克 → 基律納火車窗景', original: 'Train Narvik - Kiruna. Passenger`s view. Ofotbanen / Malmbanan / Ofoten line / Norway', channel: "V0LCHA's Trains Chan", note: '車窗實拍' },
+  narFjell: { id: 'MQRaQir-CNE', title: '納爾維克山頂纜車與峽灣景色', original: 'Narvik (Narvikfjellet) - Mountains, Fjords, Beautiful Views, Midnight Sun and Northern Lights', channel: 'AverKind The Traveller', note: '旅遊影片' },
+};
+
+export const TRIP_VIDEOS = {
+  byCity: {
+    prague: [V.prgEpisode, V.prgMarkets, V.prgOldTown],
+    krumlov: [V.ckRick, V.ckWinter, V.ckXmas],
+    vienna: [V.vieEpisode, V.vieRathaus, V.vieSchoenbrunn],
+    salzburg: [V.szgEpisode, V.szgMarket, V.szgSilentNight],
+    hallstatt: [V.halWinter, V.halSnow],
+    stockholm: [V.stoEpisode, V.stoMarket, V.stoSkansen],
+    lapland: [V.lapSkyStation, V.lapNightTrain, V.lapDogsled, V.lapIcehotel],
+    narvik: [V.narTrain, V.narFjell],
+  },
+  byItem: {
+    'fun-prg-market': [V.prgOldTown, V.prgMarkets],
+    'fun-prg-castle': [V.prgCastle, V.prgEpisode],
+    'fun-prg-charles': [V.prgEpisode],
+    'fun-prg-josefov': [V.prgJewish],
+    'fun-prg-kutna': [V.kutnaTour, V.kutnaQuiet],
+    'fun-ck-town': [V.ckWinter, V.ckRick, V.ckXmas],
+    'stay-ck-old': [V.ckWinter],
+    'fun-vie-rathaus': [V.vieRathaus, V.vieRathausDay],
+    'fun-vie-schoenbrunn': [V.vieSchoenbrunn],
+    'fun-vie-hofburg': [V.vieRing, V.vieEpisode],
+    'fun-vie-opera': [V.vieRing],
+    'food-vie-cafe': [V.vieDemel, V.vieEpisode],
+    'fun-szg-market': [V.szgMarket],
+    'fun-szg-fortress': [V.szgFortress],
+    'fun-szg-oldtown': [V.szgEpisode],
+    'fun-szg-silentnight': [V.szgSilentNight],
+    'fun-hal-village': [V.halWinter, V.halSnow],
+    'fun-sto-gamlastan': [V.stoMarket, V.stoGamla],
+    'fun-sto-skansen': [V.stoSkansen],
+    'fun-sto-vasa': [V.stoVasa],
+    'fun-sto-cityhall': [V.stoCityHall],
+    'fun-lap-skystation': [V.lapSkyStation, V.lapChairlift],
+    'fun-lap-auroratour': [V.lapAbiskoAurora],
+    'fun-lap-dogsled': [V.lapDogsled],
+    'fun-lap-icehotel': [V.lapIcehotel],
+    'stay-lap-icehotel': [V.lapIcehotel],
+    'mv-night-train': [V.lapNightTrain, V.lapNightTrainNarvik],
+    'mv-ofoten': [V.narTrain],
+    'fun-nar-fjell': [V.narFjell],
+  },
+};
